@@ -30,14 +30,14 @@ font-family:'Cormorant Garamond',serif;
 font-weight:600;
 }
 
-img{
-width:100%;
-display:block;
-}
-
 .container{
 width:min(1200px,90%);
 margin:auto;
+}
+
+img{
+width:100%;
+display:block;
 }
 
 header{
@@ -46,9 +46,9 @@ top:0;
 left:0;
 width:100%;
 z-index:999;
-background:rgba(0,0,0,0.45);
+background:rgba(0,0,0,0.55);
 backdrop-filter:blur(12px);
-border-bottom:1px solid rgba(255,255,255,0.06);
+border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 .navbar{
@@ -60,8 +60,8 @@ padding:22px 0;
 
 .logo h1{
 font-size:42px;
-line-height:1;
 color:#e5c08b;
+line-height:1;
 }
 
 .logo p{
@@ -80,7 +80,7 @@ flex-wrap:wrap;
 nav a{
 text-decoration:none;
 color:white;
-font-size:14px;
+font-size:15px;
 transition:0.3s;
 }
 
@@ -93,9 +93,11 @@ min-height:100vh;
 display:flex;
 align-items:center;
 padding-top:120px;
+
 background:
-linear-gradient(rgba(0,0,0,0.75),rgba(0,0,0,0.78)),
+linear-gradient(rgba(0,0,0,0.76),rgba(0,0,0,0.82)),
 url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1400&auto=format&fit=crop');
+
 background-size:cover;
 background-position:center;
 }
@@ -108,7 +110,7 @@ align-items:center;
 }
 
 .hero small{
-color:#d1a56b;
+color:#d8aa6d;
 letter-spacing:5px;
 font-size:13px;
 }
@@ -127,8 +129,8 @@ color:#d8aa6d;
 font-size:18px;
 line-height:1.9;
 color:#d8d8d8;
-max-width:620px;
 margin-bottom:35px;
+max-width:600px;
 }
 
 .buttons{
@@ -165,6 +167,10 @@ border:1px solid rgba(255,255,255,0.12);
 color:white;
 }
 
+.btn-secondary:hover{
+background:rgba(255,255,255,0.05);
+}
+
 .hero-image img{
 height:700px;
 object-fit:cover;
@@ -177,7 +183,7 @@ padding:110px 0;
 }
 
 .section-label{
-color:#d1a56b;
+color:#d8aa6d;
 letter-spacing:4px;
 font-size:13px;
 margin-bottom:15px;
@@ -294,9 +300,11 @@ margin-top:90px;
 padding:90px 40px;
 border-radius:40px;
 text-align:center;
+
 background:
-linear-gradient(rgba(90,50,20,0.78),rgba(50,28,10,0.78)),
+linear-gradient(rgba(90,50,20,0.75),rgba(50,28,10,0.78)),
 url('https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1400&auto=format&fit=crop');
+
 background-size:cover;
 background-position:center;
 }
@@ -500,7 +508,7 @@ Nara Pustaka adalah penerbit independen modern yang membantu penulis menerbitkan
 
 <div class="buttons">
 
-<a href="https://wa.me/6282130872054" class="btn btn-primary">
+<a href="https://wa.me/6282130872054" target="_blank" class="btn btn-primary">
 Terbitkan Buku
 </a>
 
@@ -584,8 +592,7 @@ LAYANAN
 </p>
 
 <h2 class="section-title">
-Solusi Penerbitan
-Modern
+Solusi Penerbitan Modern
 </h2>
 
 <div class="services">
@@ -653,8 +660,7 @@ PERSIAPAN KATALOG
 </p>
 
 <h2 class="section-title">
-Katalog Akan
-Segera Hadir
+Katalog Akan Segera Hadir
 </h2>
 
 <div class="future">
