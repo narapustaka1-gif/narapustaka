@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>Nara Pustaka</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
 
@@ -19,25 +19,24 @@ scroll-behavior:smooth;
 }
 
 body{
-font-family:'Inter',sans-serif;
-background:#0f0b08;
-color:white;
+font-family:'Poppins',sans-serif;
+background:#f7f3ee;
+color:#2d2d2d;
 overflow-x:hidden;
-}
-
-h1,h2,h3{
-font-family:'Cormorant Garamond',serif;
-font-weight:600;
-}
-
-.container{
-width:min(1200px,90%);
-margin:auto;
 }
 
 img{
 width:100%;
 display:block;
+}
+
+.container{
+width:min(1200px,92%);
+margin:auto;
+}
+
+h1,h2,h3{
+font-family:'Playfair Display',serif;
 }
 
 header{
@@ -46,29 +45,29 @@ top:0;
 left:0;
 width:100%;
 z-index:999;
-background:rgba(0,0,0,0.55);
+background:rgba(255,255,255,0.75);
 backdrop-filter:blur(12px);
-border-bottom:1px solid rgba(255,255,255,0.05);
+border-bottom:1px solid rgba(0,0,0,0.05);
+transition:0.3s;
 }
 
 .navbar{
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:22px 0;
+padding:20px 0;
 }
 
 .logo h1{
-font-size:42px;
-color:#e5c08b;
-line-height:1;
+font-size:38px;
+color:#8b5e3c;
 }
 
 .logo p{
 font-size:12px;
 letter-spacing:4px;
-color:#c89f66;
-margin-top:5px;
+color:#b18969;
+margin-top:4px;
 }
 
 nav{
@@ -79,13 +78,14 @@ flex-wrap:wrap;
 
 nav a{
 text-decoration:none;
-color:white;
-font-size:15px;
+color:#333;
+font-size:14px;
+font-weight:500;
 transition:0.3s;
 }
 
 nav a:hover{
-color:#d8aa6d;
+color:#b4835b;
 }
 
 .hero{
@@ -93,10 +93,9 @@ min-height:100vh;
 display:flex;
 align-items:center;
 padding-top:120px;
-
 background:
-linear-gradient(rgba(0,0,0,0.78),rgba(0,0,0,0.82)),
-url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1400&auto=format&fit=crop');
+linear-gradient(rgba(247,243,238,0.85),rgba(247,243,238,0.92)),
+url('https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1400&auto=format&fit=crop');
 
 background-size:cover;
 background-position:center;
@@ -110,27 +109,28 @@ align-items:center;
 }
 
 .hero small{
-color:#d8aa6d;
-letter-spacing:5px;
+letter-spacing:4px;
+color:#b4835b;
 font-size:13px;
 }
 
 .hero h2{
-font-size:clamp(56px,8vw,95px);
+font-size:clamp(56px,8vw,90px);
 line-height:0.95;
-margin:22px 0;
+margin:20px 0;
+color:#2f2f2f;
 }
 
 .gold{
-color:#d8aa6d;
+color:#b4835b;
 }
 
 .hero p{
 font-size:18px;
 line-height:1.9;
-color:#d8d8d8;
+color:#555;
 margin-bottom:35px;
-max-width:600px;
+max-width:620px;
 }
 
 .buttons{
@@ -149,125 +149,190 @@ font-size:15px;
 font-weight:600;
 text-decoration:none;
 transition:0.3s;
-cursor:pointer;
 }
 
 .btn-primary{
-background:#d8aa6d;
-color:black;
+background:#b4835b;
+color:white;
+box-shadow:0 12px 30px rgba(180,131,91,0.25);
 }
 
 .btn-primary:hover{
-transform:translateY(-4px);
+transform:translateY(-5px);
 }
 
 .btn-secondary{
-background:transparent;
-border:1px solid rgba(255,255,255,0.12);
-color:white;
+background:white;
+color:#333;
+border:1px solid rgba(0,0,0,0.08);
 }
 
 .btn-secondary:hover{
-background:rgba(255,255,255,0.05);
+transform:translateY(-5px);
 }
 
 .hero-image img{
-height:700px;
+height:720px;
 object-fit:cover;
-border-radius:30px;
-box-shadow:0 30px 80px rgba(0,0,0,0.6);
+border-radius:35px;
+box-shadow:0 30px 80px rgba(0,0,0,0.15);
+animation:float 5s ease-in-out infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(0px);}
+50%{transform:translateY(-12px);}
+100%{transform:translateY(0px);}
 }
 
 section{
-padding:110px 0;
+padding:120px 0;
 }
 
 .section-label{
-color:#d8aa6d;
-letter-spacing:4px;
 font-size:13px;
+letter-spacing:4px;
+color:#b4835b;
 margin-bottom:15px;
 }
 
 .section-title{
-font-size:clamp(42px,7vw,70px);
+font-size:clamp(42px,7vw,68px);
 line-height:1;
 margin-bottom:30px;
+color:#2f2f2f;
 }
 
 .about{
-background:#f5efe7;
-color:black;
-border-radius:40px;
-padding:70px;
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:60px;
+gap:70px;
 align-items:center;
+background:white;
+padding:70px;
+border-radius:40px;
+box-shadow:0 20px 60px rgba(0,0,0,0.05);
 }
 
 .about img{
 height:650px;
 object-fit:cover;
-border-radius:28px;
+border-radius:30px;
 }
 
 .about p{
 font-size:18px;
 line-height:1.9;
-color:#444;
-margin-bottom:22px;
+color:#555;
+margin-bottom:20px;
 }
 
-.stats{
-display:flex;
-flex-wrap:wrap;
-gap:30px;
-margin-top:35px;
+.vision{
+margin-top:25px;
+padding:25px;
+background:#f8f1ea;
+border-radius:22px;
 }
 
-.stat h3{
-font-size:42px;
-color:#a56d33;
+.vision h3{
+margin-bottom:12px;
+color:#8b5e3c;
+font-size:28px;
 }
 
 .services{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:30px;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:28px;
 margin-top:60px;
 }
 
 .card{
-background:#18120d;
+background:white;
+padding:35px;
 border-radius:28px;
-overflow:hidden;
-border:1px solid rgba(255,255,255,0.06);
+box-shadow:0 15px 40px rgba(0,0,0,0.05);
 transition:0.4s;
+border:1px solid rgba(0,0,0,0.04);
 }
 
 .card:hover{
-transform:translateY(-8px);
-border-color:#d8aa6d;
+transform:translateY(-10px);
 }
 
-.card img{
-height:250px;
-object-fit:cover;
-}
-
-.card-content{
-padding:28px;
-}
-
-.card-content h3{
-font-size:34px;
+.card h3{
+font-size:32px;
 margin-bottom:15px;
+color:#8b5e3c;
 }
 
-.card-content p{
+.card p{
 line-height:1.8;
-color:#d3d3d3;
+color:#666;
+}
+
+.catalog{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+margin-top:60px;
+}
+
+.book{
+background:white;
+padding:18px;
+border-radius:26px;
+box-shadow:0 15px 40px rgba(0,0,0,0.05);
+transition:0.4s;
+}
+
+.book:hover{
+transform:translateY(-8px);
+}
+
+.book img{
+height:320px;
+object-fit:cover;
+border-radius:18px;
+margin-bottom:18px;
+}
+
+.book h3{
+font-size:24px;
+margin-bottom:10px;
+}
+
+.book p{
+color:#777;
+}
+
+.open{
+margin-top:90px;
+padding:90px 40px;
+text-align:center;
+border-radius:40px;
+
+background:
+linear-gradient(rgba(180,131,91,0.82),rgba(139,94,60,0.88)),
+url('https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1400&auto=format&fit=crop');
+
+background-size:cover;
+background-position:center;
+
+color:white;
+}
+
+.open h2{
+font-size:clamp(42px,7vw,72px);
+margin-bottom:20px;
+}
+
+.open p{
+max-width:760px;
+margin:auto;
+line-height:1.9;
+font-size:18px;
+margin-bottom:35px;
 }
 
 .contact{
@@ -278,44 +343,56 @@ margin-top:60px;
 }
 
 .contact-box{
-background:#18120d;
-padding:36px;
+background:white;
+padding:35px;
 border-radius:28px;
-border:1px solid rgba(255,255,255,0.06);
+box-shadow:0 15px 40px rgba(0,0,0,0.05);
 }
 
 .contact-box h3{
-font-size:34px;
+font-size:30px;
 margin-bottom:14px;
-color:#d8aa6d;
+color:#8b5e3c;
 }
 
 .contact-box p{
 line-height:1.8;
-color:#d2d2d2;
+color:#666;
 }
 
 footer{
 padding:60px 0;
-border-top:1px solid rgba(255,255,255,0.06);
 margin-top:100px;
+background:#fff;
+border-top:1px solid rgba(0,0,0,0.05);
 }
 
 .footer-content{
 display:flex;
 justify-content:space-between;
 flex-wrap:wrap;
-gap:25px;
+gap:20px;
 }
 
 footer h3{
-font-size:36px;
-color:#e5c08b;
+font-size:34px;
+color:#8b5e3c;
 }
 
 footer p{
-color:#bdbdbd;
+color:#777;
 line-height:1.8;
+}
+
+.reveal{
+opacity:0;
+transform:translateY(60px);
+transition:all 1s ease;
+}
+
+.reveal.active{
+opacity:1;
+transform:translateY(0);
 }
 
 @media(max-width:950px){
@@ -368,37 +445,31 @@ min-width:180px;
 
 @media(max-width:600px){
 
-.container{
-width:92%;
-}
-
 .hero p,
 .about p,
-.card-content p,
-.contact-box p{
+.card p,
+.book p,
+.contact-box p,
+.open p{
 font-size:16px;
 }
 
 nav{
-gap:15px;
+gap:14px;
 }
 
 nav a{
 font-size:13px;
 }
 
-.card-content h3,
+.card h3,
 .contact-box h3{
-font-size:28px;
-}
-
-.stat h3{
-font-size:34px;
+font-size:26px;
 }
 
 .footer-content{
-text-align:center;
 justify-content:center;
+text-align:center;
 }
 
 }
@@ -420,6 +491,7 @@ justify-content:center;
 <nav>
 <a href="#tentang">Tentang</a>
 <a href="#layanan">Layanan</a>
+<a href="#katalog">Katalog</a>
 <a href="#kontak">Kontak</a>
 </nav>
 
@@ -431,19 +503,18 @@ justify-content:center;
 
 <div class="container hero-grid">
 
-<div>
+<div class="reveal">
 
-<small>PREMIUM INDEPENDENT PUBLISHER</small>
+<small>MODERN INDEPENDENT PUBLISHER</small>
 
 <h2>
-Menerbitkan
-<span class="gold">Karya</span>
-Dengan
-Elegansi.
+Nara
+<span class="gold">Pustaka</span>
 </h2>
 
 <p>
-Nara Pustaka adalah penerbit independen modern yang membantu penulis menerbitkan karya secara profesional melalui sistem print on demand dengan pendekatan editorial premium.
+Penerbit independen untuk penulis masa kini.
+Nara Pustaka membantu penulis menerbitkan karya secara profesional melalui sistem print on demand, desain modern, dan proses yang mudah.
 </p>
 
 <div class="buttons">
@@ -460,9 +531,9 @@ Info Selengkapnya
 
 </div>
 
-<div class="hero-image">
+<div class="hero-image reveal">
 
-<img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop">
+<img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200&auto=format&fit=crop">
 
 </div>
 
@@ -474,9 +545,9 @@ Info Selengkapnya
 
 <div class="container">
 
-<div class="about">
+<div class="about reveal">
 
-<img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200&auto=format&fit=crop">
+<img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop">
 
 <div>
 
@@ -485,33 +556,33 @@ TENTANG KAMI
 </p>
 
 <h2 class="section-title">
-Nara Pustaka
+Penerbit Modern
+Untuk Penulis Indonesia
 </h2>
 
 <p>
-Nara Pustaka merupakan penerbit independen berbasis print on demand yang hadir untuk mendukung penulis Indonesia menerbitkan karya secara profesional dan modern.
+Nara Pustaka adalah penerbit independen berbasis print on demand yang berfokus pada pengembangan karya penulis lokal melalui proses penerbitan yang modern, profesional, dan terjangkau.
 </p>
+
+<div class="vision">
+
+<h3>Visi</h3>
 
 <p>
-Kami percaya setiap karya memiliki nilai untuk diterbitkan dengan tampilan elegan dan proses terpercaya.
+Menjadi penerbit independen yang mendukung pertumbuhan penulis baru Indonesia.
 </p>
 
-<div class="stats">
-
-<div class="stat">
-<h3>POD</h3>
-<p>Sistem fleksibel modern</p>
 </div>
 
-<div class="stat">
-<h3>ISBN</h3>
-<p>Pengurusan resmi</p>
-</div>
+<div class="vision">
 
-<div class="stat">
-<h3>Indie</h3>
-<p>Fokus penulis lokal</p>
-</div>
+<h3>Misi</h3>
+
+<p>
+• Mendukung karya lokal<br>
+• Membantu penulis menerbitkan buku<br>
+• Mengembangkan literasi modern
+</p>
 
 </div>
 
@@ -527,63 +598,105 @@ Kami percaya setiap karya memiliki nilai untuk diterbitkan dengan tampilan elega
 
 <div class="container">
 
-<p class="section-label">
+<p class="section-label reveal">
 LAYANAN
 </p>
 
-<h2 class="section-title">
-Solusi Penerbitan Modern
+<h2 class="section-title reveal">
+Layanan Penerbitan
+Profesional
 </h2>
 
 <div class="services">
 
-<div class="card">
-
-<img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop">
-
-<div class="card-content">
-
+<div class="card reveal">
 <h3>Penerbitan Buku</h3>
-
-<p>
-Pendampingan proses penerbitan buku mulai dari naskah hingga siap terbit secara profesional.
-</p>
-
+<p>Pendampingan penerbitan profesional untuk penulis modern.</p>
 </div>
 
-</div>
-
-<div class="card">
-
-<img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop">
-
-<div class="card-content">
-
+<div class="card reveal">
 <h3>Pengurusan ISBN</h3>
+<p>Pengajuan ISBN resmi untuk kebutuhan penerbitan.</p>
+</div>
 
-<p>
-Pengajuan ISBN resmi untuk kebutuhan penerbitan buku cetak maupun digital.
+<div class="card reveal">
+<h3>Layout Buku</h3>
+<p>Penataan isi buku profesional dan nyaman dibaca.</p>
+</div>
+
+<div class="card reveal">
+<h3>Desain Cover</h3>
+<p>Cover modern dan premium untuk meningkatkan branding buku.</p>
+</div>
+
+<div class="card reveal">
+<h3>Cetak POD</h3>
+<p>Sistem print on demand fleksibel tanpa minimum cetak besar.</p>
+</div>
+
+<div class="card reveal">
+<h3>Konsultasi</h3>
+<p>Konsultasi proses penerbitan dan pengembangan karya.</p>
+</div>
+
+<div class="card reveal">
+<h3>Promosi Buku</h3>
+<p>Membantu promosi buku melalui media sosial dan branding.</p>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="katalog">
+
+<div class="container">
+
+<p class="section-label reveal">
+KATALOG
 </p>
 
+<h2 class="section-title reveal">
+Katalog Buku
+</h2>
+
+<div class="catalog">
+
+<div class="book reveal">
+<img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop">
+<h3>Segera Hadir</h3>
+<p>Katalog buku segera hadir.</p>
 </div>
 
+<div class="book reveal">
+<img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=1200&auto=format&fit=crop">
+<h3>Segera Hadir</h3>
+<p>Katalog buku segera hadir.</p>
 </div>
 
-<div class="card">
-
+<div class="book reveal">
 <img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop">
+<h3>Segera Hadir</h3>
+<p>Katalog buku segera hadir.</p>
+</div>
 
-<div class="card-content">
+</div>
 
-<h3>Desain & Layout</h3>
+<div class="open reveal">
+
+<h2>
+Open Naskah
+</h2>
 
 <p>
-Desain cover dan layout premium untuk meningkatkan kualitas visual karya penulis.
+Nara Pustaka membuka kesempatan bagi penulis baru untuk menerbitkan karya terbaiknya.
 </p>
 
-</div>
-
-</div>
+<a href="mailto:narapustaka1@gmail.com" class="btn btn-primary">
+Kirim Naskah
+</a>
 
 </div>
 
@@ -595,44 +708,29 @@ Desain cover dan layout premium untuk meningkatkan kualitas visual karya penulis
 
 <div class="container">
 
-<p class="section-label">
+<p class="section-label reveal">
 KONTAK
 </p>
 
-<h2 class="section-title">
+<h2 class="section-title reveal">
 Hubungi Kami
 </h2>
 
 <div class="contact">
 
-<div class="contact-box">
-
+<div class="contact-box reveal">
 <h3>Email</h3>
-
-<p>
-narapustaka1@gmail.com
-</p>
-
+<p>narapustaka1@gmail.com</p>
 </div>
 
-<div class="contact-box">
-
+<div class="contact-box reveal">
 <h3>WhatsApp</h3>
-
-<p>
-0821-3087-2054
-</p>
-
+<p>0821-3087-2054</p>
 </div>
 
-<div class="contact-box">
-
+<div class="contact-box reveal">
 <h3>Instagram</h3>
-
-<p>
-@narapustaka
-</p>
-
+<p>Nara Pustaka</p>
 </div>
 
 </div>
@@ -646,13 +744,8 @@ narapustaka1@gmail.com
 <div class="container footer-content">
 
 <div>
-
 <h3>Nara Pustaka</h3>
-
-<p>
-Penerbit independen modern untuk penulis Indonesia.
-</p>
-
+<p>Penerbit independen modern untuk penulis Indonesia.</p>
 </div>
 
 <p>
@@ -662,6 +755,32 @@ Penerbit independen modern untuk penulis Indonesia.
 </div>
 
 </footer>
+
+<script>
+
+window.addEventListener('scroll', reveal);
+
+function reveal(){
+
+let reveals = document.querySelectorAll('.reveal');
+
+for(let i = 0; i < reveals.length; i++){
+
+let windowHeight = window.innerHeight;
+let elementTop = reveals[i].getBoundingClientRect().top;
+let elementVisible = 100;
+
+if(elementTop < windowHeight - elementVisible){
+reveals[i].classList.add('active');
+}
+
+}
+
+}
+
+reveal();
+
+</script>
 
 </body>
 </html>
