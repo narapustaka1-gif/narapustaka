@@ -1,13 +1,39 @@
 export default function NaraPustakaWebsite() {
+  const services = [
+    {
+      title: 'Penerbitan Buku',
+      image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop',
+    },
+    {
+      title: 'Pengurusan ISBN',
+      image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop',
+    },
+    {
+      title: 'Layout Buku',
+      image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=1200&auto=format&fit=crop',
+    },
+    {
+      title: 'Desain Cover',
+      image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=1200&auto=format&fit=crop',
+    },
+    {
+      title: 'Cetak POD',
+      image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop',
+    },
+    {
+      title: 'Promosi Buku',
+      image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop',
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f172a] via-[#111827] to-[#1e1b4b] text-white font-sans overflow-hidden">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-6 backdrop-blur-md border-b border-white/15 sticky top-0 z-50 bg-black/40">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-[#f9c784]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white overflow-hidden">
+      <nav className="flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/10 bg-black/30 backdrop-blur-md sticky top-0 z-50">
+        <h1 className="text-3xl font-black tracking-wide text-amber-200">
           Nara Pustaka
         </h1>
 
-        <div className="hidden md:flex gap-8 text-sm text-gray-300">
+        <div className="hidden md:flex gap-8 text-gray-300">
           <a href="#tentang" className="hover:text-white transition">Tentang</a>
           <a href="#layanan" className="hover:text-white transition">Layanan</a>
           <a href="#katalog" className="hover:text-white transition">Katalog</a>
@@ -15,235 +41,126 @@ export default function NaraPustakaWebsite() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative px-6 md:px-12 py-24 md:py-36">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,rgba(255,215,0,0.35),transparent_40%)]" />
-
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-14 items-center relative z-10">
+      <section className="px-6 md:px-12 py-24 md:py-32">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-14 items-center">
           <div>
-            <p className="uppercase tracking-[0.3em] text-[#f9c784] text-sm mb-4">
-              Penerbit Independen Indonesia
+            <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
+              Penerbit Independen
             </p>
 
-            <h2 className="text-5xl md:text-7xl font-black leading-tight bg-gradient-to-r from-white via-[#ffe7b3] to-[#f9c784] bg-clip-text text-transparent">
-              Menerbitkan
-              <span className="text-[#f9c784]"> Ide</span>,
+            <h2 className="text-5xl md:text-7xl font-black leading-tight bg-gradient-to-r from-white via-amber-100 to-amber-300 bg-clip-text text-transparent">
+              Premium
               <br />
-              Menjaga Karya.
+              Publishing
             </h2>
 
             <p className="mt-8 text-lg text-gray-300 leading-8 max-w-xl">
-              Nara Pustaka membantu penulis menerbitkan karya secara
-              profesional melalui sistem print on demand, desain modern,
-              dan proses penerbitan yang mudah serta terpercaya.
+              Nara Pustaka membantu penulis menerbitkan karya secara profesional melalui sistem print on demand modern dengan desain premium dan branding elegan.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
-              <button className="bg-gradient-to-r from-[#f9c784] to-[#ffe7b3] text-black px-7 py-4 rounded-2xl font-semibold hover:scale-105 transition duration-300 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+              <button className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-200 to-yellow-100 text-black font-semibold shadow-2xl hover:scale-105 transition">
                 Terbitkan Buku
               </button>
 
-              <button className="border border-white/20 bg-white/10 backdrop-blur-xl backdrop-blur-md px-7 py-4 rounded-2xl hover:bg-white/10 transition">
+              <button className="px-8 py-4 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 transition">
                 Lihat Layanan
               </button>
             </div>
           </div>
 
-          <div className="relative flex justify-center">
-            <div className="absolute w-72 h-72 bg-[#f9c784]/20 blur-3xl rounded-full" />
+          <div className="relative">
+            <div className="absolute inset-0 bg-amber-200/20 blur-3xl rounded-full" />
 
             <img
               src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop"
-              alt="Buku"
-              className="relative rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/15 object-cover h-[500px] w-full max-w-md"
+              alt="Books"
+              className="relative rounded-[2rem] h-[550px] w-full object-cover border border-white/10 shadow-2xl"
             />
           </div>
         </div>
       </section>
 
-      {/* Tentang */}
       <section id="tentang" className="px-6 md:px-12 py-24">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <img
-              src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop"
-              alt="Perpustakaan"
-              className="rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/15"
-            />
-          </div>
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+          <img
+            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1400&auto=format&fit=crop"
+            alt="Library"
+            className="rounded-[2rem] shadow-2xl border border-white/10"
+          />
 
           <div>
-            <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+            <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
               Tentang Kami
             </p>
 
             <h3 className="text-4xl md:text-5xl font-bold leading-tight">
-              Penerbit modern untuk generasi penulis baru.
+              Penerbit modern untuk generasi kreatif.
             </h3>
 
-            <p className="mt-6 text-gray-300 leading-8 text-lg">
-              Nara Pustaka adalah penerbit independen berbasis print on
-              demand yang berfokus pada pengembangan karya penulis lokal
-              melalui proses penerbitan yang profesional, modern, dan
-              terjangkau.
+            <p className="mt-6 text-lg text-gray-300 leading-8">
+              Nara Pustaka adalah penerbit independen berbasis print on demand yang mendukung karya penulis lokal dengan proses penerbitan profesional, modern, dan terjangkau.
             </p>
-
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-5">
-                <h4 className="text-3xl font-bold text-[#f9c784]">100%</h4>
-                <p className="text-gray-400 mt-2 text-sm">Sistem POD Modern</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-5">
-                <h4 className="text-3xl font-bold text-[#f9c784]">Indie</h4>
-                <p className="text-gray-400 mt-2 text-sm">Fokus Penulis Lokal</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Layanan */}
-      <section id="layanan" className="px-6 md:px-12 py-24 bg-white/[0.03] border-y border-white/15">
+      <section id="layanan" className="px-6 md:px-12 py-24 bg-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+            <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
               Layanan
             </p>
 
             <h3 className="text-4xl md:text-5xl font-bold">
-              Solusi lengkap penerbitan buku.
+              Solusi Lengkap Penerbitan
             </h3>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: 'Penerbitan Buku',
-                image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop'
-              },
-              {
-                title: 'Pengurusan ISBN',
-                image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop'
-              },
-              {
-                title: 'Layout Buku',
-                image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=1200&auto=format&fit=crop'
-              },
-              {
-                title: 'Desain Cover',
-                image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=1200&auto=format&fit=crop'
-              },
-              {
-                title: 'Cetak POD',
-                image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop'
-              },
-              {
-                title: 'Promosi Buku',
-                image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop'
-              },
-            ].map((item) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {services.map((item) => (
               <div
                 key={item.title}
-                className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/15 rounded-[2rem] overflow-hidden hover:-translate-y-2 hover:border-[#f9c784]/40 transition duration-500 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+                className="overflow-hidden rounded-[2rem] bg-white/10 border border-white/10 shadow-2xl hover:-translate-y-2 transition duration-500"
               >
-                <div className="relative h-52 overflow-hidden">
+                <div className="h-56 overflow-hidden">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+                    className="w-full h-full object-cover hover:scale-110 transition duration-700"
                   />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
                 </div>
 
                 <div className="p-8">
-                  <div className="w-14 h-14 rounded-2xl bg-[#f9c784]/20 mb-6" />
+                  <h4 className="text-2xl font-bold mb-4">
+                    {item.title}
+                  </h4>
 
-                  <h4 className="text-2xl font-semibold">{item.title}</h4>
-
-                  <p className="mt-4 text-gray-400 leading-7">
-                    Layanan profesional untuk membantu penulis menerbitkan karya dengan lebih mudah dan modern.
+                  <p className="text-gray-300 leading-7">
+                    Layanan profesional dengan tampilan modern dan kualitas premium.
                   </p>
                 </div>
               </div>
             ))}
-
           </div>
         </div>
       </section>
 
-      {/* Showcase */}
-      <section className="px-6 md:px-12 py-24">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
-          <div className="relative overflow-hidden rounded-[2.5rem] h-[500px] shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/15">
-            <img
-              src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1400&auto=format&fit=crop"
-              alt="Library"
-              className="w-full h-full object-cover"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-
-            <div className="absolute bottom-10 left-10 max-w-md">
-              <p className="uppercase tracking-[0.3em] text-[#f9c784] text-sm mb-3">
-                Literary Vision
-              </p>
-
-              <h3 className="text-4xl font-bold leading-tight">
-                Membawa karya lokal menjadi lebih profesional.
-              </h3>
-            </div>
-          </div>
-
-          <div className="grid grid-rows-2 gap-8">
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-              <img
-                src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop"
-                alt="Books"
-                className="w-full h-full object-cover"
-              />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-
-              <div className="absolute bottom-8 left-8">
-                <h4 className="text-3xl font-bold">Desain Premium</h4>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-              <img
-                src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop"
-                alt="Writer"
-                className="w-full h-full object-cover"
-              />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-
-              <div className="absolute bottom-8 left-8">
-                <h4 className="text-3xl font-bold">Modern Publishing</h4>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Katalog */}
-      <section id="katalog" className="px-6 md:px-12 py-24 bg-[radial-gradient(circle_at_center,rgba(249,199,132,0.08),transparent_60%)]">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+      <section id="katalog" className="px-6 md:px-12 py-24">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
             Katalog
           </p>
 
-          <h3 className="text-4xl md:text-5xl font-bold mb-12">
-            Karya yang akan segera hadir.
+          <h3 className="text-4xl md:text-5xl font-bold mb-14">
+            Katalog Buku Premium
           </h3>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1,2,3].map((i) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {[1,2,3].map((item) => (
               <div
-                key={i}
-                className="relative overflow-hidden rounded-[2rem] h-80 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+                key={item}
+                className="relative overflow-hidden rounded-[2rem] h-96 border border-white/10 shadow-2xl"
               >
                 <img
                   src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop"
@@ -251,12 +168,12 @@ export default function NaraPustakaWebsite() {
                   className="w-full h-full object-cover"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
-                <div className="absolute bottom-8 left-8 text-left z-10">
+                <div className="absolute bottom-8 left-8 text-left">
                   <p className="text-gray-300 text-sm">Upcoming Book</p>
-                  <h4 className="text-2xl font-bold mt-2">
-                    Katalog Segera Hadir
+                  <h4 className="text-3xl font-bold mt-2">
+                    Segera Hadir
                   </h4>
                 </div>
               </div>
@@ -265,57 +182,54 @@ export default function NaraPustakaWebsite() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="px-6 md:px-12 pb-24">
-        <div className="max-w-6xl mx-auto rounded-[3rem] p-12 md:p-20 bg-gradient-to-r from-[#f9c784] via-[#ffe7b3] to-[#f8d49d] text-black text-center shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-          <h3 className="text-4xl md:text-5xl font-black leading-tight">
-            Open Naskah untuk
+        <div className="max-w-6xl mx-auto rounded-[3rem] p-14 md:p-20 bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-100 text-black text-center shadow-2xl">
+          <h3 className="text-4xl md:text-6xl font-black leading-tight">
+            Open Naskah
             <br />
-            Penulis Baru Indonesia.
+            Nara Pustaka
           </h3>
 
-          <p className="mt-6 text-lg max-w-2xl mx-auto text-black/70 leading-8">
-            Nara Pustaka membuka kesempatan bagi penulis baru untuk menerbitkan karya terbaiknya secara profesional.
+          <p className="mt-6 text-lg leading-8 max-w-2xl mx-auto text-black/70">
+            Membuka kesempatan bagi penulis baru untuk menerbitkan karya terbaiknya secara profesional.
           </p>
 
-          <button className="mt-10 bg-black text-white px-8 py-4 rounded-2xl hover:scale-105 transition">
+          <button className="mt-10 px-8 py-4 rounded-2xl bg-black text-white hover:scale-105 transition">
             Kirim Naskah
           </button>
         </div>
       </section>
 
-      {/* Kontak */}
-      <section id="kontak" className="px-6 md:px-12 py-20 border-t border-white/15">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+      <section id="kontak" className="px-6 md:px-12 py-20 border-t border-white/10">
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
             Kontak
           </p>
 
-          <h3 className="text-4xl md:text-5xl font-bold mb-10">
-            Hubungi Nara Pustaka
+          <h3 className="text-4xl md:text-5xl font-bold mb-12">
+            Hubungi Kami
           </h3>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
-              <p className="text-gray-400 mb-2">Email</p>
-              <h4 className="font-semibold">narapustaka@email.com</h4>
+            <div className="bg-white/10 border border-white/10 rounded-2xl p-8">
+              <p className="text-gray-400 mb-3">Email</p>
+              <h4 className="font-semibold">narapustaka1@gmail.com</h4>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
-              <p className="text-gray-400 mb-2">WhatsApp</p>
-              <h4 className="font-semibold">08xxxxxxxxxx</h4>
+            <div className="bg-white/10 border border-white/10 rounded-2xl p-8">
+              <p className="text-gray-400 mb-3">WhatsApp</p>
+              <h4 className="font-semibold">0821-3087-2054</h4>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
-              <p className="text-gray-400 mb-2">Instagram</p>
+            <div className="bg-white/10 border border-white/10 rounded-2xl p-8">
+              <p className="text-gray-400 mb-3">Instagram</p>
               <h4 className="font-semibold">@narapustaka</h4>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="text-center py-8 text-gray-500 border-t border-white/15">
+      <footer className="py-8 text-center text-gray-400 border-t border-white/10">
         © 2026 Nara Pustaka — All Rights Reserved.
       </footer>
     </div>
