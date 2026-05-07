@@ -1,237 +1,634 @@
-export default function NaraPustakaWebsite() {
-  const services = [
-    {
-      title: 'Penerbitan Buku',
-      image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Pengurusan ISBN',
-      image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Layout Buku',
-      image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Desain Cover',
-      image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Cetak POD',
-      image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Promosi Buku',
-      image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop',
-    },
-  ]
+```html id="narapustaka-premium-website"
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white overflow-hidden">
-      <nav className="flex justify-between items-center px-6 md:px-12 py-6 border-b border-white/10 bg-black/30 backdrop-blur-md sticky top-0 z-50">
-        <h1 className="text-3xl font-black tracking-wide text-amber-200">
-          Nara Pustaka
-        </h1>
+<title>Nara Pustaka</title>
 
-        <div className="hidden md:flex gap-8 text-gray-300">
-          <a href="#tentang" className="hover:text-white transition">Tentang</a>
-          <a href="#layanan" className="hover:text-white transition">Layanan</a>
-          <a href="#katalog" className="hover:text-white transition">Katalog</a>
-          <a href="#kontak" className="hover:text-white transition">Kontak</a>
-        </div>
-      </nav>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-      <section className="px-6 md:px-12 py-24 md:py-32">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-14 items-center">
-          <div>
-            <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
-              Penerbit Independen
-            </p>
+<style>
 
-            <h2 className="text-5xl md:text-7xl font-black leading-tight bg-gradient-to-r from-white via-amber-100 to-amber-300 bg-clip-text text-transparent">
-              Premium
-              <br />
-              Publishing
-            </h2>
-
-            <p className="mt-8 text-lg text-gray-300 leading-8 max-w-xl">
-              Nara Pustaka membantu penulis menerbitkan karya secara profesional melalui sistem print on demand modern dengan desain premium dan branding elegan.
-            </p>
-
-            <div className="mt-10 flex flex-wrap gap-4">
-              <button className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-200 to-yellow-100 text-black font-semibold shadow-2xl hover:scale-105 transition">
-                Terbitkan Buku
-              </button>
-
-              <button className="px-8 py-4 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/20 transition">
-                Lihat Layanan
-              </button>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 bg-amber-200/20 blur-3xl rounded-full" />
-
-            <img
-              src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop"
-              alt="Books"
-              className="relative rounded-[2rem] h-[550px] w-full object-cover border border-white/10 shadow-2xl"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section id="tentang" className="px-6 md:px-12 py-24">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          <img
-            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1400&auto=format&fit=crop"
-            alt="Library"
-            className="rounded-[2rem] shadow-2xl border border-white/10"
-          />
-
-          <div>
-            <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
-              Tentang Kami
-            </p>
-
-            <h3 className="text-4xl md:text-5xl font-bold leading-tight">
-              Penerbit modern untuk generasi kreatif.
-            </h3>
-
-            <p className="mt-6 text-lg text-gray-300 leading-8">
-              Nara Pustaka adalah penerbit independen berbasis print on demand yang mendukung karya penulis lokal dengan proses penerbitan profesional, modern, dan terjangkau.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section id="layanan" className="px-6 md:px-12 py-24 bg-white/5">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
-              Layanan
-            </p>
-
-            <h3 className="text-4xl md:text-5xl font-bold">
-              Solusi Lengkap Penerbitan
-            </h3>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {services.map((item) => (
-              <div
-                key={item.title}
-                className="overflow-hidden rounded-[2rem] bg-white/10 border border-white/10 shadow-2xl hover:-translate-y-2 transition duration-500"
-              >
-                <div className="h-56 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover hover:scale-110 transition duration-700"
-                  />
-                </div>
-
-                <div className="p-8">
-                  <h4 className="text-2xl font-bold mb-4">
-                    {item.title}
-                  </h4>
-
-                  <p className="text-gray-300 leading-7">
-                    Layanan profesional dengan tampilan modern dan kualitas premium.
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="katalog" className="px-6 md:px-12 py-24">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
-            Katalog
-          </p>
-
-          <h3 className="text-4xl md:text-5xl font-bold mb-14">
-            Katalog Buku Premium
-          </h3>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[1,2,3].map((item) => (
-              <div
-                key={item}
-                className="relative overflow-hidden rounded-[2rem] h-96 border border-white/10 shadow-2xl"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop"
-                  alt="Book"
-                  className="w-full h-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-
-                <div className="absolute bottom-8 left-8 text-left">
-                  <p className="text-gray-300 text-sm">Upcoming Book</p>
-                  <h4 className="text-3xl font-bold mt-2">
-                    Segera Hadir
-                  </h4>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 md:px-12 pb-24">
-        <div className="max-w-6xl mx-auto rounded-[3rem] p-14 md:p-20 bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-100 text-black text-center shadow-2xl">
-          <h3 className="text-4xl md:text-6xl font-black leading-tight">
-            Open Naskah
-            <br />
-            Nara Pustaka
-          </h3>
-
-          <p className="mt-6 text-lg leading-8 max-w-2xl mx-auto text-black/70">
-            Membuka kesempatan bagi penulis baru untuk menerbitkan karya terbaiknya secara profesional.
-          </p>
-
-          <button className="mt-10 px-8 py-4 rounded-2xl bg-black text-white hover:scale-105 transition">
-            Kirim Naskah
-          </button>
-        </div>
-      </section>
-
-      <section id="kontak" className="px-6 md:px-12 py-20 border-t border-white/10">
-        <div className="max-w-5xl mx-auto text-center">
-          <p className="uppercase tracking-[0.3em] text-amber-200 text-sm mb-4">
-            Kontak
-          </p>
-
-          <h3 className="text-4xl md:text-5xl font-bold mb-12">
-            Hubungi Kami
-          </h3>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white/10 border border-white/10 rounded-2xl p-8">
-              <p className="text-gray-400 mb-3">Email</p>
-              <h4 className="font-semibold">narapustaka1@gmail.com</h4>
-            </div>
-
-            <div className="bg-white/10 border border-white/10 rounded-2xl p-8">
-              <p className="text-gray-400 mb-3">WhatsApp</p>
-              <h4 className="font-semibold">0821-3087-2054</h4>
-            </div>
-
-            <div className="bg-white/10 border border-white/10 rounded-2xl p-8">
-              <p className="text-gray-400 mb-3">Instagram</p>
-              <h4 className="font-semibold">@narapustaka</h4>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="py-8 text-center text-gray-400 border-t border-white/10">
-        © 2026 Nara Pustaka — All Rights Reserved.
-      </footer>
-    </div>
-  )
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+scroll-behavior:smooth;
 }
+
+body{
+background:#0f0b08;
+color:white;
+font-family:'Inter',sans-serif;
+overflow-x:hidden;
+}
+
+h1,h2,h3{
+font-family:'Cormorant Garamond',serif;
+}
+
+header{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+padding:20px 7%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(0,0,0,0.45);
+backdrop-filter:blur(12px);
+z-index:999;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo img{
+width:60px;
+}
+
+.logo-text h1{
+font-size:38px;
+line-height:1;
+color:#f4d19b;
+}
+
+.logo-text p{
+font-size:14px;
+letter-spacing:3px;
+color:#d6b07c;
+}
+
+nav a{
+text-decoration:none;
+color:white;
+margin-left:35px;
+font-size:15px;
+transition:0.3s;
+}
+
+nav a:hover{
+color:#f4d19b;
+}
+
+.hero{
+min-height:100vh;
+display:grid;
+grid-template-columns:1fr 1fr;
+align-items:center;
+padding:140px 7% 80px;
+gap:60px;
+background:
+linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.7)),
+url('https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1400&auto=format&fit=crop');
+background-size:cover;
+background-position:center;
+}
+
+.hero small{
+color:#d9b37d;
+letter-spacing:4px;
+font-size:14px;
+}
+
+.hero h2{
+font-size:85px;
+line-height:0.95;
+margin:20px 0;
+}
+
+.gold{
+color:#d9a45f;
+}
+
+.hero p{
+color:#d6d6d6;
+font-size:18px;
+line-height:1.8;
+max-width:650px;
+margin-bottom:35px;
+}
+
+.btn{
+padding:16px 34px;
+border:none;
+border-radius:14px;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+margin-right:15px;
+font-weight:600;
+}
+
+.btn-primary{
+background:#d9a45f;
+color:black;
+}
+
+.btn-primary:hover{
+transform:translateY(-4px);
+}
+
+.btn-secondary{
+background:transparent;
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+}
+
+.hero-book{
+display:flex;
+justify-content:center;
+}
+
+.hero-book img{
+width:100%;
+max-width:500px;
+border-radius:30px;
+box-shadow:0 25px 80px rgba(0,0,0,0.6);
+}
+
+section{
+padding:110px 7%;
+}
+
+.section-title{
+font-size:60px;
+margin-bottom:20px;
+}
+
+.section-sub{
+color:#d9a45f;
+letter-spacing:4px;
+font-size:14px;
+margin-bottom:15px;
+}
+
+.about{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:60px;
+align-items:center;
+background:#f6f1ea;
+color:black;
+border-radius:40px;
+padding:70px;
+}
+
+.about img{
+width:100%;
+border-radius:25px;
+}
+
+.about p{
+line-height:1.9;
+font-size:18px;
+color:#444;
+margin-bottom:25px;
+}
+
+.stats{
+display:flex;
+gap:35px;
+margin-top:35px;
+flex-wrap:wrap;
+}
+
+.stat h3{
+font-size:42px;
+color:#b97a35;
+}
+
+.services{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+gap:30px;
+margin-top:60px;
+}
+
+.service-card{
+background:#18110d;
+border:1px solid rgba(255,255,255,0.08);
+border-radius:25px;
+overflow:hidden;
+transition:0.4s;
+}
+
+.service-card:hover{
+transform:translateY(-8px);
+border-color:#d9a45f;
+}
+
+.service-card img{
+width:100%;
+height:240px;
+object-fit:cover;
+}
+
+.service-content{
+padding:25px;
+}
+
+.service-content h3{
+font-size:30px;
+margin-bottom:15px;
+}
+
+.service-content p{
+color:#cfcfcf;
+line-height:1.7;
+}
+
+.catalog-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+margin-top:50px;
+}
+
+.book{
+background:#1a120d;
+padding:15px;
+border-radius:22px;
+transition:0.3s;
+}
+
+.book:hover{
+transform:translateY(-5px);
+}
+
+.book img{
+width:100%;
+height:330px;
+object-fit:cover;
+border-radius:18px;
+margin-bottom:15px;
+}
+
+.book h3{
+font-size:28px;
+}
+
+.cta{
+margin-top:100px;
+background:
+linear-gradient(rgba(120,60,20,0.75),rgba(80,40,10,0.75)),
+url('https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1400&auto=format&fit=crop');
+background-size:cover;
+background-position:center;
+padding:90px;
+border-radius:40px;
+text-align:center;
+}
+
+.cta h2{
+font-size:65px;
+margin-bottom:20px;
+}
+
+.contact{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:30px;
+margin-top:60px;
+}
+
+.contact-box{
+background:#18110d;
+padding:35px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.contact-box h3{
+font-size:30px;
+margin-bottom:15px;
+color:#d9a45f;
+}
+
+footer{
+padding:60px 7%;
+border-top:1px solid rgba(255,255,255,0.08);
+margin-top:80px;
+display:flex;
+justify-content:space-between;
+flex-wrap:wrap;
+gap:30px;
+}
+
+.footer-logo{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.footer-logo img{
+width:55px;
+}
+
+footer p{
+color:#bfbfbf;
+line-height:1.8;
+}
+
+@media(max-width:900px){
+
+.hero,
+.about{
+grid-template-columns:1fr;
+}
+
+.hero h2{
+font-size:60px;
+}
+
+.section-title{
+font-size:45px;
+}
+
+.cta h2{
+font-size:45px;
+}
+
+header{
+flex-direction:column;
+gap:20px;
+}
+
+nav{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+nav a{
+margin:10px;
+}
+
+.about{
+padding:40px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+<img src="LOGO-NARA.png">
+
+<div class="logo-text">
+<h1>Nara</h1>
+<p>PUSTAKA</p>
+</div>
+</div>
+
+<nav>
+<a href="#tentang">Tentang</a>
+<a href="#layanan">Layanan</a>
+<a href="#katalog">Katalog</a>
+<a href="#kontak">Kontak</a>
+</nav>
+
+</header>
+
+<section class="hero">
+
+<div>
+
+<small>PENERBIT INDEPENDEN</small>
+
+<h2>
+Menerbitkan Karya,
+<span class="gold">Menginspirasi</span>
+Dunia.
+</h2>
+
+<p>
+Nara Pustaka adalah penerbit independen yang membantu penulis menerbitkan karya terbaiknya dengan standar profesional, desain premium, dan sistem modern.
+</p>
+
+<button class="btn btn-primary">
+Terbitkan Buku
+</button>
+
+<button class="btn btn-secondary">
+Lihat Layanan
+</button>
+
+</div>
+
+<div class="hero-book">
+<img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop">
+</div>
+
+</section>
+
+<section id="tentang">
+
+<div class="about">
+
+<img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200&auto=format&fit=crop">
+
+<div>
+
+<p class="section-sub">
+TENTANG KAMI
+</p>
+
+<h2 class="section-title">
+Nara Pustaka
+</h2>
+
+<p>
+Nara Pustaka adalah penerbit independen berbasis print on demand yang berfokus pada pengembangan karya penulis lokal melalui proses penerbitan profesional, modern, dan terpercaya.
+</p>
+
+<div class="stats">
+
+<div class="stat">
+<h3>100+</h3>
+<p>Buku Terbit</p>
+</div>
+
+<div class="stat">
+<h3>50+</h3>
+<p>Penulis Bergabung</p>
+</div>
+
+<div class="stat">
+<h3>100%</h3>
+<p>Komitmen Kualitas</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="layanan">
+
+<p class="section-sub">
+LAYANAN KAMI
+</p>
+
+<h2 class="section-title">
+Solusi Penerbitan
+untuk Penulis
+</h2>
+
+<div class="services">
+
+<div class="service-card">
+<img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop">
+
+<div class="service-content">
+<h3>Penerbitan Buku</h3>
+<p>
+Membantu penulis menerbitkan buku secara profesional dari awal hingga terbit.
+</p>
+</div>
+</div>
+
+<div class="service-card">
+<img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop">
+
+<div class="service-content">
+<h3>Pengurusan ISBN</h3>
+<p>
+Pengajuan ISBN resmi untuk buku cetak maupun digital.
+</p>
+</div>
+</div>
+
+<div class="service-card">
+<img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop">
+
+<div class="service-content">
+<h3>Desain & Promosi</h3>
+<p>
+Desain sampul dan branding modern untuk karya penulis.
+</p>
+</div>
+</div>
+
+</div>
+
+</section>
+
+<section id="katalog">
+
+<p class="section-sub">
+KATALOG BUKU
+</p>
+
+<h2 class="section-title">
+Karya Terbaik Kami
+</h2>
+
+<div class="catalog-grid">
+
+<div class="book">
+<img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop">
+<h3>Jejak Kata</h3>
+</div>
+
+<div class="book">
+<img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop">
+<h3>Ruang Imaji</h3>
+</div>
+
+<div class="book">
+<img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop">
+<h3>Cerita yang Mengubah</h3>
+</div>
+
+</div>
+
+<div class="cta">
+
+<h2>
+Open Naskah Sekarang
+</h2>
+
+<p>
+Kirimkan naskah Anda dan wujudkan karya terbaik bersama Nara Pustaka.
+</p>
+
+<br>
+
+<button class="btn btn-primary">
+Kirim Naskah
+</button>
+
+</div>
+
+</section>
+
+<section id="kontak">
+
+<p class="section-sub">
+KONTAK
+</p>
+
+<h2 class="section-title">
+Hubungi Kami
+</h2>
+
+<div class="contact">
+
+<div class="contact-box">
+<h3>Email</h3>
+<p>narapustaka1@gmail.com</p>
+</div>
+
+<div class="contact-box">
+<h3>WhatsApp</h3>
+<p>0821-3087-2054</p>
+</div>
+
+<div class="contact-box">
+<h3>Instagram</h3>
+<p>@narapustaka</p>
+</div>
+
+</div>
+
+</section>
+
+<footer>
+
+<div class="footer-logo">
+
+<img src="LOGO-NARA.png">
+
+<div>
+<h3>Nara Pustaka</h3>
+<p>Penerbit independen modern untuk penulis Indonesia.</p>
+</div>
+
+</div>
+
+<p>
+© 2026 Nara Pustaka — All Rights Reserved.
+</p>
+
+</footer>
+
+</body>
+</html>
+```
