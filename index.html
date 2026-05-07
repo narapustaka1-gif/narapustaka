@@ -1,333 +1,323 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nara Pustaka</title>
+export default function NaraPustakaWebsite() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0f172a] via-[#111827] to-[#1e1b4b] text-white font-sans overflow-hidden">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-6 md:px-12 py-6 backdrop-blur-md border-b border-white/15 sticky top-0 z-50 bg-black/40">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-[#f9c784]">
+          Nara Pustaka
+        </h1>
 
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family: Arial, sans-serif;
-    }
+        <div className="hidden md:flex gap-8 text-sm text-gray-300">
+          <a href="#tentang" className="hover:text-white transition">Tentang</a>
+          <a href="#layanan" className="hover:text-white transition">Layanan</a>
+          <a href="#katalog" className="hover:text-white transition">Katalog</a>
+          <a href="#kontak" className="hover:text-white transition">Kontak</a>
+        </div>
+      </nav>
 
-    body{
-      background:#ffffff;
-      color:#111111;
-      line-height:1.6;
-    }
+      {/* Hero */}
+      <section className="relative px-6 md:px-12 py-24 md:py-36">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,rgba(255,215,0,0.35),transparent_40%)]" />
 
-    header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:20px 10%;
-      border-bottom:1px solid #e5e5e5;
-      position:sticky;
-      top:0;
-      background:white;
-    }
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-14 items-center relative z-10">
+          <div>
+            <p className="uppercase tracking-[0.3em] text-[#f9c784] text-sm mb-4">
+              Penerbit Independen Indonesia
+            </p>
 
-    header h1{
-      font-size:28px;
-    }
+            <h2 className="text-5xl md:text-7xl font-black leading-tight bg-gradient-to-r from-white via-[#ffe7b3] to-[#f9c784] bg-clip-text text-transparent">
+              Menerbitkan
+              <span className="text-[#f9c784]"> Ide</span>,
+              <br />
+              Menjaga Karya.
+            </h2>
 
-    nav a{
-      margin-left:20px;
-      text-decoration:none;
-      color:#111;
-      font-weight:500;
-    }
+            <p className="mt-8 text-lg text-gray-300 leading-8 max-w-xl">
+              Nara Pustaka membantu penulis menerbitkan karya secara
+              profesional melalui sistem print on demand, desain modern,
+              dan proses penerbitan yang mudah serta terpercaya.
+            </p>
 
-    .hero{
-      min-height:90vh;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      padding:40px 10%;
-      background:#f8f8f8;
-    }
+            <div className="mt-10 flex flex-wrap gap-4">
+              <button className="bg-gradient-to-r from-[#f9c784] to-[#ffe7b3] text-black px-7 py-4 rounded-2xl font-semibold hover:scale-105 transition duration-300 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                Terbitkan Buku
+              </button>
 
-    .hero h2{
-      font-size:60px;
-      margin-bottom:20px;
-    }
+              <button className="border border-white/20 bg-white/10 backdrop-blur-xl backdrop-blur-md px-7 py-4 rounded-2xl hover:bg-white/10 transition">
+                Lihat Layanan
+              </button>
+            </div>
+          </div>
 
-    .hero p{
-      max-width:700px;
-      color:#555;
-      margin-bottom:30px;
-      font-size:18px;
-    }
+          <div className="relative flex justify-center">
+            <div className="absolute w-72 h-72 bg-[#f9c784]/20 blur-3xl rounded-full" />
 
-    .btn{
-      padding:14px 28px;
-      border:none;
-      border-radius:10px;
-      cursor:pointer;
-      font-size:16px;
-      margin:10px;
-      transition:0.3s;
-    }
+            <img
+              src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop"
+              alt="Buku"
+              className="relative rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/15 object-cover h-[500px] w-full max-w-md"
+            />
+          </div>
+        </div>
+      </section>
 
-    .btn-primary{
-      background:#111;
-      color:white;
-    }
+      {/* Tentang */}
+      <section id="tentang" className="px-6 md:px-12 py-24">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <img
+              src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop"
+              alt="Perpustakaan"
+              className="rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/15"
+            />
+          </div>
 
-    .btn-primary:hover{
-      background:#333;
-    }
+          <div>
+            <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+              Tentang Kami
+            </p>
 
-    .btn-secondary{
-      background:white;
-      border:1px solid #111;
-    }
+            <h3 className="text-4xl md:text-5xl font-bold leading-tight">
+              Penerbit modern untuk generasi penulis baru.
+            </h3>
 
-    section{
-      padding:80px 10%;
-    }
+            <p className="mt-6 text-gray-300 leading-8 text-lg">
+              Nara Pustaka adalah penerbit independen berbasis print on
+              demand yang berfokus pada pengembangan karya penulis lokal
+              melalui proses penerbitan yang profesional, modern, dan
+              terjangkau.
+            </p>
 
-    .section-title{
-      text-align:center;
-      margin-bottom:40px;
-      font-size:40px;
-    }
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-5">
+                <h4 className="text-3xl font-bold text-[#f9c784]">100%</h4>
+                <p className="text-gray-400 mt-2 text-sm">Sistem POD Modern</p>
+              </div>
 
-    .about p{
-      max-width:800px;
-      margin:auto;
-      text-align:center;
-      color:#555;
-      font-size:18px;
-    }
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-5">
+                <h4 className="text-3xl font-bold text-[#f9c784]">Indie</h4>
+                <p className="text-gray-400 mt-2 text-sm">Fokus Penulis Lokal</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    .visi-misi{
-      margin-top:40px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:30px;
-    }
+      {/* Layanan */}
+      <section id="layanan" className="px-6 md:px-12 py-24 bg-white/[0.03] border-y border-white/15">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+              Layanan
+            </p>
 
-    .card{
-      background:#fafafa;
-      padding:30px;
-      border-radius:20px;
-      border:1px solid #eee;
-    }
+            <h3 className="text-4xl md:text-5xl font-bold">
+              Solusi lengkap penerbitan buku.
+            </h3>
+          </div>
 
-    .services{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-      gap:20px;
-    }
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                title: 'Penerbitan Buku',
+                image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop'
+              },
+              {
+                title: 'Pengurusan ISBN',
+                image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop'
+              },
+              {
+                title: 'Layout Buku',
+                image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=1200&auto=format&fit=crop'
+              },
+              {
+                title: 'Desain Cover',
+                image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=1200&auto=format&fit=crop'
+              },
+              {
+                title: 'Cetak POD',
+                image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop'
+              },
+              {
+                title: 'Promosi Buku',
+                image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop'
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/15 rounded-[2rem] overflow-hidden hover:-translate-y-2 hover:border-[#f9c784]/40 transition duration-500 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+              >
+                <div className="relative h-52 overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+                  />
 
-    .service-card{
-      padding:30px;
-      border-radius:20px;
-      border:1px solid #eee;
-      transition:0.3s;
-      background:white;
-    }
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                </div>
 
-    .service-card:hover{
-      transform:translateY(-5px);
-      box-shadow:0 10px 30px rgba(0,0,0,0.08);
-    }
+                <div className="p-8">
+                  <div className="w-14 h-14 rounded-2xl bg-[#f9c784]/20 mb-6" />
 
-    .catalog{
-      text-align:center;
-      background:#f8f8f8;
-      border-radius:20px;
-      padding:60px;
-      color:#666;
-    }
+                  <h4 className="text-2xl font-semibold">{item.title}</h4>
 
-    .open{
-      text-align:center;
-      background:#111;
-      color:white;
-      border-radius:20px;
-      padding:60px 20px;
-    }
+                  <p className="mt-4 text-gray-400 leading-7">
+                    Layanan profesional untuk membantu penulis menerbitkan karya dengan lebih mudah dan modern.
+                  </p>
+                </div>
+              </div>
+            ))}
 
-    .open h3{
-      margin-bottom:20px;
-      font-size:35px;
-    }
+          </div>
+        </div>
+      </section>
 
-    .contact{
-      text-align:center;
-    }
+      {/* Showcase */}
+      <section className="px-6 md:px-12 py-24">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
+          <div className="relative overflow-hidden rounded-[2.5rem] h-[500px] shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/15">
+            <img
+              src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1400&auto=format&fit=crop"
+              alt="Library"
+              className="w-full h-full object-cover"
+            />
 
-    .contact p{
-      margin:10px 0;
-      font-size:18px;
-    }
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
-    footer{
-      text-align:center;
-      padding:30px;
-      border-top:1px solid #eee;
-      color:#666;
-    }
+            <div className="absolute bottom-10 left-10 max-w-md">
+              <p className="uppercase tracking-[0.3em] text-[#f9c784] text-sm mb-3">
+                Literary Vision
+              </p>
 
-    @media(max-width:768px){
+              <h3 className="text-4xl font-bold leading-tight">
+                Membawa karya lokal menjadi lebih profesional.
+              </h3>
+            </div>
+          </div>
 
-      .hero h2{
-        font-size:42px;
-      }
+          <div className="grid grid-rows-2 gap-8">
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+              <img
+                src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1200&auto=format&fit=crop"
+                alt="Books"
+                className="w-full h-full object-cover"
+              />
 
-      .visi-misi{
-        grid-template-columns:1fr;
-      }
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
 
-      header{
-        flex-direction:column;
-      }
+              <div className="absolute bottom-8 left-8">
+                <h4 className="text-3xl font-bold">Desain Premium</h4>
+              </div>
+            </div>
 
-      nav{
-        margin-top:15px;
-      }
-    }
-  </style>
-</head>
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+              <img
+                src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=1200&auto=format&fit=crop"
+                alt="Writer"
+                className="w-full h-full object-cover"
+              />
 
-<body>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
 
-  <header>
-    <h1>Nara Pustaka</h1>
+              <div className="absolute bottom-8 left-8">
+                <h4 className="text-3xl font-bold">Modern Publishing</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <nav>
-      <a href="#tentang">Tentang</a>
-      <a href="#layanan">Layanan</a>
-      <a href="#katalog">Katalog</a>
-      <a href="#kontak">Kontak</a>
-    </nav>
-  </header>
+      {/* Katalog */}
+      <section id="katalog" className="px-6 md:px-12 py-24 bg-[radial-gradient(circle_at_center,rgba(249,199,132,0.08),transparent_60%)]">
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+            Katalog
+          </p>
 
-  <section class="hero">
-    <h2>Nara Pustaka</h2>
+          <h3 className="text-4xl md:text-5xl font-bold mb-12">
+            Karya yang akan segera hadir.
+          </h3>
 
-    <p>
-      Penerbit independen untuk penulis masa kini.
-      Membantu penulis menerbitkan karya secara profesional
-      melalui sistem print on demand, desain modern,
-      dan proses yang mudah.
-    </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[1,2,3].map((i) => (
+              <div
+                key={i}
+                className="relative overflow-hidden rounded-[2rem] h-80 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop"
+                  alt="Book"
+                  className="w-full h-full object-cover"
+                />
 
-    <div>
-      <button class="btn btn-primary">Terbitkan Buku</button>
-      <button class="btn btn-secondary">Lihat Layanan</button>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+
+                <div className="absolute bottom-8 left-8 text-left z-10">
+                  <p className="text-gray-300 text-sm">Upcoming Book</p>
+                  <h4 className="text-2xl font-bold mt-2">
+                    Katalog Segera Hadir
+                  </h4>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="px-6 md:px-12 pb-24">
+        <div className="max-w-6xl mx-auto rounded-[3rem] p-12 md:p-20 bg-gradient-to-r from-[#f9c784] via-[#ffe7b3] to-[#f8d49d] text-black text-center shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+          <h3 className="text-4xl md:text-5xl font-black leading-tight">
+            Open Naskah untuk
+            <br />
+            Penulis Baru Indonesia.
+          </h3>
+
+          <p className="mt-6 text-lg max-w-2xl mx-auto text-black/70 leading-8">
+            Nara Pustaka membuka kesempatan bagi penulis baru untuk menerbitkan karya terbaiknya secara profesional.
+          </p>
+
+          <button className="mt-10 bg-black text-white px-8 py-4 rounded-2xl hover:scale-105 transition">
+            Kirim Naskah
+          </button>
+        </div>
+      </section>
+
+      {/* Kontak */}
+      <section id="kontak" className="px-6 md:px-12 py-20 border-t border-white/15">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[#f9c784] uppercase tracking-[0.3em] text-sm mb-4">
+            Kontak
+          </p>
+
+          <h3 className="text-4xl md:text-5xl font-bold mb-10">
+            Hubungi Nara Pustaka
+          </h3>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
+              <p className="text-gray-400 mb-2">Email</p>
+              <h4 className="font-semibold">narapustaka@email.com</h4>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
+              <p className="text-gray-400 mb-2">WhatsApp</p>
+              <h4 className="font-semibold">08xxxxxxxxxx</h4>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6">
+              <p className="text-gray-400 mb-2">Instagram</p>
+              <h4 className="font-semibold">@narapustaka</h4>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="text-center py-8 text-gray-500 border-t border-white/15">
+        © 2026 Nara Pustaka — All Rights Reserved.
+      </footer>
     </div>
-  </section>
-
-  <section id="tentang" class="about">
-    <h2 class="section-title">Tentang Kami</h2>
-
-    <p>
-      Nara Pustaka adalah penerbit independen berbasis print on demand
-      yang berfokus pada pengembangan karya penulis lokal melalui proses
-      penerbitan yang modern, profesional, dan terjangkau.
-    </p>
-
-    <div class="visi-misi">
-
-      <div class="card">
-        <h3>Visi</h3>
-        <p>
-          Menjadi penerbit independen yang mendukung pertumbuhan
-          penulis baru Indonesia.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Misi</h3>
-
-        <ul>
-          <li>Mendukung karya lokal</li>
-          <li>Membantu penulis menerbitkan buku</li>
-          <li>Mengembangkan literasi modern</li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <section id="layanan">
-    <h2 class="section-title">Layanan</h2>
-
-    <div class="services">
-
-      <div class="service-card">
-        <h3>Penerbitan Buku</h3>
-      </div>
-
-      <div class="service-card">
-        <h3>Pengurusan ISBN</h3>
-      </div>
-
-      <div class="service-card">
-        <h3>Layout Buku</h3>
-      </div>
-
-      <div class="service-card">
-        <h3>Desain Cover</h3>
-      </div>
-
-      <div class="service-card">
-        <h3>Cetak POD</h3>
-      </div>
-
-      <div class="service-card">
-        <h3>Konsultasi Penerbitan</h3>
-      </div>
-
-      <div class="service-card">
-        <h3>Promosi Buku</h3>
-      </div>
-
-    </div>
-  </section>
-
-  <section id="katalog">
-    <h2 class="section-title">Katalog Buku</h2>
-
-    <div class="catalog">
-      <h3>Katalog buku segera hadir.</h3>
-    </div>
-  </section>
-
-  <section class="open">
-    <h3>Open Naskah</h3>
-
-    <p>
-      Nara Pustaka membuka kesempatan bagi penulis baru
-      untuk menerbitkan karya terbaiknya.
-    </p>
-
-    <br>
-
-    <button class="btn btn-secondary">
-      Kirim Naskah
-    </button>
-  </section>
-
-  <section id="kontak" class="contact">
-    <h2 class="section-title">Kontak</h2>
-
-    <p>Email: narapustaka1@gmail.com</p>
-    <p>WhatsApp: 0821-3087-2054</p>
-    <p>Instagram: Nara Pustaka</p>
-  </section>
-
-  <footer>
-    © 2026 Nara Pustaka — All Rights Reserved.
-  </footer>
-
-</body>
-</html>
+  )
+}
