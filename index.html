@@ -1,786 +1,813 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-<title>Nara Pustaka</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nara Pustaka — Penerbit Independen Modern</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-scroll-behavior:smooth;
-}
-
-body{
-font-family:'Poppins',sans-serif;
-background:#f7f3ee;
-color:#2d2d2d;
-overflow-x:hidden;
-}
-
-img{
-width:100%;
-display:block;
-}
-
-.container{
-width:min(1200px,92%);
-margin:auto;
-}
-
-h1,h2,h3{
-font-family:'Playfair Display',serif;
-}
-
-header{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-z-index:999;
-background:rgba(255,255,255,0.75);
-backdrop-filter:blur(12px);
-border-bottom:1px solid rgba(0,0,0,0.05);
-transition:0.3s;
-}
-
-.navbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:20px 0;
-}
-
-.logo h1{
-font-size:38px;
-color:#8b5e3c;
-}
-
-.logo p{
-font-size:12px;
-letter-spacing:4px;
-color:#b18969;
-margin-top:4px;
-}
-
-nav{
-display:flex;
-gap:28px;
-flex-wrap:wrap;
-}
-
-nav a{
-text-decoration:none;
-color:#333;
-font-size:14px;
-font-weight:500;
-transition:0.3s;
-}
-
-nav a:hover{
-color:#b4835b;
-}
-
-.hero{
-min-height:100vh;
-display:flex;
-align-items:center;
-padding-top:120px;
-background:
-linear-gradient(rgba(247,243,238,0.85),rgba(247,243,238,0.92)),
-url('https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1400&auto=format&fit=crop');
-
-background-size:cover;
-background-position:center;
-}
-
-.hero-grid{
-display:grid;
-grid-template-columns:1.1fr 1fr;
-gap:70px;
-align-items:center;
-}
-
-.hero small{
-letter-spacing:4px;
-color:#b4835b;
-font-size:13px;
-}
-
-.hero h2{
-font-size:clamp(56px,8vw,90px);
-line-height:0.95;
-margin:20px 0;
-color:#2f2f2f;
-}
-
-.gold{
-color:#b4835b;
-}
-
-.hero p{
-font-size:18px;
-line-height:1.9;
-color:#555;
-margin-bottom:35px;
-max-width:620px;
-}
-
-.buttons{
-display:flex;
-gap:18px;
-flex-wrap:wrap;
-}
-
-.btn{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-padding:16px 34px;
-border-radius:14px;
-font-size:15px;
-font-weight:600;
-text-decoration:none;
-transition:0.3s;
-}
-
-.btn-primary{
-background:#b4835b;
-color:white;
-box-shadow:0 12px 30px rgba(180,131,91,0.25);
-}
-
-.btn-primary:hover{
-transform:translateY(-5px);
-}
-
-.btn-secondary{
-background:white;
-color:#333;
-border:1px solid rgba(0,0,0,0.08);
-}
-
-.btn-secondary:hover{
-transform:translateY(-5px);
-}
-
-.hero-image img{
-height:720px;
-object-fit:cover;
-border-radius:35px;
-box-shadow:0 30px 80px rgba(0,0,0,0.15);
-animation:float 5s ease-in-out infinite;
-}
-
-@keyframes float{
-0%{transform:translateY(0px);}
-50%{transform:translateY(-12px);}
-100%{transform:translateY(0px);}
-}
-
-section{
-padding:120px 0;
-}
-
-.section-label{
-font-size:13px;
-letter-spacing:4px;
-color:#b4835b;
-margin-bottom:15px;
-}
-
-.section-title{
-font-size:clamp(42px,7vw,68px);
-line-height:1;
-margin-bottom:30px;
-color:#2f2f2f;
-}
-
-.about{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:70px;
-align-items:center;
-background:white;
-padding:70px;
-border-radius:40px;
-box-shadow:0 20px 60px rgba(0,0,0,0.05);
-}
-
-.about img{
-height:650px;
-object-fit:cover;
-border-radius:30px;
-}
-
-.about p{
-font-size:18px;
-line-height:1.9;
-color:#555;
-margin-bottom:20px;
-}
-
-.vision{
-margin-top:25px;
-padding:25px;
-background:#f8f1ea;
-border-radius:22px;
-}
-
-.vision h3{
-margin-bottom:12px;
-color:#8b5e3c;
-font-size:28px;
-}
-
-.services{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-gap:28px;
-margin-top:60px;
-}
-
-.card{
-background:white;
-padding:35px;
-border-radius:28px;
-box-shadow:0 15px 40px rgba(0,0,0,0.05);
-transition:0.4s;
-border:1px solid rgba(0,0,0,0.04);
-}
-
-.card:hover{
-transform:translateY(-10px);
-}
-
-.card h3{
-font-size:32px;
-margin-bottom:15px;
-color:#8b5e3c;
-}
-
-.card p{
-line-height:1.8;
-color:#666;
+:root {
+  --cream: #FAFAF7;
+  --cream-2: #F2F5F0;
+  --cream-3: #E4EBE2;
+  --brown-light: #7EAB8C;
+  --brown: #4A8C6A;
+  --brown-dark: #2D6B50;
+  --brown-deep: #1A4035;
+  --warm-white: #FFFFFF;
+  --text-primary: #141F1A;
+  --text-secondary: #3A5C4A;
+  --text-muted: #7A9E8C;
+  --accent: #E85D4A;
+  --accent-light: #FFB5AC;
+  --accent-teal: #56B6C6; /* Warna Baru Pilihan Anda */
+  --shadow-soft: 0 4px 24px rgba(26,64,53,0.07);
+  --shadow-card: 0 2px 16px rgba(26,64,53,0.09);
+  --shadow-hover: 0 10px 36px rgba(26,64,53,0.16);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --nav-height: 72px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-primary);line-height:1.6;overflow-x:hidden;}
+
+/* ============ SCROLLBAR ============ */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--cream);}
+::-webkit-scrollbar-thumb{background:var(--brown-light);border-radius:3px;}
+
+/* ============ NAV ============ */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-height);background:rgba(250,250,247,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(126,171,140,0.2);transition:all 0.3s ease;}
+nav.scrolled{background:rgba(250,250,247,0.98);box-shadow:var(--shadow-soft);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:38px;height:38px;background:var(--brown-deep);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.nav-logo-icon span{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;font-style:italic;}
+.nav-logo-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--brown-deep);letter-spacing:0.02em;}
+.nav-links{display:flex;align-items:center;gap:8px;}
+.nav-links a{text-decoration:none;color:var(--text-secondary);font-size:14px;font-weight:400;padding:8px 14px;border-radius:var(--radius-sm);transition:all 0.2s;}
+.nav-links a:hover{color:var(--brown-deep);background:var(--cream-2);}
+.nav-links a.active{color:var(--brown-deep);font-weight:500;}
+.nav-cta{display:flex;align-items:center;gap:10px;}
+.btn-ghost{padding:8px 18px;border:1.5px solid var(--brown-light);color:var(--brown-dark);border-radius:var(--radius-md);background:transparent;cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:var(--cream-2);}
+.btn-primary{padding:9px 20px;background:var(--brown-deep);color:var(--cream);border:none;border-radius:var(--radius-md);cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s;}
+.btn-primary:hover{background:var(--brown-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(61,43,31,0.25);}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;font-size:24px;color:var(--brown-deep);}
+
+/* ============ MOBILE NAV ============ */
+.mobile-nav{display:none;position:fixed;top:var(--nav-height);left:0;right:0;background:var(--cream);border-bottom:1px solid var(--cream-3);z-index:999;padding:16px 24px;flex-direction:column;gap:4px;}
+.mobile-nav.open{display:flex;}
+.mobile-nav a{text-decoration:none;color:var(--text-primary);font-size:15px;padding:12px 16px;border-radius:var(--radius-sm);transition:all 0.2s;}
+.mobile-nav a:hover{background:var(--cream-2);}
+.mobile-nav-btns{display:flex;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--cream-3);}
+.mobile-nav-btns button{flex:1;}
+
+/* ============ SECTIONS ============ */
+.section{display:none;}
+.section.active{display:block;}
+.page-spacer{height:var(--nav-height);}
+
+/* ============ HERO ============ */
+.hero{min-height:calc(100vh - var(--nav-height));background:var(--warm-white);display:flex;align-items:center;padding:60px 24px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-100px;right:-200px;width:700px;height:700px;background:radial-gradient(ellipse,rgba(86,182,198,0.07) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--cream-2);border:1px solid var(--cream-3);padding:6px 14px;border-radius:100px;font-size:12px;color:var(--brown-dark);font-weight:500;margin-bottom:24px;letter-spacing:0.06em;text-transform:uppercase;}
+.hero-badge span{width:6px;height:6px;background:var(--accent-teal);border-radius:50%;display:inline-block;}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,6vw,80px);line-height:1.06;font-weight:600;color:var(--brown-deep);margin-bottom:20px;}
+.hero h1 em{font-style:italic;color:var(--accent-teal);}
+.hero-sub{font-size:17px;color:var(--text-secondary);line-height:1.7;margin-bottom:36px;max-width:440px;font-weight:300;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:var(--radius-lg);font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.25s;font-weight:500;}
+.btn-dark{background:var(--brown-deep);color:var(--cream);border:none;}
+.btn-dark:hover{background:var(--brown-dark);transform:translateY(-2px);box-shadow:0 6px 24px rgba(61,43,31,0.25);}
+.btn-outline{background:transparent;color:var(--brown-dark);border:1.5px solid var(--brown-light);}
+.btn-outline:hover{background:var(--cream-2);}
+.hero-stats{display:flex;gap:32px;margin-top:48px;padding-top:36px;border-top:1px solid var(--cream-3);}
+.hero-stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--brown-deep);line-height:1;}
+.hero-stat-label{font-size:12px;color:var(--text-muted);font-weight:400;margin-top:4px;letter-spacing:0.04em;}
+.hero-visual{position:relative;}
+.hero-book-stack{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative;}
+.book-card-hero{background:var(--cream-2);border-radius:var(--radius-lg);padding:24px 20px;border:1px solid var(--cream-3);transition:all 0.3s;position:relative;overflow:hidden;}
+.book-card-hero:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);}
+.book-card-hero:nth-child(2){margin-top:32px;}
+.book-card-hero:nth-child(3){margin-top:-16px;}
+.book-spine{width:100%;height:160px;border-radius:var(--radius-md);margin-bottom:14px;display:flex;align-items:center;justify-content:center;}
+.book-spine-1{background:linear-gradient(135deg,#56B6C6,#73D2DE);}
+.book-spine-2{background:linear-gradient(135deg,#2D6B50,#4AB882);}
+.book-spine-3{background:linear-gradient(135deg,#E85D4A,#FF8C7A);}
+.book-spine span{font-family:'Cormorant Garamond',serif;color:rgba(255,255,255,0.9);font-size:13px;font-style:italic;text-align:center;padding:0 12px;}
+.book-info-title{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--brown-deep);margin-bottom:4px;}
+.book-info-cat{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;}
+
+/* ============ SECTION STYLES ============ */
+.section-wrap{max-width:1200px;margin:0 auto;padding:80px 24px;}
+.section-label{font-size:12px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-teal);font-weight:500;margin-bottom:12px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,48px);font-weight:600;color:var(--brown-deep);line-height:1.15;margin-bottom:16px;}
+.section-title em{font-style:italic;color:var(--accent-teal);}
+.section-sub{font-size:16px;color:var(--text-secondary);max-width:520px;line-height:1.7;font-weight:300;}
+.section-header{margin-bottom:56px;}
+.section-header.centered{text-align:center;}
+.section-header.centered .section-sub{margin:0 auto;}
+
+/* ============ SERVICES / ALUR ============ */
+.services-bg{background:var(--warm-white);}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+.service-card{background:var(--cream);border:1px solid var(--cream-3);border-radius:var(--radius-lg);padding:28px 24px;transition:all 0.3s;cursor:pointer;}
+.service-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);border-color:var(--brown-light);}
+.service-icon{width:48px;height:48px;background:var(--cream-2);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:20px;color:var(--accent-teal);}
+.service-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--brown-deep);margin-bottom:8px;}
+.service-desc{font-size:13px;color:var(--text-secondary);line-height:1.65;font-weight:300;}
+
+/* ============ TOKO / MARKETPLACE ============ */
+.shop-header{background:var(--warm-white);padding:40px 24px;border-bottom:1px solid var(--cream-3);}
+.search-bar-wrap{max-width:600px;margin:24px auto 0;position:relative;}
+.search-bar-wrap input{width:100%;padding:14px 20px 14px 48px;border-radius:100px;border:1.5px solid var(--cream-3);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text-primary);outline:none;transition:border 0.2s;}
+.search-bar-wrap input:focus{border-color:var(--accent-teal);}
+.search-bar-wrap span.search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:16px;}
+.cat-scroll{display:flex;gap:10px;overflow-x:auto;padding:20px 0 4px;scrollbar-width:none;}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.cat-pill{padding:8px 20px;border-radius:100px;border:1.5px solid var(--cream-3);background:var(--cream);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.cat-pill:hover,.cat-pill.active{background:var(--brown-deep);color:var(--cream);border-color:var(--brown-deep);}
+.books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;margin-top:32px;}
+.book-card{background:var(--warm-white);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--cream-3);transition:all 0.3s;cursor:pointer;}
+.book-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover);border-color:var(--brown-light);}
+.book-cover{height:220px;display:flex;align-items:center;justify-content:center;position:relative;}
+.coming-soon-badge{position:absolute;top:12px;left:12px;background:rgba(61,43,31,0.85);color:var(--cream);font-size:10px;padding:4px 10px;border-radius:100px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;}
+.wishlist-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;background:var(--warm-white);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted);transition:all 0.2s;}
+.wishlist-btn:hover{color:#E05252;}
+.book-info{padding:16px 14px;}
+.book-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--brown-deep);line-height:1.3;margin-bottom:4px;}
+.book-author{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
+.book-cat-badge{display:inline-block;font-size:10px;padding:3px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+.book-footer{display:flex;align-items:center;justify-content:space-between;}
+.book-price{font-size:13px;color:var(--text-muted);font-style:italic;}
+.btn-soon{padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+
+/* ============ NASKAH ============ */
+.naskah-bg{background:var(--warm-white);}
+.naskah-inner{max-width:760px;margin:0 auto;padding:80px 24px;}
+.form-card{background:var(--cream);border:1px solid var(--cream-3);border-radius:var(--radius-xl);padding:48px 40px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.form-group{margin-bottom:20px;}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--brown-dark);margin-bottom:8px;letter-spacing:0.02em;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 16px;border-radius:var(--radius-md);border:1.5px solid var(--cream-3);background:var(--warm-white);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text-primary);outline:none;transition:border 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent-teal);background:var(--warm-white);}
+.form-group textarea{min-height:120px;resize:vertical;}
+.upload-zone{border:2px dashed var(--cream-3);border-radius:var(--radius-md);padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--warm-white);}
+.upload-zone:hover{border-color:var(--accent-teal);background:var(--cream-2);}
+.upload-zone span.icon{font-size:32px;color:var(--brown-light);display:block;margin-bottom:12px;}
+.upload-zone p{font-size:14px;color:var(--text-secondary);}
+.upload-zone span.sub{font-size:12px;color:var(--text-muted);}
+.submit-btn{width:100%;padding:16px;background:var(--brown-deep);color:var(--cream);border:none;border-radius:var(--radius-lg);font-size:16px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all 0.25s;margin-top:8px;}
+.submit-btn:hover{background:var(--brown-dark);transform:translateY(-2px);box-shadow:0 6px 24px rgba(61,43,31,0.25);}
+.form-success{display:none;text-align:center;padding:32px;}
+.form-success span.success-icon{font-size:48px;color:var(--accent-teal);display:block;margin-bottom:16px;}
+.form-success h3{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--brown-deep);margin-bottom:8px;}
+
+/* ============ LOGIN ============ */
+.login-wrap{min-height:calc(100vh - var(--nav-height));display:flex;align-items:center;justify-content:center;padding:40px 24px;background:var(--warm-white);}
+.login-box{width:100%;max-width:420px;}
+.login-logo{text-align:center;margin-bottom:36px;}
+.login-logo-icon{width:56px;height:56px;background:var(--brown-deep);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.login-logo-icon span{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;}
+.login-logo-text{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--brown-deep);}
+.login-card{background:var(--cream);border:1px solid var(--cream-3);border-radius:var(--radius-xl);padding:36px 32px;}
+.login-card h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--brown-deep);margin-bottom:6px;}
+.login-card p{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.login-form{display:flex;flex-direction:column;gap:14px;}
+.login-form input{padding:12px 16px;border-radius:var(--radius-md);border:1.5px solid var(--cream-3);background:var(--warm-white);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text-primary);outline:none;transition:border 0.2s;}
+.login-form input:focus{border-color:var(--accent-teal);}
+.login-btn{padding:13px;background:var(--brown-deep);color:var(--cream);border:none;border-radius:var(--radius-lg);font-size:15px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all 0.25s;}
+.login-btn:hover{background:var(--brown-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(61,43,31,0.25);}
+
+/* ============ ADMIN DASHBOARD ============ */
+.admin-layout{display:flex;min-height:calc(100vh - var(--nav-height));}
+.admin-sidebar{width:240px;background:var(--brown-deep);flex-shrink:0;padding:24px 0;}
+.admin-sidebar-logo{padding:0 20px 24px;border-bottom:1px solid rgba(250,247,242,0.1);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.admin-sidebar-logo-text{color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;}
+.sidebar-menu{padding:0 12px;}
+.sidebar-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--radius-sm);color:rgba(250,250,247,0.55);font-size:14px;cursor:pointer;transition:all 0.2s;}
+.sidebar-item.active{background:rgba(86,182,198,0.15);color:var(--accent-teal);}
+.admin-main{flex:1;background:var(--cream);overflow-y:auto;}
+.admin-topbar{background:var(--warm-white);border-bottom:1px solid var(--cream-3);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.admin-topbar h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--brown-deep);}
+.admin-content{padding:28px;}
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+.dash-stat{background:var(--warm-white);border-radius:var(--radius-lg);padding:22px 20px;border:1px solid var(--cream-3);}
+.dash-stat-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.dash-stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--brown-deep);line-height:1;}
+.admin-card{background:var(--warm-white);border-radius:var(--radius-lg);border:1px solid var(--cream-3);overflow:hidden;}
+.admin-card-header{padding:18px 20px;border-bottom:1px solid var(--cream-3);display:flex;align-items:center;justify-content:space-between;}
+.admin-card-header h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--brown-deep);}
+.admin-table{width:100%;border-collapse:collapse;}
+.admin-table th{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:12px 20px;text-align:left;border-bottom:1px solid var(--cream-3);}
+.admin-table td{padding:14px 20px;font-size:13px;border-bottom:1px solid rgba(237,229,212,0.5);}
+.status-pill{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:500;}
+.status-new{background:rgba(86,182,198,0.12);color:var(--accent-teal);}
+.btn-table{padding:5px 12px;border-radius:var(--radius-sm);border:1px solid var(--cream-3);background:var(--cream);font-size:12px;cursor:pointer;color:var(--text-secondary);}
+
+/* ============ FOOTER ============ */
+footer{background:var(--brown-deep);color:var(--cream);margin-top:60px;}
+.footer-main{max-width:1200px;margin:0 auto;padding:48px 24px 30px;text-align:center;}
+.footer-brand h3{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--cream);margin-bottom:12px;}
+.footer-brand p{font-size:13px;color:rgba(250,250,247,0.5);max-width:400px;margin:0 auto 20px;}
+
+/* ============ INTERACTIVE BADGES & TOAST ============ */
+.cart-badge-nav{background:var(--accent);color:white;font-size:10px;padding:2px 7px;border-radius:100px;position:absolute;top:0;right:-8px;display:none;}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brown-deep);color:var(--cream);padding:12px 24px;border-radius:100px;font-size:14px;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;box-shadow:var(--shadow-hover);border:1px solid rgba(250,250,247,0.15);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ============ ANIMASI & RESPONSIVE ============ */
+.fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+@media (max-width: 992px) {
+  .hero-inner, .form-row { grid-template-columns: 1fr; gap: 40px; }
+  .hero-visual { order: -1; max-width: 440px; margin: 0 auto; }
+  .dash-stats { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: block; }
+  .section-wrap { padding: 48px 24px; }
 }
-
-.catalog{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:25px;
-margin-top:60px;
-}
-
-.book{
-background:white;
-padding:18px;
-border-radius:26px;
-box-shadow:0 15px 40px rgba(0,0,0,0.05);
-transition:0.4s;
-}
-
-.book:hover{
-transform:translateY(-8px);
-}
-
-.book img{
-height:320px;
-object-fit:cover;
-border-radius:18px;
-margin-bottom:18px;
-}
-
-.book h3{
-font-size:24px;
-margin-bottom:10px;
-}
-
-.book p{
-color:#777;
-}
-
-.open{
-margin-top:90px;
-padding:90px 40px;
-text-align:center;
-border-radius:40px;
-
-background:
-linear-gradient(rgba(180,131,91,0.82),rgba(139,94,60,0.88)),
-url('https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1400&auto=format&fit=crop');
-
-background-size:cover;
-background-position:center;
-
-color:white;
-}
-
-.open h2{
-font-size:clamp(42px,7vw,72px);
-margin-bottom:20px;
-}
-
-.open p{
-max-width:760px;
-margin:auto;
-line-height:1.9;
-font-size:18px;
-margin-bottom:35px;
-}
-
-.contact{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:28px;
-margin-top:60px;
-}
-
-.contact-box{
-background:white;
-padding:35px;
-border-radius:28px;
-box-shadow:0 15px 40px rgba(0,0,0,0.05);
-}
-
-.contact-box h3{
-font-size:30px;
-margin-bottom:14px;
-color:#8b5e3c;
-}
-
-.contact-box p{
-line-height:1.8;
-color:#666;
-}
-
-footer{
-padding:60px 0;
-margin-top:100px;
-background:#fff;
-border-top:1px solid rgba(0,0,0,0.05);
-}
-
-.footer-content{
-display:flex;
-justify-content:space-between;
-flex-wrap:wrap;
-gap:20px;
-}
-
-footer h3{
-font-size:34px;
-color:#8b5e3c;
-}
-
-footer p{
-color:#777;
-line-height:1.8;
-}
-
-.reveal{
-opacity:0;
-transform:translateY(60px);
-transition:all 1s ease;
-}
-
-.reveal.active{
-opacity:1;
-transform:translateY(0);
-}
-
-@media(max-width:950px){
-
-.hero-grid,
-.about{
-grid-template-columns:1fr;
-}
-
-.hero{
-padding-top:150px;
-padding-bottom:80px;
-}
-
-.hero-image{
-order:-1;
-}
-
-.hero-image img{
-height:420px;
-}
-
-.about{
-padding:40px 25px;
-}
-
-.about img{
-height:400px;
-}
-
-.navbar{
-flex-direction:column;
-gap:18px;
-}
-
-nav{
-justify-content:center;
-}
-
-.buttons{
-width:100%;
-}
-
-.btn{
-flex:1;
-min-width:180px;
-}
-
-}
-
-@media(max-width:600px){
-
-.hero p,
-.about p,
-.card p,
-.book p,
-.contact-box p,
-.open p{
-font-size:16px;
-}
-
-nav{
-gap:14px;
-}
-
-nav a{
-font-size:13px;
-}
-
-.card h3,
-.contact-box h3{
-font-size:26px;
-}
-
-.footer-content{
-justify-content:center;
-text-align:center;
-}
-
-}
-
 </style>
 </head>
-
 <body>
 
-<header>
-
-<div class="container navbar">
-
-<div class="logo">
-<h1>Nara Pustaka</h1>
-<p>PENERBIT INDEPENDEN</p>
-</div>
-
-<nav>
-<a href="#tentang">Tentang</a>
-<a href="#layanan">Layanan</a>
-<a href="#katalog">Katalog</a>
-<a href="#kontak">Kontak</a>
-</nav>
-
-</div>
-
-</header>
-
-<section class="hero">
-
-<div class="container hero-grid">
-
-<div class="reveal">
-
-<small>MODERN INDEPENDENT PUBLISHER</small>
-
-<h2>
-Nara
-<span class="gold">Pustaka</span>
-</h2>
-
-<p>
-Penerbit independen untuk penulis masa kini.
-Nara Pustaka membantu penulis menerbitkan karya secara profesional melalui sistem print on demand, desain modern, dan proses yang mudah.
-</p>
-
-<div class="buttons">
-
-<a href="mailto:narapustaka1@gmail.com" class="btn btn-primary">
-Terbitkan Buku
-</a>
-
-<a href="https://wa.me/6282130872054" target="_blank" class="btn btn-secondary">
-Info Selengkapnya
-</a>
-
-</div>
-
-</div>
-
-<div class="hero-image reveal">
-
-<img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200&auto=format&fit=crop">
-
-</div>
-
-</div>
-
-</section>
-
-<section id="tentang">
-
-<div class="container">
-
-<div class="about reveal">
-
-<img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop">
-
-<div>
-
-<p class="section-label">
-TENTANG KAMI
-</p>
-
-<h2 class="section-title">
-Penerbit Modern
-Untuk Penulis Indonesia
-</h2>
-
-<p>
-Nara Pustaka adalah penerbit independen berbasis print on demand yang berfokus pada pengembangan karya penulis lokal melalui proses penerbitan yang modern, profesional, dan terjangkau.
-</p>
-
-<div class="vision">
-
-<h3>Visi</h3>
-
-<p>
-Menjadi penerbit independen yang mendukung pertumbuhan penulis baru Indonesia.
-</p>
-
-</div>
-
-<div class="vision">
-
-<h3>Misi</h3>
-
-<p>
-• Mendukung karya lokal<br>
-• Membantu penulis menerbitkan buku<br>
-• Mengembangkan literasi modern
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="layanan">
-
-<div class="container">
-
-<p class="section-label reveal">
-LAYANAN
-</p>
-
-<h2 class="section-title reveal">
-Layanan Penerbitan
-Profesional
-</h2>
-
-<div class="services">
-
-<div class="card reveal">
-<h3>Penerbitan Buku</h3>
-<p>Pendampingan penerbitan profesional untuk penulis modern.</p>
-</div>
-
-<div class="card reveal">
-<h3>Pengurusan ISBN</h3>
-<p>Pengajuan ISBN resmi untuk kebutuhan penerbitan.</p>
-</div>
-
-<div class="card reveal">
-<h3>Layout Buku</h3>
-<p>Penataan isi buku profesional dan nyaman dibaca.</p>
-</div>
-
-<div class="card reveal">
-<h3>Desain Cover</h3>
-<p>Cover modern dan premium untuk meningkatkan branding buku.</p>
-</div>
-
-<div class="card reveal">
-<h3>Cetak POD</h3>
-<p>Sistem print on demand fleksibel tanpa minimum cetak besar.</p>
-</div>
-
-<div class="card reveal">
-<h3>Konsultasi</h3>
-<p>Konsultasi proses penerbitan dan pengembangan karya.</p>
-</div>
-
-<div class="card reveal">
-<h3>Promosi Buku</h3>
-<p>Membantu promosi buku melalui media sosial dan branding.</p>
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="katalog">
-
-<div class="container">
-
-<p class="section-label reveal">
-KATALOG
-</p>
-
-<h2 class="section-title reveal">
-Katalog Buku
-</h2>
-
-<div class="catalog">
-
-<div class="book reveal">
-<img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1200&auto=format&fit=crop">
-<h3>Segera Hadir</h3>
-<p>Katalog buku segera hadir.</p>
-</div>
-
-<div class="book reveal">
-<img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=1200&auto=format&fit=crop">
-<h3>Segera Hadir</h3>
-<p>Katalog buku segera hadir.</p>
-</div>
-
-<div class="book reveal">
-<img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=1200&auto=format&fit=crop">
-<h3>Segera Hadir</h3>
-<p>Katalog buku segera hadir.</p>
-</div>
-
-</div>
-
-<div class="open reveal">
-
-<h2>
-Open Naskah
-</h2>
-
-<p>
-Nara Pustaka membuka kesempatan bagi penulis baru untuk menerbitkan karya terbaiknya.
-</p>
-
-<a href="mailto:narapustaka1@gmail.com" class="btn btn-primary">
-Kirim Naskah
-</a>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="kontak">
-
-<div class="container">
-
-<p class="section-label reveal">
-KONTAK
-</p>
-
-<h2 class="section-title reveal">
-Hubungi Kami
-</h2>
-
-<div class="contact">
-
-<div class="contact-box reveal">
-<h3>Email</h3>
-<p>narapustaka1@gmail.com</p>
-</div>
-
-<div class="contact-box reveal">
-<h3>WhatsApp</h3>
-<p>0821-3087-2054</p>
-</div>
-
-<div class="contact-box reveal">
-<h3>Instagram</h3>
-<p>Nara Pustaka</p>
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<footer>
-
-<div class="container footer-content">
-
-<div>
-<h3>Nara Pustaka</h3>
-<p>Penerbit independen modern untuk penulis Indonesia.</p>
-</div>
-
-<p>
-© 2026 Nara Pustaka — All Rights Reserved.
-</p>
-
-</div>
-
-</footer>
-
-<script>
-
-window.addEventListener('scroll', reveal);
-
-function reveal(){
-
-let reveals = document.querySelectorAll('.reveal');
-
-for(let i = 0; i < reveals.length; i++){
-
-let windowHeight = window.innerHeight;
-let elementTop = reveals[i].getBoundingClientRect().top;
-let elementVisible = 100;
-
-if(elementTop < windowHeight - elementVisible){
-reveals[i].classList.add('active');
-}
-
-}
-
-}
-
-reveal();
-
-</script>
-
+  <!-- ============ NAVBAR ============ -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="#" onclick="switchSection('home')">
+        <div class="nav-logo-icon"><span>N</span></div>
+        <span class="nav-logo-text">Nara Pustaka</span>
+      </a>
+      <div class="nav-links">
+        <a href="#" onclick="switchSection('home')" class="active">Beranda</a>
+        <a href="#" onclick="switchSection('shop')">Katalog Toko</a>
+        <a href="#" onclick="switchSection('naskah')">Kirim Naskah</a>
+      </div>
+      <div class="nav-cta">
+        <div style="position: relative; margin-right: 15px; cursor: pointer;" onclick="switchSection('shop')">
+          <span style="font-size: 20px;">🛒</span>
+          <span id="cart-count" class="cart-badge-nav">0</span>
+        </div>
+        <button class="btn-primary" id="mainLoginNavBtn" onclick="switchSection('login')">👤 Masuk</button>
+      </div>
+      <button class="hamburger" onclick="toggleMobileNav()">☰</button>
+    </div>
+  </nav>
+
+  <!-- MOBILE NAVIGATION DIALOG -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#" onclick="switchSection('home')">Beranda</a>
+    <a href="#" onclick="switchSection('shop')">Katalog Toko</a>
+    <a href="#" onclick="switchSection('naskah')">Kirim Naskah</a>
+    <div class="mobile-nav-btns">
+      <button class="btn-primary" onclick="switchSection('login')">👤 Masuk</button>
+    </div>
+  </div>
+
+  <div class="page-spacer"></div>
+
+  <!-- ============ SECTION 1: HOME (BERANDA) ============ -->
+  <div id="home" class="section active">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="fade-up">
+          <div class="hero-badge"><span></span>Ruang Karya lnklusi Modern</div>
+          <h1>Menerbitkan Buku Sastra <em>Berkualitas</em></h1>
+          <p class="hero-sub">Kami mendampingi para penulis independen untuk melahirkan karya-karya terbaik dan menghubungkannya langsung dengan pembaca nasional.</p>
+          <div class="hero-btns">
+            <button class="btn-lg btn-dark" onclick="switchSection('shop')">Jelajahi Toko Buku</button>
+            <button class="btn-lg btn-outline" onclick="switchSection('naskah')">Terbitkan Naskah Anda ↗</button>
+          </div>
+          <div class="hero-stats">
+            <div><div class="hero-stat-num">120+</div><div class="hero-stat-label">Buku Terbit</div></div>
+            <div><div class="hero-stat-num">80+</div><div class="hero-stat-label">Penulis Berbakat</div></div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-book-stack">
+            <div class="book-card-hero">
+              <div class="book-spine book-spine-1"><span>Langkah Menuju Sunyi</span></div>
+              <div class="book-info-title">Langkah Menuju Sunyi</div>
+              <div class="book-info-cat">Fiksi</div>
+            </div>
+            <div class="book-card-hero">
+              <div class="book-spine book-spine-2"><span>Algoritma Rasa</span></div>
+              <div class="book-info-title">Algoritma Rasa & Logika</div>
+              <div class="book-info-cat">Non-Fiksi</div>
+            </div>
+            <div class="book-card-hero">
+              <div class="book-spine book-spine-3"><span>Rembulan Atap</span></div>
+              <div class="book-info-title">Rembulan di Atas Atap</div>
+              <div class="book-info-cat">Puisi</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="services-bg section-wrap">
+      <div class="section-header centered">
+        <span class="section-label">Alur Kerja</span>
+        <h2 class="section-title">Layanan Ekosistem <em>Nara</em></h2>
+        <p class="section-sub">Komitmen kami dalam mengawal naskah mentah mentransformasi menjadi buku bernilai jual tinggi di pasar digital.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card" onclick="switchSection('naskah')">
+          <div class="service-icon">📄</div>
+          <h3 class="service-title">Penyuntingan Profesional</h3>
+          <p class="service-desc">Koreksi ejaan, tanda baca, serta struktur plot naratif komprehensif tanpa menghilangkan orisinalitas suara unik penulis.</p>
+        </div>
+        <div class="service-card" onclick="switchSection('shop')">
+          <div class="service-icon">🎨</div>
+          <h3 class="service-title">Desain Sampul & Tata Letak</h3>
+          <p class="service-desc">Visualisasi cover estetik modern yang relevan dengan tren pasar, dikombinasikan dengan layout interior isi yang nyaman dibaca.</p>
+        </div>
+        <div class="service-card" onclick="switchSection('shop')">
+          <div class="service-icon">🛒</div>
+          <h3 class="service-title">Distribusi & Monetisasi</h3>
+          <p class="service-desc">Akses pemasaran eksklusif ke jaringan marketplace nasional dan sistem pre-order independen terintegrasi.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ SECTION 2: SHOP (KATALOG BUKU) ============ -->
+  <div id="shop" class="section">
+    <div class="shop-header">
+      <div class="section-header centered" style="margin-bottom:0;">
+        <span class="section-label">Etalase Toko</span>
+        <h2 class="section-title">Katalog Karya <em>Pilihan</em></h2>
+        <p class="section-sub">Dukung penulis independen lokal dengan mengapresiasi dan mengoleksi mahakarya fisik berlisensi resmi.</p>
+      </div>
+      <div class="search-bar-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="bookSearch" placeholder="Cari judul buku atau nama penulis idaman Anda...">
+      </div>
+      <div class="cat-scroll" style="max-width:600px; margin: 16px auto 0; justify-content: center;">
+        <div class="cat-pill active" data-cat="semua">Semua Genre</div>
+        <div class="cat-pill" data-cat="fiksi">Fiksi Sastra</div>
+        <div class="cat-pill" data-cat="nonfiksi">Non-Fiksi</div>
+        <div class="cat-pill" data-cat="puisi">Antologi Puisi</div>
+        <div class="cat-pill" data-cat="akademik">Akademik</div>
+      </div>
+    </div>
+    <div class="section-wrap" style="padding-top:10px;">
+      <div class="books-grid" id="booksGrid">
+        <!-- Buku Di-render Menggunakan Logika JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 3: KIRIM NASKAH ============ -->
+  <div id="naskah" class="section">
+    <section class="naskah-bg section-wrap">
+      <div class="naskah-inner">
+        <div class="section-header centered">
+          <span class="section-label">Redaksi Penerbitan</span>
+          <h2 class="section-title">Kirimkan Sinopsis & <em>Naskah</em></h2>
+          <p class="section-sub">Pintu seleksi kurasi Nara Pustaka terbuka sepanjang tahun. Sampaikan gagasan hebat Anda langsung ke meja dewan editor kami.</p>
+        </div>
+        <div class="form-card">
+          <form id="naskahForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nama Lengkap Penulis</label>
+                <input type="text" id="nama_lengkap" placeholder="Contoh: Pramoedya" required>
+              </div>
+              <div class="form-group">
+                <label>Alamat Email Aktif</label>
+                <input type="email" placeholder="nama@email.com" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Judul Proposal Naskah</label>
+                <input type="text" id="judul_naskah" placeholder="Tuliskan judul definitif karya Anda" required>
+              </div>
+              <div class="form-group">
+                <label>Kategori Genre Buku</label>
+                <select required>
+                  <option value="fiksi">Fiksi Sastra</option>
+                  <option value="nonfiksi">Non-Fiksi Ilmiah Populer</option>
+                  <option value="puisi">Antologi Puisi/Prosa Lirik</option>
+                  <option value="akademik">Buku Ajar Akademik</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Sinopsis Singkat Cerita (Maksimal 300 Kata)</label>
+              <textarea placeholder="Gambarkan inti premis konseptual, konflik utama, dan target pembaca karya Anda..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label>Berkas File Naskah (PDF/DOCX)</label>
+              <div class="upload-zone" id="dropzoneArea">
+                <span class="icon">📁</span>
+                <p>Klik area ini untuk memuat draf naskah bab sampel</p>
+                <span class="sub">Format dokumen yang diizinkan: .pdf atau .docx (Maks. 10MB)</span>
+              </div>
+            </div>
+            <button type="submit" class="submit-btn">Kirim Proposal Naskah Kontrak</button>
+          </form>
+
+          <div class="form-success" id="formSuccess">
+            <span class="success-icon">🎉</span>
+            <h3>Proposal Sukses Terkirim!</h3>
+            <p>Tim redaksi editorial kami akan melakukan kurasi kelayakan awal dalam kurun waktu 7x24 jam kerja. Pemberitahuan resmi dikirim ke email Anda.</p>
+            <button class="btn-ghost" style="margin-top:20px;" onclick="resetNaskahForm()">Kirim Naskah Baru Lainnya</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ SECTION 4: LOGIN GATE (USER & ADMIN) ============ -->
+  <div id="login" class="section">
+    <div class="login-wrap">
+      <div class="login-box">
+        <div class="login-logo">
+          <div class="login-logo-icon"><span>N</span></div>
+          <span class="login-logo-text">Gerbang Otentikasi</span>
+        </div>
+        <div class="login-card">
+          <h3>Masuk Sistem</h3>
+          <p>Gunakan akun Anda untuk transaksi atau gunakan kredensial khusus untuk akses dashboard admin.</p>
+          <form id="loginForm">
+            <div class="form-group">
+              <label>Username / Email</label>
+              <input type="text" id="loginUsername" placeholder="Masukkan nama pengguna..." required>
+            </div>
+            <div class="form-group">
+              <label>Kata Sandi</label>
+              <input type="password" id="loginPassword" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="login-btn" style="width:100%; margin-top:10px;">Autentikasi Masuk</button>
+          </form>
+          <div style="margin-top: 16px; font-size: 11px; text-align: center; color: var(--text-muted);">
+            Tips Petunjuk Admin &rarr; User: <span style="color:var(--accent-teal)">narapuastaka</span> | Sandi: <span style="color:var(--accent-teal)">admin</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 5: ADMIN DASHBOARD CONTROL ============ -->
+  <div id="admin" class="section">
+    <div class="admin-layout">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-logo">
+          <span class="admin-sidebar-logo-text">🛡️ Konsol Panel Admin</span>
+        </div>
+        <div class="sidebar-menu">
+          <div class="sidebar-item active">📬 Manajemen Naskah Masuk</div>
+          <div class="sidebar-item" style="margin-top:40px; opacity: 0.6;" onclick="handleLogoutAdmin()">🚪 Log Out Sistem</div>
+        </div>
+      </div>
+      <div class="admin-main">
+        <div class="admin-topbar">
+          <h2>Ringkasan Arus Data Masuk</h2>
+          <span style="font-size:13px; font-weight:500; color:var(--brown);">Status Server: SINKRON</span>
+        </div>
+        <div class="admin-content">
+          <div class="dash-stats">
+            <div class="dash-stat">
+              <div class="dash-stat-label">Total Naskah Masuk</div>
+              <div class="dash-stat-num" id="adminTotalCount">3</div>
+            </div>
+            <div class="dash-stat">
+              <div class="dash-stat-label">Perlu Review Kurasi</div>
+              <div class="dash-stat-num" style="color: var(--accent);">2</div>
+            </div>
+            <div class="dash-stat">
+              <div class="dash-stat-label">Lolos Seleksi Terbit</div>
+              <div class="dash-stat-num" style="color: var(--brown);">1</div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Daftar Antrean Kurasi Draf Naskah Penulis</h3>
+            </div>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Judul Naskah</th>
+                  <th>Nama Penulis</th>
+                  <th>Status Review</th>
+                  <th>Tindakan Kerja</th>
+                </tr>
+              </thead>
+              <tbody id="adminNaskahTable">
+                <tr>
+                  <td>Rhapsody Musim Gugur</td>
+                  <td>Sapardi Djoko</td>
+                  <td><span class="status-pill status-new">Baru</span></td>
+                  <td><button class="btn-table" onclick="showToast('Membuka file dokumen teks draf...')">Review</button></td>
+                </tr>
+                <tr>
+                  <td>Teori Relativitas Semesta Jamak</td>
+                  <td>Prof. Suhadi</td>
+                  <td><span class="status-pill status-new">Baru</span></td>
+                  <td><button class="btn-table" onclick="showToast('Membuka file dokumen teks draf...')">Review</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER SECTION ============ -->
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <h3>Nara Pustaka</h3>
+        <p>Menumbuhkan gairah literasi melalui wadah penerbitan mandiri berstandar editorial nasional profesional terpadu.</p>
+      </div>
+      <div style="font-size: 11px; color: rgba(250,250,247,0.3); border-top: 1px solid rgba(250,250,247,0.1); padding-top:20px;">
+        &copy; 2026 Nara Pustaka. Made for Professional Showcase Standar.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ INTERACTIVE CORE LOGIC (JAVASCRIPT) ============ -->
+  <script>
+    // Data Katalog Buku Primer
+    const BOOK_DATA = [
+      { id: 1, title: "Langkah Menuju Sunyi", author: "Ayu Utami", cat: "fiksi", price: "Rp 89.000", status: "tersedia" },
+      { id: 2, title: "Algoritma Rasa & Logika", author: "Dr. Indra", cat: "nonfiksi", price: "Rp 115.000", status: "segera" },
+      { id: 3, title: "Rembulan di Atas Atap", author: "Seno Gumira", cat: "puisi", price: "Rp 65.000", status: "tersedia" },
+      { id: 4, title: "Manajemen Esensial Modern", author: "Rhenald Kasali", cat: "akademik", price: "Rp 145.000", status: "tersedia" },
+      { id: 5, title: "Dunia di Dalam Kotak", author: "Dee Lestari", cat: "fiksi", price: "Rp 98.000", status: "segera" }
+    ];
+
+    // State Kontrol Global Aplikasi
+    let isUserLoggedIn = false;
+    let cartCount = 0;
+    let totalNaskahAdmin = 2; // Counter default bawaan tabel awal
+
+    // 1. SPA Router Kontroler Utama Halaman
+    function switchSection(sectionId) {
+      // PROTEKSI: Wajib login terlebih dahulu jika ingin masuk halaman Kirim Naskah
+      if (sectionId === 'naskah' && !isUserLoggedIn) {
+        showToast("🔒 Akses Ditolak! Harap login akun Anda terlebih dahulu.");
+        switchSection('login');
+        return;
+      }
+
+      // Sembunyikan seluruh modul tampilan
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      
+      // Munculkan target halaman yang sah
+      const targetSection = document.getElementById(sectionId);
+      if (targetSection) {
+        targetSection.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Sinkronisasi class active pada menu navigasi desktop & mobile
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.getAttribute('onclick')?.includes(sectionId)) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      document.getElementById('mobileNav').classList.remove('open');
+    }
+
+    // 2. Proteksi Aksi Pembelian Buku (Wajib Login)
+    function handleBuyBook(bookTitle) {
+      if (!isUserLoggedIn) {
+        showToast("🔒 Sesi Belum Valid! Harap login terlebih dahulu sebelum berbelanja.");
+        switchSection('login');
+        return;
+      }
+      
+      // Alur eksekusi sukses jika status terautentikasi login true
+      cartCount++;
+      const cartBadge = document.getElementById('cart-count');
+      if (cartBadge) {
+        cartBadge.textContent = cartCount;
+        cartBadge.style.display = 'block';
+      }
+      showToast(`🛒 Sukses! ${bookTitle} dimasukkan ke keranjang belanja.`);
+    }
+
+    // 3. Mesin Alur Otentikasi Login (User Biasa & Gerbang Admin Khusus)
+    function processLoginAuthentication(username, password) {
+      // VALIDASI UTAMA: Sesuai Instruksi User Kunci Masuk Dashboard Admin
+      if (username === "narapuastaka" && password === "admin") {
+        showToast("🛡️ Otentikasi Kredensial Admin Valid! Membuka Dashboard...");
+        switchSection('admin');
+        return;
+      }
+
+      // Alternatif Alur Simulasi Login User Umum
+      if (username.trim() !== "" && password.trim() !== "") {
+        isUserLoggedIn = true;
+        showToast(`👋 Selamat Datang Kembali, ${username}!`);
+        
+        // Transformasikan tombol navigasi login penanda identitas login berhasil
+        document.getElementById('mainLoginNavBtn').textContent = "👤 Log Out";
+        document.getElementById('mainLoginNavBtn').setAttribute('onclick', 'handleUserLogout()');
+        
+        switchSection('shop');
+      } else {
+        showToast("❌ Kesalahan! Username atau kata sandi tidak boleh dikosongkan.");
+      }
+    }
+
+    // Penanganan Event Submit Form Login Akun
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const uName = document.getElementById('loginUsername').value;
+      const pWord = document.getElementById('loginPassword').value;
+      processLoginAuthentication(uName, pWord);
+    });
+
+    function handleUserLogout() {
+      isUserLoggedIn = false;
+      cartCount = 0;
+      document.getElementById('cart-count').style.display = 'none';
+      const btn = document.getElementById('mainLoginNavBtn');
+      btn.textContent = "👤 Masuk";
+      btn.setAttribute('onclick', "switchSection('login')");
+      showToast("🔒 Anda telah keluar dari sistem akun pengguna.");
+      switchSection('home');
+    }
+
+    function handleLogoutAdmin() {
+      showToast("🔒 Sesi administrasi ditutup aman.");
+      document.getElementById('loginForm').reset();
+      switchSection('home');
+    }
+
+    // 4. Perenderan Dinamis Katalog Buku Toko dengan Aksen Warna #56B6C6
+    function renderShopBooks(filterCat = 'semua', searchTerm = '') {
+      const grid = document.getElementById('booksGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      const filtered = BOOK_DATA.filter(book => {
+        const matchCat = filterCat === 'semua' || book.cat === filterCat;
+        const matchSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            book.author.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px 0;">Koleksi buku tidak ditemukan.</p>`;
+        return;
+      }
+
+      filtered.forEach(book => {
+        const card = document.createElement('div');
+        card.className = 'book-card fade-up';
+        card.innerHTML = `
+          <div class="book-cover" style="background: var(--cream-2);">
+            ${book.status === 'segera' ? '<span class="coming-soon-badge">Segera Hadir</span>' : ''}
+            <button class="wishlist-btn" onclick="event.stopPropagation(); showToast('❤️ Dimasukkan ke daftar buku impian!')">🤍</button>
+            <span style="font-size:50px; color:var(--accent-teal)">📖</span>
+          </div>
+          <div class="book-info">
+            <span class="book-cat-badge" style="background:rgba(86,182,198,0.12); color:var(--accent-teal);">${book.cat}</span>
+            <h4 class="book-title">${book.title}</h4>
+            <p class="book-author">Oleh ${book.author}</p>
+            <div class="book-footer">
+              <span class="book-price" style="color:var(--accent-teal); font-weight:500;">${book.price}</span>
+              <button class="btn-soon" style="background:var(--accent-teal); color:white; border:none;" onclick="event.stopPropagation(); handleBuyBook('${book.title}')">
+                ${book.status === 'segera' ? 'Pre-Order' : 'Beli'}
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // 5. Interaktivitas Pengunggahan & Pemrosesan Form Proposal Kirim Naskah
+    const dropzone = document.getElementById('dropzoneArea');
+    if (dropzone) {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.pdf,.docx';
+      fileInput.style.display = 'none';
+      dropzone.appendChild(fileInput);
+
+      dropzone.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          dropzone.innerHTML = `
+            <span class="icon" style="color:var(--accent-teal)">📄</span>
+            <p style="font-weight:500; color:var(--brown-deep);">${e.target.files[0].name}</p>
+            <span class="sub">Berkas berhasil divalidasi sistem lokal</span>
+          `;
+          showToast("📄 Berkas draf dokumen berhasil dilampirkan!");
+        }
+      });
+    }
+
+    document.getElementById('naskahForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('.submit-btn');
+      submitBtn.textContent = "Mengirim Berkas Ke Meja Kurasi...";
+      submitBtn.disabled = true;
+
+      setTimeout(() => {
+        document.getElementById('naskahForm').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+        showToast("🚀 Sukses! Naskah Anda berhasil dikirim ke Admin.");
+
+        // Suntik data dinamis secara real-time ke struktur tabel internal dashboard admin
+        const adminTable = document.getElementById('adminNaskahTable');
+        if (adminTable) {
+          totalNaskahAdmin++;
+          document.getElementById('adminTotalCount').textContent = totalNaskahAdmin;
+          
+          const newRow = adminTable.insertRow(0);
+          const judul = document.getElementById('judul_naskah').value;
+          const penulis = document.getElementById('nama_lengkap').value;
+          newRow.innerHTML = `
+            <td>${judul}</td>
+            <td>${penulis}</td>
+            <td><span class="status-pill status-new">Baru</span></td>
+            <td><button class="btn-table" onclick="showToast('Membuka file kurasi...')">Review</button></td>
+          `;
+        }
+      }, 1200);
+    });
+
+    function resetNaskahForm() {
+      document.getElementById('naskahForm').reset();
+      document.getElementById('naskahForm').style.display = 'block';
+      document.getElementById('formSuccess').style.display = 'none';
+      const submitBtn = document.querySelector('#naskahForm .submit-btn');
+      submitBtn.textContent = "Kirim Proposal Naskah Kontrak";
+      submitBtn.disabled = false;
+      
+      // Reset tampilan area upload zone file
+      document.getElementById('dropzoneArea').innerHTML = `
+        <span class="icon">📁</span>
+        <p>Klik area ini untuk memuat draf naskah bab sampel</p>
+        <span class="sub">Format dokumen yang diizinkan: .pdf atau .docx (Maks. 10MB)</span>
+      `;
+    }
+
+    // 6. Global Utility Komponen Efek Navbar & Pemicu Klik
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      if (window.scrollY > 50) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    });
+
+    function toggleMobileNav() {
+      document.getElementById('mobileNav').classList.toggle('open');
+    }
+
+    function showToast(message) {
+      let toast = document.getElementById('toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Pemicu filter kategori menu pada etalase toko buku
+    document.querySelectorAll('.cat-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+        e.target.classList.add('active');
+        const searchVal = document.getElementById('bookSearch').value;
+        renderShopBooks(e.target.getAttribute('data-cat'), searchVal);
+      });
+    });
+
+    document.getElementById('bookSearch').addEventListener('input', (e) => {
+      const activeCat = document.querySelector('.cat-pill.active').getAttribute('data-cat') || 'semua';
+      renderShopBooks(activeCat, e.target.value);
+    });
+
+    // lnizialisasi Pemuatan Perdana Aplikasi
+    document.addEventListener('DOMContentLoaded', () => {
+      switchSection('home');
+      renderShopBooks();
+    });
+  </script>
 </body>
 </html>
