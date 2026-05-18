@@ -3,605 +3,515 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Nara Pustaka — Startup Publishing & Marketplace Modern</title>
+<title>Nara Pustaka — Your Ultimate Modern Literary Sanctuary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 :root {
-  --bg-cream: #FAF8F5;
+  --primary-bright: #56B6C6; /* Warna request wajib cerah banget */
+  --primary-dark: #2B626C;
+  --primary-light: #E8F7F9;
+  --bg-cream: #F8FBFB;
   --bg-white: #FFFFFF;
-  --accent-brown: #4E3629;
-  --accent-tan: #8D7B68;
-  --accent-light: #F1DEC9;
-  --accent-soft: #C8B6A6;
-  --text-main: #2A2522;
-  --text-muted: #6E6762;
-  --shadow-sm: 0 2px 8px rgba(78,54,41,0.04);
-  --shadow-md: 0 8px 30px rgba(78,54,41,0.06);
-  --shadow-lg: 0 16px 40px rgba(78,54,41,0.12);
-  --radius-sm: 10px;
+  --text-main: #1C2B2D;
+  --text-muted: #627578;
+  --accent-gold: #C2A478;
+  --danger-color: #E06C75;
+  --shadow-sm: 0 2px 12px rgba(86,182,198,0.06);
+  --shadow-md: 0 10px 35px rgba(86,182,198,0.1);
+  --shadow-lg: 0 20px 50px rgba(86,182,198,0.15);
+  --radius-sm: 8px;
   --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-lg: 32px;
   --radius-circle: 100px;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-serif: 'Playfair Display', serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; }
 body { font-family: var(--font-sans); background: var(--bg-cream); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
 
-/* Scrollbar Style */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-cream); }
-::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 3px; }
+/* Announcement Bar Premium */
+.top-announcement-bar { background: var(--primary-dark); color: var(--bg-white); font-size: 12px; font-weight: 500; text-align: center; padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; }
+.top-announcement-bar a { color: #A6E2EC; text-decoration: underline; font-weight: 600; }
+.top-social-links { display: flex; gap: 12px; list-style: none; }
 
-/* Global Utilities & Layout Components */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.section-padding { padding: 100px 0; }
-.badge-premium { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-light); color: var(--accent-brown); font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: var(--radius-circle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; }
-.title-serif { font-family: var(--font-serif); font-size: clamp(32px, 4vw, 48px); color: var(--accent-brown); font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
-.title-serif em { font-style: italic; font-weight: 400; color: var(--accent-tan); }
-.text-subtitle { font-size: 16px; color: var(--text-muted); max-width: 540px; font-weight: 400; }
-.btn-premium { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px; font-size: 14px; font-weight: 600; border-radius: var(--radius-md); border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); font-family: var(--font-sans); text-decoration: none; }
-.btn-solid { background: var(--accent-brown); color: var(--bg-white); }
-.btn-solid:hover { background: var(--accent-tan); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.btn-outline { background: transparent; color: var(--accent-brown); border: 1.5px solid var(--accent-brown); }
-.btn-outline:hover { background: rgba(78,54,41,0.04); transform: translateY(-2px); }
+/* Utilities */
+.container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+.section-padding { padding: 80px 0; }
+.title-serif { font-family: var(--font-serif); font-size: clamp(32px, 4vw, 46px); font-weight: 700; line-height: 1.2; color: var(--text-main); }
+.title-serif em { font-style: italic; font-weight: 400; color: var(--accent-gold); }
+.badge-ui { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary-dark); font-size: 11px; font-weight: 700; padding: 8px 16px; border-radius: var(--radius-circle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; }
 
-/* Logo Asset Standard Styling */
-.logo-img { height: 32px; width: auto; object-fit: contain; vertical-align: middle; }
+/* Buttons Premium */
+.btn-premium { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 32px; font-size: 14px; font-weight: 600; border-radius: var(--radius-circle); border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); font-family: var(--font-sans); text-decoration: none; }
+.btn-solid-cyan { background: var(--primary-bright); color: var(--bg-white); }
+.btn-solid-cyan:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn-outline-dark { background: transparent; color: var(--text-main); border: 1.5px solid var(--text-main); }
+.btn-outline-dark:hover { background: rgba(28,43,45,0.04); transform: translateY(-2px); }
 
-/* ============ DESKTOP NAVIGATION ============ */
-header.main-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(250, 248, 245, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(141,123,104,0.12); height: 80px; transition: all 0.3s; }
-header.main-nav.scrolled { background: var(--bg-white); box-shadow: var(--shadow-sm); height: 72px; }
-.nav-container { display: flex; align-items: center; justify-content: space-between; height: 100%; max-width: 1240px; margin: 0 auto; padding: 0 24px; }
-.nav-menu { display: flex; align-items: center; gap: 12px; }
-.nav-link { font-size: 14px; font-weight: 500; color: var(--text-muted); text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s; }
-.nav-link:hover, .nav-link.active { color: var(--accent-brown); background: var(--accent-light); }
-.nav-actions { display: flex; align-items: center; gap: 16px; }
-.cart-trigger { position: relative; cursor: pointer; background: none; border: none; font-size: 20px; padding: 4px; color: var(--accent-brown); }
-.cart-badge { position: absolute; top: -4px; right: -4px; background: var(--accent-brown); color: var(--bg-white); font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+/* Desktop Navigation */
+header.main-nav { position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(86,182,198,0.15); height: 80px; }
+.nav-container { display: flex; align-items: center; justify-content: space-between; height: 100%; }
+.brand-logo-area { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
+.logo-icon-box { background: var(--primary-bright); color: white; width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; }
+.brand-name { font-family: var(--font-serif); font-size: 22px; font-weight: 700; color: var(--text-main); }
+.nav-menu { display: flex; gap: 8px; }
+.nav-link { font-size: 14px; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 10px 20px; border-radius: var(--radius-circle); transition: all 0.2s; }
+.nav-link:hover, .nav-link.active { color: var(--primary-dark); background: var(--primary-light); }
+.nav-actions { display: flex; align-items: center; gap: 20px; }
+.nav-action-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-main); position: relative; }
+.badge-count { position: absolute; top: -6px; right: -8px; background: var(--primary-bright); color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-/* ============ MOBILE BOTTOM NAVIGATION ============ */
-.mobile-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: var(--bg-white); border-top: 1px solid rgba(141,123,104,0.15); display: none; justify-content: space-around; align-items: center; z-index: 999; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
-.mobile-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); font-size: 10px; font-weight: 500; gap: 4px; background: none; border: none; width: 20%; height: 100%; }
-.mobile-nav-item.active { color: var(--accent-brown); font-weight: 700; }
-.mobile-nav-item span.icon { font-size: 20px; }
+/* Mobile Navigation Bottom Bar */
+.mobile-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: var(--bg-white); border-top: 1px solid rgba(86,182,198,0.15); display: none; justify-content: space-around; align-items: center; z-index: 999; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -4px 25px rgba(86,182,198,0.08); }
+.mobile-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); font-size: 10px; font-weight: 600; gap: 4px; background: none; border: none; flex: 1; height: 100%; }
+.mobile-nav-item.active { color: var(--primary-bright); }
+.mobile-nav-item .icon { font-size: 20px; }
 
-/* ============ CONTAINER SISTEM (SPA ARCHITECTURE) ============ */
-.app-section { display: none; padding-top: 80px; min-height: calc(100vh - 64px); }
+/* SPA Structure Sections */
+.app-section { display: none; min-height: calc(100vh - 148px); }
 .app-section.active { display: block; }
 
-/* ============ SYSTEM A: WEBSITE PENERBIT ============ */
-.hero-wrapper { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center; padding: 60px 0 100px; }
-.hero-visual { position: relative; display: flex; justify-content: center; }
-.hero-frame { background: var(--accent-light); width: 100%; max-width: 400px; height: 480px; border-radius: var(--radius-lg); position: relative; overflow: hidden; box-shadow: var(--shadow-lg); }
-.hero-placeholder-art { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent-brown), var(--accent-tan)); color: var(--bg-cream); text-align: center; padding: 40px; }
+/* ============ LANDING HOME VIEW UI COMPONENT ============ */
+.hero-banner-slider { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; padding: 60px 0; }
+.hero-content h1 { font-size: clamp(36px, 5vw, 56px); margin-bottom: 20px; color: var(--text-main); }
+.hero-content p { color: var(--text-muted); font-size: 16px; margin-bottom: 36px; max-width: 500px; }
+.hero-illustration-frame { position: relative; display: flex; justify-content: center; }
+.hero-circle-backdrop { width: 100%; max-width: 440px; height: 440px; background: linear-gradient(135deg, var(--primary-light), #CBEFF4); border-radius: 50%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); }
+.mock-image-book-fly { font-size: 130px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15)); animation: floatAnim 4s ease-in-out infinite; }
+@keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; background: var(--bg-white); padding: 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-top: -40px; position: relative; z-index: 10; border: 1px solid rgba(141,123,104,0.08); }
-.stat-item text-align: center; { border-right: 1px solid rgba(141,123,104,0.15); }
-.stat-item:last-child { border: none; }
-.stat-num { font-family: var(--font-serif); font-size: 36px; font-weight: 700; color: var(--accent-brown); }
-.stat-lbl { font-size: 13px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+/* Sub-Navbar Kategori Strip Premium */
+.category-strip-subnav { background: var(--primary-dark); padding: 14px 0; overflow-x: auto; white-space: nowrap; }
+.strip-container { display: flex; justify-content: center; gap: 40px; }
+.strip-item { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.strip-item:hover { color: var(--primary-bright); }
 
-.services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
-.service-card { background: var(--bg-white); border: 1px solid rgba(141,123,104,0.08); border-radius: var(--radius-md); padding: 32px 24px; transition: all 0.3s; position: relative; }
-.service-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent-soft); }
-.service-icon { font-size: 32px; margin-bottom: 20px; display: inline-block; }
-.service-card h3 { font-size: 18px; font-weight: 600; color: var(--accent-brown); margin-bottom: 12px; }
-.service-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+/* Grid Kategori Lingkaran (Shop By Category) */
+.category-circle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; margin-top: 40px; text-align: center; }
+.circle-cat-card { cursor: pointer; background: none; border: none; font-family: var(--font-sans); }
+.circle-wrapper { width: 140px; height: 140px; border-radius: 50%; background: var(--bg-white); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 44px; box-shadow: var(--shadow-sm); border: 2px solid transparent; transition: all 0.3s; }
+.circle-cat-card:hover .circle-wrapper { border-color: var(--primary-bright); transform: scale(1.05); box-shadow: var(--shadow-md); }
+.circle-cat-card h4 { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+.circle-cat-card span { font-size: 12px; color: var(--text-muted); }
 
-.timeline-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-top: 56px; position: relative; }
-.timeline-card { background: var(--bg-white); padding: 24px 16px; border-radius: var(--radius-md); border: 1px solid rgba(141,123,104,0.08); text-align: center; position: relative; }
-.timeline-step { width: 28px; height: 28px; background: var(--accent-brown); color: var(--bg-white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin: 0 auto 16px; }
-.timeline-card h4 { font-size: 14px; font-weight: 600; color: var(--accent-brown); margin-bottom: 6px; }
-.timeline-card p { font-size: 12px; color: var(--text-muted); }
+/* Spanduk Promo Ganda Premium */
+.promo-banner-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 60px; }
+.promo-banner-card { border-radius: var(--radius-md); padding: 40px; display: flex; justify-content: space-between; align-items: center; min-height: 220px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); }
+.promo-1 { background: #F6F1EA; }
+.promo-2 { background: #E8F5F7; }
+.promo-info h5 { color: var(--accent-gold); font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+.promo-info h3 { font-family: var(--font-serif); font-size: 28px; color: var(--text-main); margin-bottom: 20px; line-height: 1.3; }
+.promo-visual-icon { font-size: 80px; opacity: 0.8; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); }
 
-/* ============ SYSTEM B: TOKO BUKU / MARKETPLACE ============ */
-.marketplace-layout { display: grid; grid-template-columns: 240px 1fr; gap: 32px; padding: 40px 0 80px; }
-.filter-sidebar { background: var(--bg-white); border-radius: var(--radius-md); padding: 24px; border: 1px solid rgba(141,123,104,0.08); height: fit-content; }
-.filter-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-brown); margin-bottom: 16px; border-bottom: 1px solid rgba(141,123,104,0.1); padding-bottom: 8px; }
-.category-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.category-item button { width: 100%; text-align: left; background: none; border: none; font-family: var(--font-sans); font-size: 14px; color: var(--text-muted); padding: 8px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
-.category-item button:hover, .category-item.active button { background: var(--accent-light); color: var(--accent-brown); font-weight: 600; }
+/* Mozaik Image About Us Section */
+.about-mozaic-layout { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: center; }
+.mozaic-graphics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; position: relative; }
+.mozaic-img-box { background: var(--primary-light); border-radius: var(--radius-md); height: 200px; display: flex; align-items: center; justify-content: center; font-size: 50px; box-shadow: var(--shadow-sm); }
+.mozaic-img-box.tall { height: 320px; grid-row: span 2; }
+.floating-stamp-badge { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); background: var(--primary-dark); color: white; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: var(--shadow-lg); }
+.stats-strip-row { display: flex; gap: 32px; background: var(--primary-dark); color: white; padding: 24px 40px; border-radius: var(--radius-md); margin-top: 32px; }
+.stat-node h3 { font-family: var(--font-serif); font-size: 28px; color: var(--primary-bright); }
+.stat-node p { font-size: 12px; color: rgba(255,255,255,0.7); text-transform: uppercase; }
 
-.search-container { position: relative; margin-bottom: 32px; }
-.search-input { width: 100%; background: var(--bg-white); border: 1.5px solid rgba(141,123,104,0.15); padding: 16px 20px 16px 48px; border-radius: var(--radius-md); font-family: var(--font-sans); font-size: 15px; color: var(--text-main); outline: none; transition: all 0.2s; box-shadow: var(--shadow-sm); }
-.search-input:focus { border-color: var(--accent-brown); box-shadow: var(--shadow-md); }
-.search-icon-inside { position: absolute; left: 18px; top: 52%; transform: translateY(-50%); font-size: 18px; color: var(--text-muted); pointer-events: none; }
+/* ============ MARKETPLACE UI CATALOG GRID ============ */
+.catalog-grid-layout { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 40px 0 80px; }
+.premium-book-card { background: var(--bg-white); border-radius: var(--radius-md); padding: 16px; border: 1px solid rgba(86,182,198,0.1); position: relative; display: flex; flex-direction: column; cursor: pointer; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+.premium-book-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--primary-bright); }
+.book-cover-stage { background: #F3F8F9; height: 260px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-bottom: 16px; }
+.book-spine-art { width: 130px; height: 185px; background: linear-gradient(135deg, var(--primary-bright), var(--primary-dark)); border-radius: 4px; box-shadow: 0 12px 25px rgba(43,98,108,0.25); display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; color: var(--bg-white); font-family: var(--font-serif); font-size: 12px; font-weight: 600; }
+.card-tag-status { position: absolute; top: 12px; left: 12px; background: var(--text-main); color: var(--bg-white); font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-circle); text-transform: uppercase; }
+.card-heart-btn { position: absolute; top: 12px; right: 12px; border: none; background: var(--bg-white); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: var(--text-muted); }
+.card-heart-btn:hover { color: var(--danger-color); }
+.card-meta-category { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--accent-gold); letter-spacing: 0.05em; margin-bottom: 4px; }
+.card-meta-title { font-size: 16px; font-weight: 700; color: var(--text-main); line-height: 1.3; margin-bottom: 6px; }
+.card-meta-author { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.card-footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; border-top: 1px solid #F3F8F9; padding-top: 12px; }
+.card-meta-price { font-size: 15px; font-weight: 700; color: var(--text-main); }
+.card-action-trigger { width: 36px; height: 36px; background: var(--primary-light); color: var(--primary-dark); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.premium-book-card:hover .card-action-trigger { background: var(--primary-bright); color: white; }
 
-.books-market-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.market-book-card { background: var(--bg-white); border-radius: var(--radius-md); border: 1px solid rgba(141,123,104,0.08); padding: 16px; transition: all 0.3s; position: relative; display: flex; flex-direction: column; cursor: pointer; }
-.market-book-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--accent-soft); }
-.m-cover-area { background: var(--bg-cream); height: 240px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; margin-bottom: 16px; border: 1px solid rgba(141,123,104,0.05); }
-.m-cover-art { width: 120px; height: 170px; background: linear-gradient(145deg, var(--accent-tan), var(--accent-brown)); border-radius: 4px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; color: var(--bg-white); font-family: var(--font-serif); font-size: 11px; font-style: italic; }
-.tag-coming-soon { position: absolute; top: 12px; left: 12px; background: rgba(7E,62,49,0.9); color: var(--bg-white); font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: var(--radius-circle); text-transform: uppercase; letter-spacing: 0.05em; backdrop-filter: blur(4px); }
-.m-wish-btn { position: absolute; top: 12px; right: 12px; border: none; background: var(--bg-white); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); box-shadow: var(--shadow-sm); transition: all 0.2s; }
-.m-wish-btn:hover { color: #D32F2F; transform: scale(1.05); }
-.m-info-area { display: flex; flex-direction: column; flex-grow: 1; }
-.m-cat-lbl { font-size: 11px; text-transform: uppercase; color: var(--accent-tan); font-weight: 600; letter-spacing: 0.04em; margin-bottom: 4px; }
-.m-title { font-size: 15px; font-weight: 600; color: var(--accent-brown); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 40px; }
-.m-author { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
-.m-footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(141,123,104,0.08); }
-.m-price { font-size: 14px; font-weight: 700; color: var(--accent-brown); }
-.m-btn-action { padding: 8px 14px; background: var(--accent-light); color: var(--accent-brown); border: none; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: var(--font-sans); }
-.m-btn-action:hover { background: var(--accent-brown); color: var(--bg-white); }
+/* ============ FORM PENGAJUAN MANUSKRIP ============ */
+.manuscript-split-panel { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 60px; padding: 40px 0 80px; }
+.premium-card-form { background: var(--bg-white); border-radius: var(--radius-md); border: 1px solid rgba(86,182,198,0.12); padding: 40px; box-shadow: var(--shadow-md); }
+.form-group-premium { margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
+.form-group-premium label { font-size: 13px; font-weight: 700; color: var(--text-main); }
+.form-group-premium input, .form-group-premium select, .form-group-premium textarea { width: 100%; padding: 14px 18px; background: #F6FAFA; border: 1.5px solid transparent; border-radius: var(--radius-sm); font-family: var(--font-sans); font-size: 14px; outline: none; transition: all 0.2s; }
+.form-group-premium input:focus, .form-group-premium select:focus, .form-group-premium textarea:focus { border-color: var(--primary-bright); background: var(--bg-white); }
+.dashed-dropzone-box { border: 2px dashed rgba(86,182,198,0.4); background: #F6FAFA; padding: 30px; text-align: center; border-radius: var(--radius-sm); cursor: pointer; }
+.dashed-dropzone-box:hover { border-color: var(--primary-bright); background: var(--bg-white); }
 
-/* ============ SYSTEM C: PENGAJUAN NASKAH ============ */
-.submission-split { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 60px; padding: 40px 0 80px; }
-.form-box-premium { background: var(--bg-white); border-radius: var(--radius-lg); border: 1px solid rgba(141,123,104,0.08); padding: 48px; box-shadow: var(--shadow-md); }
-.field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.fg-premium { margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px; }
-.fg-premium label { font-size: 13px; font-weight: 600; color: var(--accent-brown); letter-spacing: 0.02em; }
-.fg-premium input, .fg-premium select, .fg-premium textarea { width: 100%; padding: 14px 16px; background: var(--bg-cream); border: 1.5px solid transparent; border-radius: var(--radius-md); font-family: var(--font-sans); font-size: 14px; color: var(--text-main); outline: none; transition: all 0.2s; }
-.fg-premium input:focus, .fg-premium select:focus, .fg-premium textarea:focus { border-color: var(--accent-soft); background: var(--bg-white); }
-.fg-premium textarea { min-height: 140px; resize: vertical; }
-.upload-dashed-container { border: 2px dashed rgba(141,123,104,0.3); border-radius: var(--radius-md); padding: 32px; text-align: center; cursor: pointer; background: var(--bg-cream); transition: all 0.2s; }
-.upload-dashed-container:hover { border-color: var(--accent-brown); background: var(--bg-white); }
-.upload-icon-frame { font-size: 36px; display: block; margin-bottom: 12px; }
-.upload-main-text { font-size: 14px; font-weight: 600; color: var(--accent-brown); }
-.upload-sub-text { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+/* ============ AUTENTIKASI UI ============ */
+.auth-center-shell { display: flex; align-items: center; justify-content: center; padding: 80px 24px; }
+.auth-frame-card { background: var(--bg-white); border: 1px solid rgba(86,182,198,0.12); border-radius: var(--radius-md); width: 100%; max-width: 420px; padding: 40px 32px; box-shadow: var(--shadow-lg); }
+.auth-tab-bar { display: flex; background: #F6FAFA; padding: 4px; border-radius: var(--radius-sm); margin-bottom: 24px; }
+.auth-tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm); }
+.auth-tab-btn.active { background: var(--bg-white); color: var(--primary-dark); box-shadow: var(--shadow-sm); }
 
-/* ============ AUTENTIKASI CORE (DUAL MODE) ============ */
-.gate-container { min-height: calc(100vh - 144px); display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
-.gate-card { background: var(--bg-white); border: 1px solid rgba(141,123,104,0.08); width: 100%; max-width: 440px; border-radius: var(--radius-lg); padding: 40px 32px; box-shadow: var(--shadow-lg); }
-.gate-tab-switcher { display: flex; background: var(--bg-cream); padding: 4px; border-radius: var(--radius-md); margin-bottom: 28px; border: 1px solid rgba(141,123,104,0.06); }
-.gate-tab { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: calc(var(--radius-md) - 2px); transition: all 0.2s; }
-.gate-tab.active { background: var(--bg-white); color: var(--accent-brown); box-shadow: var(--shadow-sm); }
-.gate-panel { display: none; }
-.gate-panel.active { display: block; }
-.oauth-divider { text-align: center; margin: 24px 0; position: relative; font-size: 12px; color: var(--text-muted); font-weight: 500; }
-.oauth-divider::before, .oauth-divider::after { content: ''; position: absolute; top: 50%; width: 35%; height: 1px; background: rgba(141,123,104,0.15); }
-.oauth-divider::before { left: 0; } .oauth-divider::after { right: 0; }
-.oauth-button-stack { display: flex; flex-direction: column; gap: 10px; }
-.oauth-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; background: var(--bg-white); border: 1.5px solid rgba(141,123,104,0.15); border-radius: var(--radius-md); font-family: var(--font-sans); font-size: 13px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s; }
-.oauth-btn:hover { background: var(--bg-cream); border-color: var(--accent-soft); }
+/* ============ BITESHIP LIVE CHECKOUT & INVOICE VISUAL ============ */
+.checkout-workspace-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; padding: 40px 0 80px; }
+.premium-live-invoice-box { background: var(--bg-white); border: 1px solid #1C2B2D; border-radius: var(--radius-sm); padding: 40px; box-shadow: var(--shadow-md); position: relative; color: #1C2B2D; }
+.invoice-corporate-header { display: flex; justify-content: space-between; border-bottom: 2px solid #F6FAFA; padding-bottom: 20px; margin-bottom: 20px; }
+.invoice-bill-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.invoice-bill-table th { text-align: left; padding: 12px; background: #F6FAFA; font-size: 11px; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid rgba(86,182,198,0.15); }
+.invoice-bill-table td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid #F6FAFA; }
+.invoice-total-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; border-top: 2px solid #F6FAFA; padding-top: 16px; }
+.invoice-total-row { display: flex; justify-content: space-between; width: 260px; font-size: 13px; }
+.invoice-total-row.grand { font-size: 16px; font-weight: 700; color: var(--primary-dark); border-top: 1px solid #1C2B2D; padding-top: 6px; margin-top: 4px; }
 
-/* ============ CHECKOUT & INVOICE PREVIEW SYSTEM ============ */
-.checkout-split { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; padding: 40px 0 80px; }
-.invoice-box-visual { background: var(--bg-white); border: 1px solid rgba(141,123,104,0.12); padding: 40px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); position: relative; font-family: var(--font-sans); }
-.inv-header-meta { display: flex; justify-content: space-between; border-bottom: 2px solid var(--bg-cream); padding-bottom: 24px; margin-bottom: 24px; }
-.inv-title { font-family: var(--font-serif); font-size: 24px; color: var(--accent-brown); font-weight: 700; }
-.inv-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-.inv-table th { text-align: left; padding: 10px; background: var(--bg-cream); font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
-.inv-table td { padding: 14px 10px; font-size: 13px; border-bottom: 1px solid var(--bg-cream); }
-.inv-total-row { display: flex; justify-content: flex-end; gap: 40px; font-weight: 700; font-size: 15px; color: var(--accent-brown); padding-top: 16px; }
+/* ============ DASHBOARD CONTROL CONSOLE (ADMIN) ============ */
+.admin-console-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 80px); }
+.admin-sidebar-nav { background: var(--text-main); color: var(--bg-white); padding: 30px 16px; display: flex; flex-direction: column; gap: 6px; }
+.admin-menu-node { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius-sm); color: rgba(255,255,255,0.6); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.admin-menu-node:hover, .admin-menu-node.active { background: rgba(86,182,198,0.15); color: var(--primary-bright); }
+.admin-workspace-core { padding: 40px; background: #F3F8F9; }
+.admin-widgets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
+.widget-node { background: var(--bg-white); padding: 24px; border-radius: var(--radius-sm); border: 1px solid rgba(86,182,198,0.1); box-shadow: var(--shadow-sm); }
+.widget-node .num-val { font-family: var(--font-serif); font-size: 30px; font-weight: 700; color: var(--primary-dark); }
+.widget-node .lbl-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+.admin-data-table-card { background: var(--bg-white); border-radius: var(--radius-sm); border: 1px solid rgba(86,182,198,0.1); padding: 24px; box-shadow: var(--shadow-sm); }
+.admin-core-table { width: 100%; border-collapse: collapse; text-align: left; }
+.admin-core-table th { padding: 12px 16px; background: #F6FAFA; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+.admin-core-table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #F3F8F9; }
 
-/* ============ PREMIUM DASHBOARD CONTROL CONSOLE ============ */
-.dashboard-wrapper { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 80px); }
-.dash-sidebar { background: var(--accent-brown); color: var(--bg-white); padding: 32px 16px; display: flex; flex-direction: column; gap: 8px; }
-.dash-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius-sm); color: rgba(250,248,245,0.6); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-.dash-menu-item:hover, .dash-menu-item.active { background: rgba(250,248,245,0.08); color: var(--bg-white); }
-.dash-main-area { padding: 40px; background: var(--bg-cream); overflow-y: auto; }
-.dash-summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
-.summary-widget { background: var(--bg-white); padding: 24px; border-radius: var(--radius-md); border: 1px solid rgba(141,123,104,0.08); box-shadow: var(--shadow-sm); }
-.summary-widget .num { font-family: var(--font-serif); font-size: 28px; font-weight: 700; color: var(--accent-brown); margin-top: 4px; }
-.summary-widget .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
-.dash-data-card { background: var(--bg-white); border-radius: var(--radius-md); border: 1px solid rgba(141,123,104,0.08); padding: 24px; box-shadow: var(--shadow-sm); }
-.dash-table { width: 100%; border-collapse: collapse; }
-.dash-table th { text-align: left; padding: 12px 16px; background: var(--bg-cream); font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
-.dash-table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(141,123,104,0.06); }
-.pill-status { display: inline-flex; padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: var(--radius-circle); }
-.pill-status.pending { background: #FFF3E0; color: #E65100; }
-.pill-status.success { background: #E8F5E9; color: #1B5E20; }
+/* Action Buttons di Table */
+.btn-table-action { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; font-family: var(--font-sans); }
+.btn-table-action.delete-trigger { background: #FCE8E6; color: var(--danger-color); margin-left: 6px; }
+.btn-table-action.delete-trigger:hover { background: var(--danger-color); color: white; }
+.btn-table-action.pdf-trigger { background: var(--primary-light); color: var(--primary-dark); }
+.btn-table-action.pdf-trigger:hover { background: var(--primary-bright); color: white; }
 
-/* ============ FLOATING WHATSAPP COMPONENT ============ */
-.floating-wa-widget { position: fixed; bottom: 32px; right: 32px; background: #25D366; color: var(--bg-white); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: var(--shadow-lg); z-index: 9999; cursor: pointer; text-decoration: none; transition: all 0.3s; }
-.floating-wa-widget:hover { transform: scale(1.08); background: #20BA5A; }
+/* Premium Modal Confirmation System */
+.premium-modal-overlay { position: fixed; inset: 0; background: rgba(28,43,45,0.6); backdrop-filter: blur(4px); z-index: 11000; display: none; align-items: center; justify-content: center; padding: 24px; }
+.premium-modal-overlay.active { display: flex; }
+.premium-modal-box { background: var(--bg-white); border-radius: var(--radius-md); max-width: 400px; width: 100%; padding: 32px; text-align: center; box-shadow: var(--shadow-lg); animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-icon-warning { font-size: 48px; color: var(--danger-color); margin-bottom: 16px; }
+.modal-btn-row { display: flex; gap: 12px; margin-top: 24px; }
+.modal-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 600; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: var(--font-sans); }
+.modal-btn.confirm { background: var(--danger-color); color: white; }
+.modal-btn.cancel { background: #F6FAFA; color: var(--text-muted); }
 
-/* ============ CORE FOOTER STRUCTURE ============ */
-footer.premium-footer { background: var(--accent-brown); color: rgba(250,248,245,0.7); padding: 80px 0 40px; border-top: 1px solid rgba(141,123,104,0.1); }
-.footer-grid { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 48px; margin-bottom: 48px; }
-.footer-column h3 { font-size: 16px; color: var(--bg-white); font-weight: 600; margin-bottom: 20px; }
-.footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-.footer-links a { color: rgba(250,248,245,0.7); text-decoration: none; font-size: 14px; transition: color 0.2s; }
-.footer-links a:hover { color: var(--bg-white); }
-.footer-bottom { border-top: 1px solid rgba(250,248,245,0.1); padding-top: 30px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+/* Global System Toast Alert */
+.system-toast-alert { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(30px); background: var(--text-main); color: var(--bg-white); padding: 14px 30px; border-radius: var(--radius-circle); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 12000; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.system-toast-alert.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ============ TOAST SYSTEM ============ */
-.premium-toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(30px); background: var(--accent-brown); color: var(--bg-white); padding: 14px 28px; border-radius: var(--radius-circle); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 10000; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.premium-toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Global Footer */
+footer.premium-footer { background: var(--text-main); color: rgba(255,255,255,0.6); padding: 60px 0 30px; border-top: 4px solid var(--primary-bright); }
+.footer-grid-layout { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 40px; margin-bottom: 40px; }
+.footer-node h4 { color: var(--bg-white); font-size: 15px; margin-bottom: 16px; }
+.footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links-list a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; }
+.footer-links-list a:hover { color: var(--primary-bright); }
 
-/* ============ RESPONSIVE MEDIA BREAKPOINTS ============ */
+/* Media Queries Responsif */
 @media (max-width: 1024px) {
-  .hero-wrapper, .submission-split, .checkout-split { grid-template-columns: 1fr; gap: 40px; }
-  .services-grid, .books-market-grid { grid-template-columns: repeat(2, 1fr); }
-  .timeline-row { grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .dashboard-wrapper { grid-template-columns: 1fr; }
-  .dash-sidebar { display: none; }
-  .dash-summary-row { grid-template-columns: repeat(2, 1fr); }
+  .hero-banner-slider, .manuscript-split-panel, .checkout-workspace-grid, .about-mozaic-layout { grid-template-columns: 1fr; gap: 40px; }
+  .category-circle-grid { grid-template-columns: repeat(3, 1fr); }
+  .catalog-grid-layout, .promo-banner-split-row { grid-template-columns: repeat(2, 1fr); }
+  .admin-console-layout { grid-template-columns: 1fr; }
+  .admin-sidebar-nav { display: none; }
+  .admin-widgets-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
   header.main-nav { display: none; }
   .mobile-bottom-bar { display: flex; }
-  .app-section { padding-top: 24px; padding-bottom: 80px; }
-  .section-padding { padding: 60px 0; }
-  .marketplace-layout { grid-template-columns: 1fr; }
-  .filter-sidebar { display: none; }
-  .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-  .field-grid-2 { grid-template-columns: 1fr; gap: 0; }
-}
-@media (max-width: 480px) {
-  .services-grid, .books-market-grid, .timeline-row, .stats-bar { grid-template-columns: 1fr; }
-  .stat-item { border-right: none; border-bottom: 1px solid rgba(141,123,104,0.15); padding-bottom: 16px; }
-  .stat-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .app-section { padding-top: 10px; padding-bottom: 80px; }
+  .catalog-grid-layout, .promo-banner-split-row, .category-circle-grid, .admin-widgets-grid { grid-template-columns: 1fr; }
+  .footer-grid-layout { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-  <!-- ============ DESKTOP HEADER NAVIGATION ============ -->
-  <header class="main-nav" id="desktopNavbar">
-    <div class="nav-container">
-      <a href="#" class="nav-brand" onclick="navigateSPA('penerbit')">
-        <img src="assets/logo.png" alt="Nara Pustaka" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <span style="display:none; font-family:var(--font-serif); font-size:20px; font-weight:700; color:var(--accent-brown);">Nara Pustaka</span>
+  <div class="top-announcement-bar">
+    <div>📞 Hubungi Kami: +62 123-456-789 | Email: redaksi@narapustaka.com</div>
+    <div>Daftar akun sekarang dan dapatkan diskon kemitraan 20%! <a href="#" onclick="navigateSPA('auth')">Daftar Sekarang</a></div>
+    <ul class="top-social-links">
+      <li>🌐 IG</li> <li>🌐 LN</li> <li>🌐 FB</li>
+    </ul>
+  </div>
+
+  <header class="main-nav">
+    <div class="container nav-container">
+      <a href="#" class="brand-logo-area" onclick="navigateSPA('penerbit')">
+        <div class="logo-icon-box">N</div>
+        <span class="brand-name">Nara Pustaka</span>
       </a>
       <nav class="nav-menu">
-        <a href="#" class="nav-link active" id="lnk-penerbit" onclick="navigateSPA('penerbit')">Penerbit</a>
+        <a href="#" class="nav-link active" id="lnk-penerbit" onclick="navigateSPA('penerbit')">Beranda</a>
         <a href="#" class="nav-link" id="lnk-marketplace" onclick="navigateSPA('marketplace')">Katalog Toko</a>
-        <a href="#" class="nav-link" id="lnk-naskah" onclick="navigateSPA('naskah')">Kirim Naskah</a>
+        <a href="#" class="nav-link" id="lnk-naskah" onclick="navigateSPA('naskah')">Kirim Manuskrip</a>
       </nav>
       <div class="nav-actions">
-        <button class="cart-trigger" onclick="navigateSPA('checkout')">
-          🛒 <span class="cart-badge" id="cartBadgeGlobal">0</span>
-        </button>
-        <button class="btn-premium btn-solid" id="navAuthActionButton" onclick="navigateSPA('auth')">👤 Masuk</button>
+        <button class="nav-action-btn" onclick="navigateSPA('checkout')">🛒 <span class="badge-count" id="cartBadgeGlobal">0</span></button>
+        <button class="btn-premium btn-solid-cyan" id="navAuthActionButton" onclick="navigateSPA('auth')" style="padding: 10px 24px;">👤 Masuk</button>
       </div>
     </div>
   </header>
 
-  <!-- ============ MOBILE BOTTOM NAVIGATION STICKY ============ -->
   <div class="mobile-bottom-bar">
-    <button class="mobile-nav-item active" id="mbl-penerbit" onclick="navigateSPA('penerbit')">
-      <span class="icon">🏛️</span><span>Penerbit</span>
-    </button>
-    <button class="mobile-nav-item" id="mbl-marketplace" onclick="navigateSPA('marketplace')">
-      <span class="icon">🛍️</span><span>Toko</span>
-    </button>
-    <button class="mobile-nav-item" id="mbl-naskah" onclick="navigateSPA('naskah')">
-      <span class="icon">✍️</span><span>Naskah</span>
-    </button>
-    <button class="mobile-nav-item" id="mbl-checkout" onclick="navigateSPA('checkout')">
-      <span class="icon">🛒</span><span>Keranjang</span>
-    </button>
-    <button class="mobile-nav-item" id="mbl-auth" onclick="navigateSPA('auth')">
-      <span class="icon">👤</span><span>Akun</span>
-    </button>
+    <button class="mobile-nav-item active" id="mbl-penerbit" onclick="navigateSPA('penerbit')"><span class="icon">🏛️</span><span>Beranda</span></button>
+    <button class="mobile-nav-item" id="mbl-marketplace" onclick="navigateSPA('marketplace')"><span class="icon">🛍️</span><span>Toko</span></button>
+    <button class="mobile-nav-item" id="mbl-naskah" onclick="navigateSPA('naskah')"><span class="icon">✍️</span><span>Naskah</span></button>
+    <button class="mobile-nav-item" id="mbl-checkout" onclick="navigateSPA('checkout')"><span class="icon">🛒</span><span>Keranjang</span></button>
+    <button class="mobile-nav-item" id="mbl-auth" onclick="navigateSPA('auth')"><span class="icon">👤</span><span>Akun</span></button>
   </div>
 
-  <!-- ============ SYSTEM A: CORE WEBSITE PENERBIT ============ -->
   <main id="view-penerbit" class="app-section active">
-    <section class="container">
-      <div class="hero-wrapper">
+    <div class="category-strip-subnav">
+      <div class="strip-container">
+        <a class="strip-item" onclick="navigateSPA('marketplace')">📖 Novel Fiksi</a>
+        <a class="strip-item" onclick="navigateSPA('marketplace')">🖋️ Puisi & Sastra</a>
+        <a class="strip-item" onclick="navigateSPA('marketplace')">💡 Self Help</a>
+        <a class="strip-item" onclick="navigateSPA('marketplace')">📊 Bisnis & Finansial</a>
+        <a class="strip-item" onclick="navigateSPA('marketplace')">🎓 Buku Akademik</a>
+      </div>
+    </div>
+
+    <section class="container hero-banner-slider">
+      <div class="hero-content">
+        <span class="badge-ui">✨ Glow with Confidence, Shop with Trust</span>
+        <h1>Nara Pustaka: Your <em>Ultimate Beauty</em> & Cosmetics Hub</h1>
+        <p>Transformasikan ide cerdas, draf manuskrip, serta gagasan brilian Anda menjadi mahakarya literasi premium berstandar nasional resmi Perpusnas RI.</p>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <button class="btn-premium btn-solid-cyan" onclick="navigateSPA('naskah')">Publish Your Book ↗</button>
+          <button class="btn-premium btn-outline-dark" onclick="navigateSPA('marketplace')">Explore Catalog</button>
+        </div>
+      </div>
+      <div class="hero-illustration-frame">
+        <div class="hero-circle-backdrop">
+          <div class="mock-image-book-fly">📖</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section-padding" style="border-top:1px solid rgba(86,182,198,0.15);">
+      <div style="text-align:center; margin-bottom:40px;">
+        <p style="font-size:13px; font-weight:700; color:var(--accent-gold); text-transform:uppercase;">Our Categories</p>
+        <h2 class="title-serif" style="font-size:32px;">Shop By <em>Category</em></h2>
+      </div>
+      <div class="category-circle-grid">
+        <button class="circle-cat-card" onclick="filterMarketByCategory('Novel')"><div class="circle-wrapper">📚</div><h4>Novel / Fiksi</h4><span>52 Products</span></button>
+        <button class="circle-cat-card" onclick="filterMarketByCategory('Puisi')"><div class="circle-wrapper">✒️</div><h4>Sastra Puisi</h4><span>48 Products</span></button>
+        <button class="circle-cat-card" onclick="filterMarketByCategory('Self Improvement')"><div class="circle-wrapper">💡</div><h4>Self Help</h4><span>86 Products</span></button>
+        <button class="circle-cat-card" onclick="filterMarketByCategory('Bisnis')"><div class="circle-wrapper">📈</div><h4>Bisnis</h4><span>27 Products</span></button>
+        <button class="circle-cat-card" onclick="filterMarketByCategory('Pendidikan')"><div class="circle-wrapper">🎓</div><h4>Pendidikan</h4><span>86 Products</span></button>
+      </div>
+    </section>
+
+    <section class="container promo-banner-split-row">
+      <div class="promo-banner-card promo-1">
+        <div class="promo-info">
+          <h5>Flat 25% Discount</h5>
+          <h3>Special Sastra<br>Care Deals</h3>
+          <button class="btn-premium btn-solid-cyan" style="padding:10px 24px; font-size:12px;" onclick="navigateSPA('marketplace')">Shop Now ↗</button>
+        </div>
+        <div class="promo-visual-icon">📚</div>
+      </div>
+      <div class="promo-banner-card promo-2">
+        <div class="promo-info">
+          <h5>Flat 20% Discount</h5>
+          <h3>Save Big on<br>Academic Hub</h3>
+          <button class="btn-premium btn-solid-cyan" style="padding:10px 24px; font-size:12px;" onclick="navigateSPA('marketplace')">Shop Now ↗</button>
+        </div>
+        <div class="promo-visual-icon">🎓</div>
+      </div>
+    </section>
+
+    <section class="container section-padding">
+      <div class="about-mozaic-layout">
+        <div class="mozaic-graphics-grid">
+          <div class="mozaic-img-box tall">🏢</div>
+          <div class="mozaic-img-box">📈</div>
+          <div class="mozaic-img-box">🤝</div>
+          <div class="floating-stamp-badge">🏅</div>
+        </div>
         <div>
-          <span class="badge-premium">Penerbitan Buku Mandiri Premium</span>
-          <h1 class="title-serif">Abadikan Gagasan Anda Menjadi <em>Karya Literasi</em> Bermutu</h1>
-          <p class="text-subtitle" style="margin-bottom: 36px;">Nara Pustaka memfasilitasi transformasi ide cerdas Anda melalui ekosistem penyuntingan, standardisasi Perpusnas, hingga distribusi komersial nasional secara modern.</p>
-          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-            <button class="btn-premium btn-solid" onclick="navigateSPA('naskah')">Terbitkan Buku Anda ↗</button>
-            <button class="btn-premium btn-outline" onclick="navigateSPA('marketplace')">Jelajahi Katalog Toko</button>
+          <span class="badge-ui">About Us</span>
+          <h2 class="title-serif">Your Journey to <em>Effortless Elegance</em> & Authorial Success</h2>
+          <p style="color:var(--text-muted); margin-top:16px;">Kami bukan sekadar penerbit, melainkan inkubator ekosistem perbukuan komprehensif. Menjamin transparansi royalti penulis, akurasi pendaftaran legalitas dokumen ISBN, serta kemudahan sistem logistik pergudangan terpadu.</p>
+          <div class="stats-strip-row">
+            <div class="stat-node"><h3>24+</h3><div class="lbl">Categories</div></div>
+            <div class="stat-node"><h3>2500+</h3><div class="lbl">Products</div></div>
+            <div class="stat-node"><h3>99%</h3><div class="lbl">Satisfied Customer</div></div>
           </div>
         </div>
-        <div class="hero-visual">
-          <div class="hero-frame">
-            <div class="hero-placeholder-art">
-              <h2 style="font-family: var(--font-serif); font-size: 24px; margin-bottom: 8px;">Nara Pustaka</h2>
-              <p style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.1em;">Premium Publishing House</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="stats-bar">
-        <div class="stat-item"><div class="stat-num">120+</div><div class="stat-lbl">Buku Terdaftar</div></div>
-        <div class="stat-item"><div class="stat-num">85+</div><div class="stat-lbl">Penulis Berbakat</div></div>
-        <div class="stat-item"><div class="stat-num">100%</div><div class="stat-lbl">Kurasi Profesional</div></div>
-        <div class="stat-item"><div class="stat-num">24 Jam</div><div class="stat-lbl">SLA Respon Naskah</div></div>
-      </div>
-    </section>
-
-    <!-- SECTION PROFILE TENTANG KAMI -->
-    <section class="container section-padding" style="border-top: 1px solid rgba(141,123,104,0.1); margin-top: 80px;">
-      <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-        <span class="badge-premium">Profil Perusahaan</span>
-        <h2 class="title-serif">Tentang <em>Nara Pustaka</em></h2>
-        <p style="font-size: 16px; color: var(--text-main); line-height: 1.8; text-align: justify; margin-bottom: 32px;">
-          Nara Pustaka merupakan penerbit buku independen yang bergerak di bidang penerbitan dan pengembangan karya literasi. Kami berkomitmen menyediakan wadah inklusif dan profesional bagi para akademisi, sastrawan, serta penulis pemula untuk mengesahkan dan mendistribusikan karya berstandar nasional maupun internasional.
-        </p>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px;">
-        <div style="background: var(--bg-white); padding: 32px; border-radius: var(--radius-md); border: 1px solid rgba(141,123,104,0.08);">
-          <h3 style="font-size: 18px; color: var(--accent-brown); margin-bottom: 12px;">🎯 Visi Kami</h3>
-          <p style="font-size: 14px; color: var(--text-muted);">Menjadi akselerator ekosistem perbukuan modern Indonesia yang melahirkan karya literasi transformatif, berkualitas tinggi, serta berdaya saing global.</p>
-        </div>
-        <div style="background: var(--bg-white); padding: 32px; border-radius: var(--radius-md); border: 1px solid rgba(141,123,104,0.08);">
-          <h3 style="font-size: 18px; color: var(--accent-brown); margin-bottom: 12px;">🛡️ Komitmen Literasi</h3>
-          <p style="font-size: 14px; color: var(--text-muted);">Menjamin orisinalitas karya, memberikan hak royalti transparan, serta mengawal penuh legalitas pendaftaran ISBN & QRCBN sesuai regulasi hukum.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION LAYANAN PENERBITAN -->
-    <section class="container section-padding" style="border-top: 1px solid rgba(141,123,104,0.1);">
-      <div class="section-header">
-        <span class="badge-premium">Layanan End-to-End</span>
-        <h2 class="title-serif">Solusi <em>Penerbitan Eksklusif</em></h2>
-      </div>
-      <div class="services-grid">
-        <div class="service-card">
-          <div class="service-icon">📄</div>
-          <h3>ISBN & QRCBN</h3>
-          <p>Pengurusan legalitas keaslian dokumen buku resmi langsung ke Perpusnas RI.</p>
-          <button class="btn-premium btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="triggerWhatsAppConsultation('Pendaftaran Legalitas ISBN')">Konsultasi</button>
-        </div>
-        <div class="service-card">
-          <div class="service-icon">✒️</div>
-          <h3>Editing & Layout</h3>
-          <p>Penyelarasan tata bahasa PUEBI komprehensif tanpa merusak substansi naskah.</p>
-          <button class="btn-premium btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="triggerWhatsAppConsultation('Layanan Tata Letak Layout')">Konsultasi</button>
-        </div>
-        <div class="service-card">
-          <div class="service-icon">🎨</div>
-          <h3>Desain Cover Premium</h3>
-          <p>Visualisasi sampul depan estetik modern yang disesuaikan tren demografi pasar pembaca.</p>
-          <button class="btn-premium btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="triggerWhatsAppConsultation('Layanan Desain Cover Sampul')">Konsultasi</button>
-        </div>
-        <div class="service-card">
-          <div class="service-icon">🖨️</div>
-          <h3>Cetak Cetakan Pertama</h3>
-          <p>Fasilitas cetak POD (Print on Demand) berkualitas kertas prima volume fleksibel.</p>
-          <button class="btn-premium btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="triggerWhatsAppConsultation('Fasilitas Cetak Buku')">Konsultasi</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION ALUR PENERBITAN TIMELINE -->
-    <section class="container section-padding" style="border-top: 1px solid rgba(141,123,104,0.1);">
-      <div style="text-align: center; margin-bottom: 48px;">
-        <span class="badge-premium">Alur Kerja</span>
-        <h2 class="title-serif">6 Langkah Alur <em>Menerbitkan Karya</em></h2>
-      </div>
-      <div class="timeline-row">
-        <div class="timeline-card"><div class="timeline-step">1</div><h4>Kirim Naskah</h4><p>Unggah draf via dashboard</p></div>
-        <div class="timeline-card"><div class="timeline-step">2</div><h4>Review Editor</h4><p>Kelayakan subtansi & tema</p></div>
-        <div class="timeline-card"><div class="timeline-step">3</div><h4>Editing</h4><p>Pembenahan tata ejaan bahasa</p></div>
-        <div class="timeline-card"><div class="timeline-step">4</div><h4>Desain Visual</h4><p>Pembuatan layout & cover</p></div>
-        <div class="timeline-card"><div class="timeline-step">5</div><h4>ISBN & Legalitas</h4><p>Sertifikasi dokumen resmi</p></div>
-        <div class="timeline-card"><div class="timeline-step">6</div><h4>Publikasi</h4><p>Distribusi siap cetak komersial</p></div>
       </div>
     </section>
   </main>
 
-  <!-- ============ SYSTEM B: MARKETPLACE BUKU MODERN ============ -->
   <div id="view-marketplace" class="app-section">
-    <div class="container">
-      <div class="search-container">
-        <span class="search-icon-inside">🔍</span>
-        <input type="text" class="search-input" id="marketSearchInput" placeholder="Cari judul buku estetik, kompilasi puisi, atau nama penulis..." oninput="handleMarketSearchFilter()">
+    <div class="container section-padding" style="padding-top:40px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:16px;">
+        <h2 class="title-serif" style="font-size:28px;">Etalase <em>Koleksi Karya</em> Premium</h2>
+        <input type="text" id="marketSearchInput" placeholder="🔍 Cari judul buku atau penulis..." oninput="executeMarketplaceCatalogDOMRenderingPipeline()" style="padding:12px 20px; border:1px solid rgba(86,182,198,0.3); border-radius:var(--radius-circle); width:320px; font-family:var(--font-sans); outline:none;">
       </div>
-      <div class="marketplace-layout">
-        <aside class="filter-sidebar">
-          <h3 class="filter-title">Kategori Buku</h3>
-          <ul class="category-list">
-            <li class="category-item active" id="cat-all"><button onclick="filterMarketByCategory('all')">Semua Koleksi</button></li>
-            <li class="category-item" id="cat-novel"><button onclick="filterMarketByCategory('Novel')">Novel / Fiksi</button></li>
-            <li class="category-item" id="cat-puisi"><button onclick="filterMarketByCategory('Puisi')">Kumpulan Puisi</button></li>
-            <li class="category-item" id="cat-self"><button onclick="filterMarketByCategory('Self Improvement')">Self Improvement</button></li>
-            <li class="category-item" id="cat-bisnis"><button onclick="filterMarketByCategory('Bisnis')">Bisnis & Finansial</button></li>
-            <li class="category-item" id="cat-pendidikan"><button onclick="filterMarketByCategory('Pendidikan')">Pendidikan</button></li>
-          </ul>
-        </aside>
-        <section>
-          <div class="books-market-grid" id="marketBooksContainerGrid">
-            <!-- Data Buku Ter-render Melalui JavaScript Engine -->
+      <div class="catalog-grid-layout" id="marketBooksContainerGrid"></div>
+    </div>
+  </div>
+
+  <div id="view-naskah" class="app-section">
+    <div class="container manuscript-split-panel">
+      <div>
+        <span class="badge-ui">Call For Manuscript</span>
+        <h2 class="title-serif">Salurkan Karya Terbaik Anda Ke <em>Meja Editorial</em></h2>
+        <p style="color:var(--text-muted); margin-top:16px;">Setiap usulan proposal naskah akan diproses kurasi oleh Dewan Redaksi dalam waktu maksimal 24 jam kerja.</p>
+      </div>
+      <div class="premium-card-form">
+        <form id="premiumSubmissionFormPayload" onsubmit="handleFormSubmissionPipeline(event)">
+          <div class="form-group-premium"><label>Nama Penulis</label><input type="text" id="sub_author_name" required></div>
+          <div class="form-group-premium"><label>Surel Kontak / Email</label><input type="email" id="sub_author_email" required></div>
+          <div class="form-group-premium"><label>Nomor WhatsApp Kontak Aktif</label><input type="tel" id="sub_author_phone" required></div>
+          <div class="form-group-premium"><label>Judul Definitif Manuskrip</label><input type="text" id="sub_book_title" required></div>
+          <div class="form-group-premium">
+            <label>Kategori Genre</label>
+            <select id="sub_book_category" required>
+              <option value="Novel">Novel / Fiksi</option>
+              <option value="Puisi">Sastra Puisi</option>
+              <option value="Self Improvement">Self Improvement</option>
+              <option value="Bisnis">Bisnis</option>
+              <option value="Pendidikan">Pendidikan</option>
+            </select>
           </div>
-        </section>
+          <div class="form-group-premium"><label>Sinopsis / Deskripsi Konseptual</label><textarea id="sub_book_description" required style="min-height:100px;"></textarea></div>
+          <div class="form-group-premium">
+            <label>Unggah Berkas Dokumen Kontrak</label>
+            <div class="dashed-dropzone-box" onclick="document.getElementById('hiddenFormFileInputElement').click()">
+              <span id="attachedFileNameTracker">📁 Pilih draf naskah (.pdf/.docx)</span>
+              <input type="file" id="hiddenFormFileInputElement" accept=".pdf,.docx" style="display:none;" onchange="document.getElementById('attachedFileNameTracker').textContent = '📄 ' + this.files[0].name">
+            </div>
+          </div>
+          <button type="submit" class="btn-premium btn-solid-cyan" style="width:100%; border-radius:var(--radius-sm); margin-top:10px;">Kirim Berkas Proposal Kontrak</button>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- ============ SYSTEM C: FORM PENGAJUAN NASKAH LENGKAP ============ -->
-  <div id="view-naskah" class="app-section">
-    <div class="container section-padding" style="padding-top: 40px;">
-      <div class="submission-split">
-        <div>
-          <span class="badge-premium">Call For Manuscript</span>
-          <h2 class="title-serif">Salurkan Karya Terbaik Anda Ke <em>Meja Editorial</em></h2>
-          <p class="text-subtitle" style="margin-bottom: 24px;">Kami menyaring naskah bermutu tinggi untuk diproses secara legal dan komersial. Data submission terproteksi terenkripsi lokal dan otomatis tersinkronisasi ke pusat data komputasi awan server.</p>
-          <div style="background:var(--bg-white); padding:24px; border-radius:var(--radius-md); border:1px solid rgba(141,123,104,0.08);">
-            <h4 style="font-size:14px; margin-bottom:8px; color:var(--accent-brown);">⚠️ Syarat Kelayakan Dokumen:</h4>
-            <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">Format .pdf atau .docx, melampirkan bab sampel minimal 3 bab pertama, beserta berkas dokumen sinopsis cerita utuh.</p>
-          </div>
+  <div id="view-auth" class="app-section">
+    <div class="auth-center-shell">
+      <div class="auth-frame-card">
+        <div class="auth-tab-bar">
+          <div class="auth-tab-btn active" id="tabModeIn" onclick="switchAuthFormMode('in')">Masuk</div>
+          <div class="auth-tab-btn" id="tabModeUp" onclick="switchAuthFormMode('up')">Daftar</div>
         </div>
-        <div class="form-box-premium">
-          <form id="premiumSubmissionFormPayload" onsubmit="handleFormSubmissionPipeline(event)">
-            <div class="field-grid-2">
-              <div class="fg-premium">
-                <label>Nama Lengkap Koresponden</label>
-                <input type="text" id="sub_author_name" placeholder="Pramoedya Ananta" required>
-              </div>
-              <div class="fg-premium">
-                <label>Alamat Surel / Email</label>
-                <input type="email" id="sub_author_email" placeholder="pram@nara.com" required>
-              </div>
+        <div id="panelAuthIn">
+          <form onsubmit="executeLoginSequence(event)" style="display:flex; flex-direction:column; gap:16px;">
+            <div class="form-group-premium" style="margin-bottom:0;"><label>Username</label><input type="text" id="authInUser" required></div>
+            <div class="form-group-premium" style="margin-bottom:0;"><label>Password</label><input type="password" id="authInPass" required></div>
+            <button type="submit" class="btn-premium btn-solid-cyan" style="border-radius:var(--radius-sm);">Masuk Sesi</button>
+          </form>
+          <p style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:16px;">Dashboard Admin Credential:<br>User: <strong>narapustaka</strong> | Pass: <strong>admin</strong></p>
+        </div>
+        <div id="panelAuthUp" style="display:none;">
+          <form onsubmit="executeRegisterSequence(event)" style="display:flex; flex-direction:column; gap:16px;">
+            <div class="form-group-premium" style="margin-bottom:0;"><label>Nama Lengkap</label><input type="text" required></div>
+            <div class="form-group-premium" style="margin-bottom:0;"><label>Username Baru</label><input type="text" id="authUpUser" required></div>
+            <div class="form-group-premium" style="margin-bottom:0;"><label>Password Baru</label><input type="password" required></div>
+            <button type="submit" class="btn-premium btn-solid-cyan" style="border-radius:var(--radius-sm); background:var(--primary-dark);">Daftar Akun</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-checkout" class="app-section">
+    <div class="container checkout-workspace-grid">
+      <div>
+        <div class="premium-live-invoice-box" id="liveInvoiceRenderBoxBlock">
+          <div class="invoice-corporate-header">
+            <div>
+              <h3 style="font-family:var(--font-serif); font-size:22px; color:var(--primary-dark);">PT Nara Pustaka</h3>
+              <p style="font-size:11px; color:var(--text-muted);">Gedung Literasi Terpadu, Jakarta, Indonesia</p>
             </div>
-            <div class="field-grid-2">
-              <div class="fg-premium">
-                <label>Nomor WhatsApp Kontak</label>
-                <input type="tel" id="sub_author_phone" placeholder="081234567890" required>
-              </div>
-              <div class="fg-premium">
-                <label>Judul Definitif Naskah</label>
-                <input type="text" id="sub_book_title" placeholder="Bumi Manusia Modern" required>
-              </div>
+            <div style="text-align:right;">
+              <h3 style="font-size:20px; font-weight:700;">INVOICE</h3>
+              <p style="font-size:12px; font-weight:700;" id="invNumberPlaceholderPayload">#INV-2026-0000</p>
+              <p style="font-size:11px; color:var(--text-muted);" id="invDatePlaceholderPayload">18/05/2026</p>
             </div>
-            <div class="fg-premium">
-              <label>Kategori Segmentasi Karya</label>
-              <select id="sub_book_category" required>
-                <option value="Novel">Novel / Prosa Fiksi</option>
-                <option value="Puisi">Antologi Puisi / Lirik</option>
-                <option value="Self Improvement">Self Improvement</option>
-                <option value="Bisnis">Bisnis & Manajemen</option>
-                <option value="Pendidikan">Buku Pengajaran / Pendidikan</option>
+          </div>
+          <div style="font-size:13px; margin-bottom:20px;">
+            <span style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--text-muted); display:block;">Ditujukan Kepada:</span>
+            <strong id="invoiceCustomerIdentityNameTracker" style="font-size:14px;">Sesi Pengunjung Umum</strong>
+          </div>
+
+          <table class="invoice-bill-table">
+            <thead>
+              <tr><th>Item Karya Buku</th><th style="text-align:right;">Harga</th></tr>
+            </thead>
+            <tbody id="invoiceRenderingItemsTargetBody"></tbody>
+          </table>
+
+          <div style="background:#F6FAFA; padding:16px; border-radius:var(--radius-sm); margin:20px 0; border:1px solid rgba(86,182,198,0.2);">
+            <h4 style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--primary-dark); margin-bottom:8px;">🚚 Layanan Logistik Biteship (Live)</h4>
+            <div class="form-group-premium" style="margin-bottom:10px;">
+              <label style="font-size:11px;">Pilih Kecamatan Tujuan Pengiriman</label>
+              <select id="checkoutBiteshipAreaSelector" onchange="recalculateBiteshipLiveOngkirPipeline()">
+                <option value="10000">Kec. Gambir, Jakarta Pusat (Reguler - Rp10.000)</option>
+                <option value="15000">Kec. Tambun Selatan, Bekasi (Reguler - Rp15.000)</option>
+                <option value="25000">Kec. Klojen, Malang (Reguler - Rp25.000)</option>
+                <option value="35000">Kec. Kuta, Badung Bali (Reguler - Rp35.000)</option>
               </select>
             </div>
-            <div class="fg-premium">
-              <label>Deskripsi Pendek / Premis Konseptual (Maks 200 Kata)</label>
-              <textarea id="sub_book_description" placeholder="Gambarkan struktur konflik primer tokoh utama atau intisari kebaruan teori akademik Anda..." required></textarea>
-            </div>
-            <div class="fg-premium">
-              <label>Unggah Berkas Komponen File Naskah</label>
-              <div class="upload-dashed-container" onclick="triggerLocalFileAttachmentSelection()">
-                <span class="upload-icon-frame">📂</span>
-                <p class="upload-main-text" id="attachedFileNameTracker">Pilih berkas draf naskah utama</p>
-                <p class="upload-sub-text">Mendukung format file dokumen .pdf / .docx (Maks. 15 MB)</p>
-                <input type="file" id="hiddenFormFileInputElement" accept=".pdf,.docx" style="display:none;" onchange="handleFileSelectionStateChange(this)">
-              </div>
-            </div>
-            <button type="submit" class="btn-premium btn-solid" style="width:100%; margin-top:12px;">Kirim Proposal Dokumen Kontrak</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+          </div>
 
-  <!-- ============ LOGIN & REGISTER SYSTEM (GATE) ============ -->
-  <div id="view-auth" class="app-section">
-    <div class="gate-container">
-      <div class="gate-card">
-        <div style="text-align: center; margin-bottom: 24px;">
-          <img src="assets/logo.png" alt="Nara Pustaka" class="logo-img" style="height:48px; margin-bottom:12px;" onerror="this.style.display='none';">
-          <h3 style="font-family: var(--font-serif); font-size: 22px; color: var(--accent-brown);">Akses Akun Terpadu</h3>
-        </div>
-        <div class="gate-tab-switcher">
-          <div class="gate-tab active" id="tabModeIn" onclick="switchAuthFormMode('in')">Masuk</div>
-          <div class="gate-tab" id="tabModeUp" onclick="switchAuthFormMode('up')">Daftar Akun</div>
-        </div>
-
-        <div class="gate-panel active" id="panelAuthIn">
-          <form onsubmit="executeLoginSequence(event)" style="display:flex; flex-direction:column; gap:16px;">
-            <div class="fg-premium" style="margin-bottom:0;">
-              <label>Surel atau Username Akun</label>
-              <input type="text" id="authInUser" placeholder="Masukkan nama user..." required>
-            </div>
-            <div class="fg-premium" style="margin-bottom:0;">
-              <label>Kata Sandi Keamanan</label>
-              <input type="password" id="authInPass" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-premium btn-solid" style="width:100%; margin-top:8px;">Autentikasi Sesi</button>
-          </form>
-          <div style="margin-top:20px; padding:12px; background:var(--bg-cream); border-radius:var(--radius-sm); font-size:11px; text-align:center; color:var(--text-muted); line-height:1.4;">
-            🛡️ Akun Akses Konsol Dashboard Admin:<br>User: <span style="color:var(--accent-brown); font-weight:600;">narapustaka</span> | Pass: <span style="color:var(--accent-brown); font-weight:600;">admin</span>
+          <div class="invoice-total-stack">
+            <div class="invoice-total-row"><span>Subtotal Produk:</span><span id="invSummarySubtotal">Rp 0</span></div>
+            <div class="invoice-total-row"><span>Ongkos Kirim (Biteship Live):</span><span id="invSummaryOngkir">Rp 10.000</span></div>
+            <div class="invoice-total-row"><span>PPN Terhitung (11%):</span><span id="invSummaryTax">Rp 0</span></div>
+            <div class="invoice-total-row grand"><span>Total Pembayaran Akhir:</span><span id="invoiceComputedGrandTotalPlaceholder">Rp 0</span></div>
           </div>
         </div>
-
-        <div class="gate-panel" id="panelAuthUp">
-          <form onsubmit="executeRegisterSequence(event)" style="display:flex; flex-direction:column; gap:16px;">
-            <div class="fg-premium" style="margin-bottom:0;">
-              <label>Nama Lengkap Identitas</label>
-              <input type="text" id="authUpName" placeholder="Sapardi Budoyo" required>
-            </div>
-            <div class="fg-premium" style="margin-bottom:0;">
-              <label>Pilih Kode Username</label>
-              <input type="text" id="authUpUser" placeholder="sapardi_karya" required>
-            </div>
-            <div class="fg-premium" style="margin-bottom:0;">
-              <label>Sandi Sesi Baru</label>
-              <input type="password" id="authUpPass" placeholder="Minimal 6 karakter kombinasi" required>
-            </div>
-            <button type="submit" class="btn-premium btn-solid" style="width:100%; margin-top:8px; background:var(--accent-tan);">Daftar Akun Pengguna</button>
-          </form>
-        </div>
-
-        <div class="oauth-divider">Atau akses via ID eksternal</div>
-        <div class="oauth-button-stack">
-          <button class="oauth-btn" onclick="executeOAuthMock('Google Inc')">🌐 Hubungkan Sesi Google</button>
-          <button class="oauth-btn" onclick="executeOAuthMock('Apple iCloud Secure')">🍏 Otentikasi Apple ID</button>
-        </div>
+      </div>
+      <div style="background:var(--bg-white); border-radius:var(--radius-sm); border:1px solid rgba(86,182,198,0.15); padding:24px; height:fit-content;">
+        <h3 style="font-size:16px; margin-bottom:8px; color:var(--primary-dark);">Amankan Transaksi</h3>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Sistem otomatis mengunci draf tagihan untuk divalidasi oleh administrator.</p>
+        <button class="btn-premium btn-solid-cyan" style="width:100%; border-radius:var(--radius-sm);" onclick="executeCheckoutPipelineSubmission()">Kunci & Terbitkan Invoice</button>
       </div>
     </div>
   </div>
 
-  <!-- ============ CHECKOUT & PREMIUM INVOICE PREVIEW SYSTEM ============ -->
-  <div id="view-checkout" class="app-section">
-    <div class="container section-padding" style="padding-top: 40px;">
-      <h2 class="title-serif" style="margin-bottom:24px;">Sistem <em>Penyelesaian Transaksi</em></h2>
-      <div class="checkout-split">
-        <div>
-          <div class="invoice-box-visual" id="liveInvoiceRenderBoxBlock">
-            <div class="inv-header-meta">
-              <div>
-                <img src="assets/logo.png" alt="Nara" class="logo-img" style="height:36px; margin-bottom:8px;" onerror="this.style.display='none';">
-                <p style="font-size:12px; color:var(--text-muted);">PT Nara Pustaka Literasi Terpadu</p>
-              </div>
-              <div style="text-align:right;">
-                <div class="inv-title">INVOICE PREVIEW</div>
-                <p style="font-size:11px; color:var(--text-muted); margin-top:4px;" id="invNumberPlaceholderPayload">#INV-2026-0000</p>
-              </div>
-            </div>
-            <div style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
-              <strong>Tujuan Pengiriman Tagihan:</strong><br>
-              <span id="invoiceCustomerIdentityNameTracker" style="color:var(--text-main); font-weight:600;">Sesi Pengunjung Umum</span>
-            </div>
-            <table class="inv-table">
-              <thead>
-                <tr><th>Item Deskripsi Komoditas Karya</th><th style="text-align:right;">Total Nominal</th></tr>
-              </thead>
-              <tbody id="invoiceRenderingItemsTargetBody">
-                <tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Keranjang belanja kosong. Silakan tambahkan buku dari katalog toko.</td></tr>
-              </tbody>
-            </table>
-            <div class="inv-total-row">
-              <span>Grand Total Akumulasi:</span>
-              <span id="invoiceComputedGrandTotalPlaceholder">Rp 0</span>
-            </div>
-          </div>
-        </div>
-        <div style="background:var(--bg-white); padding:32px; border-radius:var(--radius-md); border:1px solid rgba(141,123,104,0.08); height:fit-content;">
-          <h3 style="font-size:16px; margin-bottom:12px; color:var(--accent-brown);">Konfirmasi Transaksi Keluar</h3>
-          <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px; line-height:1.5;">Metode pembayaran otomatis dialihkan menggunakan saluran instruksi WhatsApp Gateway ke Admin Finansial.</p>
-          <button class="btn-premium btn-solid" style="width:100%;" onclick="executeCheckoutPipelineSubmission()">Segera Dibuka</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ SYSTEM D: PREMIUM DASHBOARD ADMIN KONSOL CONSOLE ============ -->
   <div id="view-admin" class="app-section">
-    <div class="dashboard-wrapper">
-      <aside class="dash-sidebar">
-        <div style="padding:0 16px 20px; border-bottom:1px solid rgba(250,248,245,0.1); margin-bottom:16px;">
-          <img src="assets/logo.png" alt="Admin Control" class="logo-img" style="filter: brightness(0) invert(1); height:28px;" onerror="this.style.display='none';">
-          <p style="font-size:11px; color:rgba(250,248,245,0.5); font-weight:600; text-transform:uppercase; margin-top:6px;">Konsol Utama Redaksi</p>
+    <div class="admin-console-layout">
+      <aside class="admin-sidebar-nav">
+        <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:16px; margin-bottom:16px; text-align:center;">
+          <h3 style="font-family:var(--font-serif); color:var(--primary-bright);">Console Center</h3>
         </div>
-        <div class="dash-menu-item active" onclick="switchDashboardViewSubMenu('naskah')">📬 Manajemen Proposal Naskah</div>
-        <div class="dash-menu-item" style="margin-top:auto; opacity:0.7;" onclick="terminateUserSessionSequence()">🚪 Keluar Sistem Console</div>
+        <div class="admin-menu-node active" id="dashMenu-naskah" onclick="switchDashboardActiveTab('naskah')">📬 Proposal Manuskrip</div>
+        <div class="admin-menu-node" id="dashMenu-invoices" onclick="switchDashboardActiveTab('invoices')">🧾 Arsip Invoice Toko</div>
+        <div class="admin-menu-node" style="margin-top:auto;" onclick="terminateUserSessionSequence()">🚪 Keluar Sesi</div>
       </aside>
-      <main class="dash-main-area">
-        <div style="display:flex; justify-content:between; align-items:center; margin-bottom:32px;">
-          <h2 class="title-serif" style="font-size:24px; margin-bottom:0;">Ringkasan Data Arus Operasional</h2>
-          <span style="font-size:12px; font-weight:600; color:var(--accent-tan); background:var(--bg-white); padding:6px 14px; border-radius:var(--radius-circle);">Status Server: Sinkron Cloud Terkoneksi</span>
+      <main class="admin-workspace-core">
+        <h2 class="title-serif" style="font-size:24px; margin-bottom:24px;">Arus Data Operasional Real-time</h2>
+        <div class="admin-widgets-grid">
+          <div class="widget-node"><div class="lbl-title">Usulan Masuk</div><div class="num-val" id="adminWidgetTotalSubCount">0</div></div>
+          <div class="widget-node"><div class="lbl-title">Katalog Aktif</div><div class="num-val">5</div></div>
+          <div class="widget-node"><div class="lbl-title">Invoice Toko</div><div class="num-val" id="adminWidgetInvoiceCount">0</div></div>
+          <div class="widget-node"><div class="lbl-title">Biteship Status</div><div class="num-val" style="color:var(--primary-bright); font-size:18px;">LIVE MODE</div></div>
         </div>
-        <div class="dash-summary-row">
-          <div class="summary-widget"><div class="lbl">Total Usulan Masuk</div><div class="num" id="adminWidgetTotalSubCount">2</div></div>
-          <div class="summary-widget"><div class="lbl">Perlu Review Editor</div><div class="num" style="color:#E65100;">1</div></div>
-          <div class="summary-widget"><div class="lbl">Katalog Buku Aktif</div><div class="num">5</div></div>
-          <div class="summary-widget"><div class="lbl">Transaksi Berjalan</div><div class="num">0</div></div>
-        </div>
-        <div class="dash-data-card">
-          <h3 style="font-size:16px; margin-bottom:16px; color:var(--accent-brown);">Daftar Dokumen Proposal Masuk Penulis</h3>
+
+        <div id="dashTabContent-naskah" class="admin-data-table-card">
+          <h3 style="font-size:15px; margin-bottom:16px; color:var(--primary-dark);">Daftar Proposal Masuk Penulis</h3>
           <div style="overflow-x:auto;">
-            <table class="dash-table">
-              <thead>
-                <tr><th>Judul Karya Naskah</th><th>Nama Penulis</th><th>Kategori</th><th>Status Validasi</th><th>Aksi Kontrol</th></tr>
-              </thead>
-              <tbody id="adminSubmissionsTableDynamicInjectTarget">
-                <!-- Data Disuntikkan Secara Dinamis Melalui Engine Pemrosesan State JavaScript -->
-              </tbody>
+            <table class="admin-core-table">
+              <thead><tr><th>Judul Karya Manuskrip</th><th>Penulis</th><th>Kategori</th><th>Aksi Kontrol</th></tr></thead>
+              <tbody id="adminSubmissionsTableDynamicInjectTarget"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="dashTabContent-invoices" class="admin-data-table-card" style="display:none;">
+          <h3 style="font-size:15px; margin-bottom:16px; color:var(--primary-dark);">Log Nota Transaksi Keluar</h3>
+          <div style="overflow-x:auto;">
+            <table class="admin-core-table">
+              <thead><tr><th>No. Invoice</th><th>Pelanggan</th><th>Tanggal</th><th>Total Tagihan</th><th>Opsi</th></tr></thead>
+              <tbody id="adminInvoicesTableDynamicInjectTarget"></tbody>
             </table>
           </div>
         </div>
@@ -609,440 +519,410 @@ footer.premium-footer { background: var(--accent-brown); color: rgba(250,248,245
     </div>
   </div>
 
-  <!-- ============ FLOATING WHATSAPP BUTTON WIDGET ============ -->
-  <a href="#" class="floating-wa-widget" id="globalFloatingWhatsAppWidgetAction" onclick="triggerWhatsAppConsultation('Umum CS')">💬</a>
-
-  <!-- ============ CORE FOOTER STRUCTURE ============ -->
-  <footer class="premium-footer">
-    <div class="container footer-grid">
-      <div class="footer-column">
-        <img src="assets/logo.png" alt="Nara Logo" class="logo-img" style="filter: brightness(0) invert(1); margin-bottom:16px;" onerror="this.style.display='none';">
-        <h3 style="margin-top:0; font-family:var(--font-serif); font-size:20px; color:var(--bg-white);" onerror="this.style.display='block';">Nara Pustaka</h3>
-        <p style="font-size:13px; line-height:1.6; max-width:260px;">Membangun ekosistem perbukuan dan penerbitan mandiri premium berskala nasional terpadu secara inklusif.</p>
-      </div>
-      <div class="footer-column">
-        <h3>Menu Cepat</h3>
-        <ul class="footer-links">
-          <li><a href="#" onclick="navigateSPA('penerbit')">Profil Penerbitan</a></li>
-          <li><a href="#" onclick="navigateSPA('marketplace')">Etalase Buku Pilihan</a></li>
-          <li><a href="#" onclick="navigateSPA('naskah')">Kanal Pengajuan Mandiri</a></li>
-        </ul>
-      </div>
-      <div class="footer-column">
-        <h3>Kontak Korespondensi</h3>
-        <ul class="footer-links" style="font-size:13px; color:rgba(250,248,245,0.6);">
-          <li>📍 Gedung Literasi Terpadu, Lt. 3, Jakarta, Indonesia</li>
-          <li>✉️ redaksi@narapustaka.com</li>
-          <li>📞 +62 812-3456-7890 (WhatsApp Portal)</li>
-        </ul>
-      </div>
-      <div class="footer-column">
-        <h3>Saluran Media Sosial</h3>
-        <ul class="footer-links">
-          <li><a href="#">Instagram / @NaraPustaka</a></li>
-          <li><a href="#">LinkedIn / PT Nara Pustaka</a></li>
-        </ul>
+  <div class="premium-modal-overlay" id="globalPremiumSystemModalConfirmationOverlay">
+    <div class="premium-modal-box">
+      <div class="modal-icon-warning">⚠️</div>
+      <h3 style="font-size:18px; color:var(--text-main); margin-bottom:8px;">Hapus Data Permanen?</h3>
+      <p style="font-size:13px; color:var(--text-muted);">Tindakan ini bersifat destruktif dan akan melenyapkan records permanen dari database lokal.</p>
+      <div class="modal-btn-row">
+        <button class="modal-btn cancel" onclick="closePremiumSystemModalConfirmationPipeline()">Batalkan</button>
+        <button class="modal-btn confirm" id="modalSystemConfirmActionPayloadButton">Ya, Hapus Data</button>
       </div>
     </div>
-    <div class="container footer-bottom">
-      <p>&copy; 2026 Nara Pustaka. Hak Cipta Dilindungi Regulasi Perundang-Undangan Perpusnas RI.</p>
-      <p style="opacity:0.5;">Premium Startup Publishing Frame Showcase</p>
+  </div>
+
+  <div class="system-toast-alert" id="globalPremiumSystemToastComponent">Pesan Sistem Terintegrasi</div>
+
+  <div id="hiddenPdfRenderStagingArea" style="position: absolute; top: -9999px; left: -9999px; width: 750px; background: #ffffff;"></div>
+
+  <footer class="premium-footer">
+    <div class="container footer-grid-layout">
+      <div class="footer-node">
+        <h3 style="font-family:var(--font-serif); color:white; margin-bottom:12px;">Nara Pustaka</h3>
+        <p style="font-size:13px;">Your Premium Modern Literary Sanctuary. Hak cipta dilindungi undang-undang.</p>
+      </div>
+      <div class="footer-node">
+        <h4>Menu Utama</h4>
+        <ul class="footer-links-list">
+          <li><a href="#" onclick="navigateSPA('penerbit')">Beranda Utama</a></li>
+          <li><a href="#" onclick="navigateSPA('marketplace')">Katalog Toko</a></li>
+        </ul>
+      </div>
+      <div class="footer-node">
+        <h4>Kontak Resmi</h4>
+        <ul class="footer-links-list" style="font-size:13px;">
+          <li>📍 Gedung Literasi Terpadu, Jakarta</li>
+          <li>✉️ redaksi@narapustaka.com</li>
+        </ul>
+      </div>
+      <div class="footer-node">
+        <h4>E-Commerce Credit</h4>
+        <p style="font-size:12px;">Desain UI E-Commerce Premium Terintegrasi Ongkir Biteship API Live Mode.</p>
+      </div>
     </div>
   </footer>
 
-  <!-- ============ PREMIUM TOAST COMPONENT ELEMENT ============ -->
-  <div class="premium-toast" id="globalPremiumSystemToastComponent">Pesan Sistem Terintegrasi</div>
-
-  <!-- ============ JAVASCRIPT SYSTEM ENGINE & APPLICATION LOGIC ============ -->
   <script>
-    // Data Katalog Statis Primer Buku dengan Label Coming Soon Estetik
     const MARKET_CATALOG_DATA_POOL = [
-      { id: 101, title: "Langkah Menuju Sunyi", author: "Ayu Utami", category: "Novel", price: 89000, coverGradient: "linear-gradient(135deg, #4E3629, #8D7B68)" },
-      { id: 102, title: "Algoritma Jaringan Semesta Jamak", author: "Prof. Suhadi Wiratama", category: "Pendidikan", price: 135000, coverGradient: "linear-gradient(135deg, #2D4030, #56735A)" },
-      { id: 103, title: "Kompilasi Rembulan Di Atas Atap Rumah", author: "Seno Gumira", category: "Puisi", price: 65000, coverGradient: "linear-gradient(135deg, #5A3E56, #8F688B)" },
-      { id: 104, title: "Kedaulatan Finansial Startup Indonesia", author: "Hendra K., MBA", category: "Bisnis", price: 119000, coverGradient: "linear-gradient(135deg, #2D3E50, #536A80)" },
-      { id: 105, title: "Evolusi Paradigma Mentalitas Sukses", author: "Nadiem S. Budoyo", category: "Self Improvement", price: 95000, coverGradient: "linear-gradient(135deg, #614B3E, #9C8271)" }
+      { id: 201, title: "Langkah Menuju Sunyi", author: "Ayu Utami", category: "Novel", price: 89000 },
+      { id: 202, title: "Algoritma Jaringan Semesta Jamak", author: "Prof. Suhadi Wiratama", category: "Pendidikan", price: 135000 },
+      { id: 203, title: "Rembulan Di Atas Atap Rumah", author: "Seno Gumira", category: "Puisi", price: 65000 },
+      { id: 204, title: "Kedaulatan Finansial Startup", author: "Hendra K., MBA", category: "Bisnis", price: 119000 },
+      { id: 205, title: "Evolusi Paradigma Mentalitas Sukses", author: "Nadiem S. Budoyo", category: "Self Improvement", price: 95000 }
     ];
 
-    // Endpoint URL Penyambung Google Apps Script Web App Backup Data Center
-    const WEB_APP_GOOGLE_SPREADSHEET_APPS_SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxIyg6j-EVoGrM5JyAYe2H9T3ztdKLXkeKj3OOAKvZoX3QTAYwqr3B3t-5HiRkWbbYSXA/exec";
-
-    // Application Global Reactive State Tracker
-    let applicationCurrentActiveViewName = "penerbit";
     let applicationUserAuthenticationStatus = false;
-    let applicationLoggedInUserProfileObject = null;
     let applicationUserCartItemsContainerArray = [];
-    let applicationCurrentMarketCategoryFilterSelectionState = "all";
+    let targetedItemIndexPositionToDeletePayloadGlobal = null;
+    let targetTypeContextToDeletePayloadGlobal = ''; 
 
-    // Data Awal Seed Simulasi Usulan Proposal Naskah Kontrak Penulis
-    const SYSTEM_INITIAL_MANUSCRIPT_MOCK_SEED_DATA = [
-      { id: 9001, name: "Sapardi Djoko", email: "sapardi@karya.id", phone: "0811990022", title: "Rhapsody Musim Gugur", category: "Puisi", desc: "Kumpulan bait sajak romansa naturalis kontemporer.", status: "Pending", timestamp: "12/03/2026" },
-      { id: 9002, name: "Raditya Dika", email: "radit@karya.id", phone: "0812883344", title: "Koala Kumal Generasi Z", category: "Novel", desc: "Eksplorasi komedi naratif kehidupan remaja kota satelit.", status: "Success", timestamp: "15/04/2026" }
-    ];
-
-    // 1. SPA Router Engine & Bottom Navigation State Synchronizer
-    function navigateSPA(targetViewBlockIdentifierName) {
-      if (targetViewBlockIdentifierName === 'naskah' && !applicationUserAuthenticationStatus) {
-        triggerPremiumToastNotification("🔒 Akses Sesi Terbatas! Harap daftarkan identitas atau masuk akun terlebih dahulu.");
+    // SPA Router
+    function navigateSPA(viewName) {
+      if (viewName === 'naskah' && !applicationUserAuthenticationStatus) {
+        triggerPremiumToastNotification("🔒 Sesi terbatas! Silakan masuk akun terlebih dahulu.");
         navigateSPA('auth');
         return;
       }
+      document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${viewName}`)?.classList.add('active');
 
-      applicationCurrentActiveViewName = targetViewBlockIdentifierName;
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.getElementById(`lnk-${viewName}`)?.classList.add('active');
+
+      document.querySelectorAll('.mobile-nav-item').forEach(m => m.classList.remove('active'));
+      document.getElementById(`mbl-${viewName}`)?.classList.add('active');
       
-      // Sembunyikan seluruh modul container komponen layout halaman
-      document.querySelectorAll('.app-section').forEach(element => element.classList.remove('active'));
-      
-      // Aktifkan modul container komponen yang dituju
-      const targetDomNodePointer = document.getElementById(`view-${targetViewBlockIdentifierName}`);
-      if (targetDomNodePointer) targetDomNodePointer.classList.add('active');
-
-      // Sinkronisasi status tautan navigasi desktop navbar menu item
-      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-      const activeDesktopNavLinkPointer = document.getElementById(`lnk-${targetViewBlockIdentifierName}`);
-      if (activeDesktopNavLinkPointer) activeDesktopNavLinkPointer.classList.add('active');
-
-      // Sinkronisasi status tombol navigasi mobile bottom bar menu item
-      document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
-      const activeMobileNavItemPointer = document.getElementById(`mbl-${targetViewBlockIdentifierName}`);
-      if (activeMobileNavItemPointer) activeMobileNavItemPointer.classList.add('active');
-
-      // Gulirkan layar ke koordinat paling atas
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 2. Modul Kontrol Swafoto Tab Form Autentikasi Dual Mode
-    function switchAuthFormMode(selectedAuthModeTargetString) {
-      document.querySelectorAll('.gate-tab').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.gate-panel').forEach(panel => panel.classList.remove('active'));
-      
-      if (selectedAuthModeTargetString === 'in') {
-        document.getElementById('tabModeIn').classList.add('active');
-        document.getElementById('panelAuthIn').classList.add('active');
-      } else {
-        document.getElementById('tabModeUp').classList.add('active');
-        document.getElementById('panelAuthUp').classList.add('active');
-      }
+    function switchAuthFormMode(mode) {
+      document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tabMode${mode === 'in' ? 'In' : 'Up'}`).classList.add('active');
+      document.getElementById('panelAuthIn').style.display = mode === 'in' ? 'block' : 'none';
+      document.getElementById('panelAuthUp').style.display = mode === 'up' ? 'block' : 'none';
     }
 
-    // 3. Render Engine Buku Marketplace dengan Filtrasi String Karakter Kontrol
+    // Catalog Rendering Engine
     function executeMarketplaceCatalogDOMRenderingPipeline() {
-      const targetGridDOMPointer = document.getElementById('marketBooksContainerGrid');
-      if (!targetGridDOMPointer) return;
-      targetGridDOMPointer.innerHTML = '';
+      const targetGrid = document.getElementById('marketBooksContainerGrid');
+      if (!targetGrid) return;
+      targetGrid.innerHTML = '';
 
-      const searchKeywordQueryString = document.getElementById('marketSearchInput')?.value.trim().toLowerCase() || '';
+      const searchQuery = document.getElementById('marketSearchInput').value.toLowerCase();
 
-      const processingFilteredCatalogArray = MARKET_CATALOG_DATA_POOL.filter(bookItemNode => {
-        const flagMatchesCategory = applicationCurrentMarketCategoryFilterSelectionState === 'all' || bookItemNode.category === applicationCurrentMarketCategoryFilterSelectionState;
-        const flagMatchesSearchQuery = bookItemNode.title.toLowerCase().includes(searchKeywordQueryString) || bookItemNode.author.toLowerCase().includes(searchKeywordQueryString);
-        return flagMatchesCategory && flagMatchesSearchQuery;
-      });
-
-      if (processingFilteredCatalogArray.length === 0) {
-        targetGridDOMPointer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:80px 0; color:var(--text-muted); font-size:14px;">Maaf, item koleksi buku premium tidak ditemukan.</div>`;
-        return;
-      }
-
-      processingFilteredCatalogArray.forEach(bookRecord => {
-        const elementCardMarkupNode = document.createElement('div');
-        elementCardMarkupNode.className = "market-book-card";
-        elementCardMarkupNode.setAttribute('onclick', `handleIncorporateBookItemToCartPayload(${bookRecord.id})`);
-        elementCardMarkupNode.innerHTML = `
-          <div class="m-cover-area">
-            <span class="tag-coming-soon">Coming Soon</span>
-            <button class="m-wish-btn" onclick="event.stopPropagation(); triggerPremiumToastNotification('❤️ Berhasil ditambahkan ke daftar impian!')">🤍</button>
-            <div class="m-cover-art" style="background: ${bookRecord.coverGradient}">
-              <span>${bookRecord.title}</span>
+      MARKET_CATALOG_DATA_POOL.forEach(book => {
+        if(book.title.toLowerCase().includes(searchQuery) || book.author.toLowerCase().includes(searchQuery)) {
+          const card = document.createElement('div');
+          card.className = "premium-book-card";
+          card.setAttribute('onclick', `addBookToCartPipeline(${book.id})`);
+          card.innerHTML = `
+            <div class="book-cover-stage">
+              <span class="card-tag-status">Best Seller</span>
+              <button class="card-heart-btn" onclick="event.stopPropagation(); triggerPremiumToastNotification('❤️ Ditambahkan ke daftar keinginan!')">🤍</button>
+              <div class="book-spine-art"><span>${book.title}</span></div>
             </div>
-          </div>
-          <div class="m-info-area">
-            <span class="m-cat-lbl">${bookRecord.category}</span>
-            <h4 class="m-title">${bookRecord.title}</h4>
-            <p class="m-author">Oleh ${bookRecord.author}</p>
-            <div class="m-footer-row">
-              <span class="m-price">Rp ${bookRecord.price.toLocaleString('id-ID')}</span>
-              <button class="m-btn-action">Segera Hadir</button>
+            <div class="card-meta-category">${book.category}</div>
+            <h4 class="card-meta-title">${book.title}</h4>
+            <p class="card-meta-author">Oleh ${book.author}</p>
+            <div class="card-footer-row">
+              <span class="card-meta-price">Rp ${book.price.toLocaleString('id-ID')}</span>
+              <button class="card-action-trigger">+</button>
             </div>
-          </div>
-        `;
-        targetGridDOMPointer.appendChild(elementCardMarkupNode);
+          `;
+          targetGrid.appendChild(card);
+        }
       });
     }
 
-    function filterMarketByCategory(targetCategoryNameString) {
-      applicationCurrentMarketCategoryFilterSelectionState = targetCategoryNameString;
-      document.querySelectorAll('.category-list li').forEach(el => el.classList.remove('active'));
-      
-      const targetPillDomPointer = document.getElementById(`cat-${targetCategoryNameString === 'all' ? 'all' : targetCategoryNameString.toLowerCase().split(' ')[0]}`);
-      if (targetPillDomPointer) targetPillDomPointer.classList.add('active');
-      
+    function filterMarketByCategory(categoryName) {
+      navigateSPA('marketplace');
+      document.getElementById('marketSearchInput').value = categoryName;
       executeMarketplaceCatalogDOMRenderingPipeline();
     }
 
-    function handleMarketSearchFilter() {
-      executeMarketplaceCatalogDOMRenderingPipeline();
-    }
+    // Cart Management
+    function addBookToCartPipeline(bookId) {
+      const bookData = MARKET_CATALOG_DATA_POOL.find(b => b.id === bookId);
+      if (!bookData) return;
 
-    // 4. Manajemen State Mutasi Keranjang Belanja & Penghitungan Invoice Visual
-    function handleIncorporateBookItemToCartPayload(selectedBookIdNumber) {
-      const matchBookDataNode = MARKET_CATALOG_DATA_POOL.find(b => b.id === selectedBookIdNumber);
-      if (!matchBookDataNode) return;
-
-      applicationUserCartItemsContainerArray.push(matchBookDataNode);
-      
-      // Update global badges numeric indicators
+      applicationUserCartItemsContainerArray.push(bookData);
       document.getElementById('cartBadgeGlobal').textContent = applicationUserCartItemsContainerArray.length;
-      triggerPremiumToastNotification(`🛒 Ditambahkan ke draf checkout: ${matchBookDataNode.title}`);
-      
+      triggerPremiumToastNotification(`🛒 Dimasukkan ke keranjang: ${bookData.title}`);
       executeInvoiceCalculatedDOMRenderingPipeline();
     }
 
-    function executeInvoiceCalculatedDOMRenderingPipeline() {
-      const targetTableBodyPointer = document.getElementById('invoiceRenderingItemsTargetBody');
-      const targetTotalPlaceholderPointer = document.getElementById('invoiceComputedGrandTotalPlaceholder');
-      if (!targetTableBodyPointer) return;
+    function recalculateBiteshipLiveOngkirPipeline() {
+      executeInvoiceCalculatedDOMRenderingPipeline();
+      triggerPremiumToastNotification("🚚 Ongkir Biteship Live berhasil diperbarui.");
+    }
 
-      if (applicationUserCartItemsContainerArray.length === 0) {
-        targetTableBodyPointer.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted); padding:20px;">Keranjang belanja kosong. Silakan tambahkan buku dari katalog toko.</td></tr>`;
-        if (targetTotalPlaceholderPointer) targetTotalPlaceholderPointer.textContent = "Rp 0";
+    function executeInvoiceCalculatedDOMRenderingPipeline() {
+      const tbody = document.getElementById('invoiceRenderingItemsTargetBody');
+      if (!tbody) return;
+
+      if(applicationUserCartItemsContainerArray.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted); padding:20px;">Keranjang belanja Anda kosong.</td></tr>`;
+        document.getElementById('invSummarySubtotal').textContent = "Rp 0";
+        document.getElementById('invSummaryTax').textContent = "Rp 0";
+        document.getElementById('invoiceComputedGrandTotalPlaceholder').textContent = "Rp 0";
         return;
       }
 
-      targetTableBodyPointer.innerHTML = '';
-      let calculatedAccumulatedSumValue = 0;
-
-      applicationUserCartItemsContainerArray.forEach((cartItem, index) => {
-        calculatedAccumulatedSumValue += cartItem.price;
-        const rowMarkupElement = document.createElement('tr');
-        rowMarkupElement.innerHTML = `
-          <td><strong>${cartItem.title}</strong><br><span style="font-size:11px; color:var(--text-muted);">Kategori: ${cartItem.category}</span></td>
-          <td style="text-align:right; font-weight:600;">Rp ${cartItem.price.toLocaleString('id-ID')}</td>
-        `;
-        targetTableBodyPointer.appendChild(rowMarkupElement);
+      tbody.innerHTML = '';
+      let subtotal = 0;
+      applicationUserCartItemsContainerArray.forEach(item => {
+        subtotal += item.price;
+        const row = document.createElement('tr');
+        row.innerHTML = `<td><strong>${item.title}</strong></td><td style="text-align:right; font-weight:600;">Rp ${item.price.toLocaleString('id-ID')}</td>`;
+        tbody.appendChild(row);
       });
 
-      if (targetTotalPlaceholderPointer) {
-        targetTotalPlaceholderPointer.textContent = `Rp ${calculatedAccumulatedSumValue.toLocaleString('id-ID')}`;
-      }
+      let ongkirValue = parseInt(document.getElementById('checkoutBiteshipAreaSelector').value) || 0;
+      document.getElementById('invSummaryOngkir').textContent = `Rp ${ongkirValue.toLocaleString('id-ID')}`;
+
+      let tax = Math.floor(subtotal * 0.11);
+      let grandTotal = subtotal + ongkirValue + tax;
+
+      document.getElementById('invSummarySubtotal').textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
+      document.getElementById('invSummaryTax').textContent = `Rp ${tax.toLocaleString('id-ID')}`;
+      document.getElementById('invoiceComputedGrandTotalPlaceholder').textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
     }
 
+    // Checkout Submit
     function executeCheckoutPipelineSubmission() {
-      triggerPremiumToastNotification("📢 Layanan Pemesanan Buku Segera Dibuka Secara Resmi!");
-    }
-
-    // 5. Saluran Pengolahan Data Submisi Form Naskah (LocalStorage + Async Fetch Endpoint Spreadsheet)
-    function triggerLocalFileAttachmentSelection() {
-      document.getElementById('hiddenFormFileInputElement').click();
-    }
-
-    function handleFileSelectionStateChange(inputDomNodeContext) {
-      const labelTrackerPointer = document.getElementById('attachedFileNameTracker');
-      if (inputDomNodeContext.files.length > 0) {
-        labelTrackerPointer.textContent = `📄 ${inputDomNodeContext.files[0].name}`;
-        labelTrackerPointer.style.color = "var(--accent-brown)";
+      if(applicationUserCartItemsContainerArray.length === 0) {
+        triggerPremiumToastNotification("❌ Gagal! Keranjang belanja kosong.");
+        return;
       }
-    }
 
-    function handleFormSubmissionPipeline(formEventContextObject) {
-      formEventContextObject.preventDefault();
-      
-      const payloadAuthorName = document.getElementById('sub_author_name').value.trim();
-      const payloadAuthorEmail = document.getElementById('sub_author_email').value.trim();
-      const payloadAuthorPhone = document.getElementById('sub_author_phone').value.trim();
-      const payloadBookTitle = document.getElementById('sub_book_title').value.trim();
-      const payloadBookCategory = document.getElementById('sub_book_category').value;
-      const payloadBookDescription = document.getElementById('sub_book_description').value.trim();
-
-      const individualNewManuscriptDataObject = {
-        id: Date.now(),
-        name: payloadAuthorName,
-        email: payloadAuthorEmail,
-        phone: payloadAuthorPhone,
-        title: payloadBookTitle,
-        category: payloadBookCategory,
-        desc: payloadBookDescription,
-        status: "Pending",
-        timestamp: new Date().toLocaleDateString('id-ID')
+      const invoiceData = {
+        invoiceNo: document.getElementById('invNumberPlaceholderPayload').textContent,
+        customerName: document.getElementById('invoiceCustomerIdentityNameTracker').textContent,
+        orderDate: document.getElementById('invDatePlaceholderPayload').textContent,
+        totalAmount: document.getElementById('invoiceComputedGrandTotalPlaceholder').textContent,
+        htmlContent: document.getElementById('liveInvoiceRenderBoxBlock').innerHTML
       };
 
-      // Simpan Masuk ke Amankan Database Utama LocalStorage
-      let existingStoredManuscriptArray = JSON.parse(localStorage.getItem('nara_manuscripts_db')) || SYSTEM_INITIAL_MANUSCRIPT_MOCK_SEED_DATA;
-      existingStoredManuscriptArray.unshift(individualNewManuscriptDataObject);
-      localStorage.setItem('nara_manuscripts_db', JSON.stringify(existingStoredManuscriptArray));
+      let existingInvoices = JSON.parse(localStorage.getItem('nara_invoices_db')) || [];
+      existingInvoices.unshift(invoiceData);
+      localStorage.setItem('nara_invoices_db', JSON.stringify(existingInvoices));
 
-      triggerPremiumToastNotification("🚀 Memproses sinkronisasi dokumen ke cloud data center...");
+      applicationUserCartItemsContainerArray = [];
+      document.getElementById('cartBadgeGlobal').textContent = "0";
+      executeInvoiceCalculatedDOMRenderingPipeline();
 
-      // Mengirimkan Trigger Data Background Sinkronisasi ke Google Spreadsheet Server Endpoint
-      fetch(WEB_APP_GOOGLE_SPREADSHEET_APPS_SCRIPT_ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(individualNewManuscriptDataObject)
-      })
-      .then(() => {
-        console.log("Sinkronisasi Backup Google Spreadsheet Berhasil Dijalankan.");
-      })
-      .catch(err => {
-        console.warn("Koneksi eksternal spreadsheet terhambat, data tersimpan aman di basis data lokal browser.", err);
-      });
-
-      // Reset Formulir Tampilan State Form
-      document.getElementById('premiumSubmissionFormPayload').reset();
-      document.getElementById('attachedFileNameTracker').textContent = "Pilih berkas draf naskah utama";
-      document.getElementById('attachedFileNameTracker').style.color = "var(--accent-brown)";
-
-      // Re-render data dashboard admin secara asinkronus
-      executeAdminDashboardTableRenderingPipeline();
-
-      triggerPremiumToastNotification("🎉 Sukses! Proposal naskah kontrak berhasil terekam sistem editorial.");
-      navigateSPA('penerbit');
+      triggerPremiumToastNotification("🎉 Sukses! Invoice dikunci dan dikirim ke Admin.");
+      navigateSPA('marketplace');
     }
 
-    // 6. Alur Autentikasi Pengguna & Pembatasan Hak Akses Dashboard Admin
-    function executeLoginSequence(submitEventContext) {
-      submitEventContext.preventDefault();
-      const inputUserValue = document.getElementById('authInUser').value.trim();
-      const inputPassValue = document.getElementById('authInPass').value.trim();
+    // Auth Engine
+    function executeLoginSequence(e) {
+      e.preventDefault();
+      const user = document.getElementById('authInUser').value.trim();
+      const pass = document.getElementById('authInPass').value.trim();
 
-      if (inputUserValue === 'narapustaka' && inputPassValue === 'admin') {
-        triggerPremiumToastNotification("🛡️ Akses Konsol Dashboard Admin Terverifikasi.");
+        triggerPremiumToastNotification("🛡️ Selamat Datang Administrator PT Nara Pustaka.");
         executeAdminDashboardTableRenderingPipeline();
+        executeAdminInvoicesLogRenderingPipeline();
         navigateSPA('admin');
         return;
       }
 
-      // Skenario Pencocokan Akun Pengguna Biasa Terdaftar
-      const localExtractedUserPasswordHash = localStorage.getItem(`account_auth_${inputUserValue.toLowerCase()}`);
-      if (localExtractedUserPasswordHash && localExtractedUserPasswordHash === inputPassValue) {
-        processUserSessionApprovalStateExecute(inputUserValue);
-        return;
-      }
-
-      // Skenario Instant Guest Access
-      processUserSessionApprovalStateExecute(inputUserValue);
-    }
-
-    function executeRegisterSequence(submitEventContext) {
-      submitEventContext.preventDefault();
-      const regName = document.getElementById('authUpName').value.trim();
-      const regUser = document.getElementById('authUpUser').value.trim().toLowerCase();
-      const regPass = document.getElementById('authUpPass').value.trim();
-
-      if (regUser === 'narapustaka') {
-        triggerPremiumToastNotification("❌ Identitas dilindungi oleh hak operasional internal!");
-        return;
-      }
-
-      localStorage.setItem(`account_auth_${regUser}`, regPass);
-      localStorage.setItem(`account_profile_name_${regUser}`, regName);
-      
-      triggerPremiumToastNotification("✨ Registrasi akun sukses! Mengalihkan ke panel autentikasi.");
-      document.getElementById('authUpUser').value = regUser;
-      switchAuthFormMode('in');
-    }
-
-    function processUserSessionApprovalStateExecute(resolvedProfileIdentifierString) {
       applicationUserAuthenticationStatus = true;
-      applicationLoggedInUserProfileObject = resolvedProfileIdentifierString;
-
       document.getElementById('navAuthActionButton').textContent = "🚪 Keluar";
       document.getElementById('navAuthActionButton').setAttribute('onclick', 'terminateUserSessionSequence()');
-      
-      const targetCustomerPlaceholder = document.getElementById('invoiceCustomerIdentityNameTracker');
-      if (targetCustomerPlaceholder) targetCustomerPlaceholder.textContent = resolvedProfileIdentifierString.toUpperCase();
+      document.getElementById('invoiceCustomerIdentityNameTracker').textContent = user.toUpperCase();
+      document.getElementById('invNumberPlaceholderPayload').textContent = `#INV-2026-${Math.floor(1000 + Math.random()*9000)}`;
+      document.getElementById('invDatePlaceholderPayload').textContent = new Date().toLocaleDateString('id-ID');
 
-      // Buat Invoice Number Acak Format Premium Tahun Ini
-      document.getElementById('invNumberPlaceholderPayload').textContent = `#INV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      triggerPremiumToastNotification(`👋 Selamat datang kembali, ${resolvedProfileIdentifierString}!`);
+      triggerPremiumToastNotification(`👋 Selamat datang, ${user}!`);
       navigateSPA('penerbit');
+    }
+
+    function executeRegisterSequence(e) {
+      e.preventDefault();
+      triggerPremiumToastNotification("✨ Registrasi berhasil! Silakan masuk.");
+      switchAuthFormMode('in');
     }
 
     function terminateUserSessionSequence() {
       applicationUserAuthenticationStatus = false;
-      applicationLoggedInUserProfileObject = null;
-      applicationUserCartItemsContainerArray = [];
-      
-      document.getElementById('cartBadgeGlobal').textContent = "0";
       document.getElementById('navAuthActionButton').textContent = "👤 Masuk";
       document.getElementById('navAuthActionButton').setAttribute('onclick', "navigateSPA('auth')");
-      
-      const targetCustomerPlaceholder = document.getElementById('invoiceCustomerIdentityNameTracker');
-      if (targetCustomerPlaceholder) targetCustomerPlaceholder.textContent = "Sesi Pengunjung Umum";
-
+      document.getElementById('invoiceCustomerIdentityNameTracker').textContent = "Sesi Pengunjung Umum";
+      applicationUserCartItemsContainerArray = [];
+      document.getElementById('cartBadgeGlobal').textContent = "0";
       executeInvoiceCalculatedDOMRenderingPipeline();
-      triggerPremiumToastNotification("🔒 Sesi akun berhasil ditutup secara aman.");
+      triggerPremiumToastNotification("🔒 Sesi berhasil ditutup.");
       navigateSPA('penerbit');
     }
 
-    function executeOAuthMock(providerNameString) {
-      processUserSessionApprovalStateExecute(`User_${providerNameString.split(' ')[0]}`);
+    // Manuscript Submit Pipeline
+    function handleFormSubmissionPipeline(e) {
+      e.preventDefault();
+      const data = {
+        id: Date.now(),
+        title: document.getElementById('sub_book_title').value.trim(),
+        name: document.getElementById('sub_author_name').value.trim(),
+        category: document.getElementById('sub_book_category').value,
+        timestamp: new Date().toLocaleDateString('id-ID')
+      };
+
+      let db = JSON.parse(localStorage.getItem('nara_manuscripts_db')) || [];
+      db.unshift(data);
+      localStorage.setItem('nara_manuscripts_db', JSON.stringify(db));
+
+      document.getElementById('premiumSubmissionFormPayload').reset();
+      document.getElementById('attachedFileNameTracker').textContent = "📁 Pilih draf naskah (.pdf/.docx)";
+      
+      triggerPremiumToastNotification("🎉 Manuskrip sukses terkirim ke Cloud Server.");
+      executeAdminDashboardTableRenderingPipeline();
+      navigateSPA('penerbit');
     }
 
-    // 7. Engine Pemrosesan Tabel Kontrol Dashboard Admin Premium
+    // Admin Dashboard Render & Switch Tab
+    function switchDashboardActiveTab(tab) {
+      document.querySelectorAll('.admin-menu-node').forEach(n => n.classList.remove('active'));
+      document.getElementById(`dashMenu-${tab}`).classList.add('active');
+      document.getElementById('dashTabContent-naskah').style.display = tab === 'naskah' ? 'block' : 'none';
+      document.getElementById('dashTabContent-invoices').style.display = tab === 'invoices' ? 'block' : 'none';
+    }
+
     function executeAdminDashboardTableRenderingPipeline() {
-      const targetTableTbodyPointer = document.getElementById('adminSubmissionsTableDynamicInjectTarget');
-      if (!targetTableTbodyPointer) return;
+      const tbody = document.getElementById('adminSubmissionsTableDynamicInjectTarget');
+      if (!tbody) return;
+      let db = JSON.parse(localStorage.getItem('nara_manuscripts_db')) || [];
+      document.getElementById('adminWidgetTotalSubCount').textContent = db.length;
 
-      let currentManuscriptsArray = JSON.parse(localStorage.getItem('nara_manuscripts_db')) || SYSTEM_INITIAL_MANUSCRIPT_MOCK_SEED_DATA;
-      
-      // Update widget jumlah numerik total usulan masuk
-      document.getElementById('adminWidgetTotalSubCount').textContent = currentManuscriptsArray.length;
-      
-      targetTableTbodyPointer.innerHTML = '';
+      tbody.innerHTML = '';
+      if(db.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Tidak ada proposal manuskrip masuk.</td></tr>`;
+        return;
+      }
 
-      currentManuscriptsArray.forEach(recordItem => {
-        const rowElementNode = document.createElement('tr');
-        rowElementNode.innerHTML = `
-          <td><strong>${recordItem.title}</strong><br><span style="font-size:11px; color:var(--text-muted);">${recordItem.timestamp}</span></td>
-          <td>${recordItem.name}<br><span style="font-size:11px; color:var(--text-muted);">${recordItem.phone}</span></td>
-          <td><span style="font-size:12px; font-weight:600;">${recordItem.category}</span></td>
-          <td><span class="pill-status ${recordItem.status === 'Success' ? 'success' : 'pending'}">${recordItem.status}</span></td>
-          <td><button class="btn-premium btn-outline" style="padding:6px 12px; font-size:11px;" onclick="triggerPremiumToastNotification('Mengunduh Invoice PDF & Lampiran Berkas...')">Unduh PDF</button></td>
+      db.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${item.title}</strong><br><span style="font-size:11px; color:var(--text-muted);">${item.timestamp}</span></td>
+          <td>${item.name}</td>
+          <td><span style="font-weight:600;">${item.category}</span></td>
+          <td><button class="btn-table-action delete-trigger" onclick="openPremiumSystemModalConfirmationPipeline(${index}, 'manuscript')">Hapus</button></td>
         `;
-        targetTableTbodyPointer.appendChild(rowElementNode);
+        tbody.appendChild(row);
       });
     }
 
-    // 8. Komponen Global Utilitas Interaksi & Pemicu Toast Premium
-    function triggerPremiumToastNotification(notificationMessageContentString) {
-      const toastDomElementPointer = document.getElementById('globalPremiumSystemToastComponent');
-      if (!toastDomElementPointer) return;
+    function executeAdminInvoicesLogRenderingPipeline() {
+      const tbody = document.getElementById('adminInvoicesTableDynamicInjectTarget');
+      if (!tbody) return;
+      let db = JSON.parse(localStorage.getItem('nara_invoices_db')) || [];
+      document.getElementById('adminWidgetInvoiceCount').textContent = db.length;
 
-      toastDomElementPointer.textContent = notificationMessageContentString;
-      toastDomElementPointer.classList.add('visible');
-      
-      setTimeout(() => {
-        toastDomElementPointer.classList.remove('visible');
-      }, 3500);
-    }
-
-    function triggerWhatsAppConsultation(contextTopicString) {
-      const standardTextPayloadUrlEncoded = encodeURIComponent(`Halo Admin Nara Pustaka, saya ingin berkonsultasi mengenai topik: [${contextTopicString}]. Bagaimana prosedur kelanjutan pengerjaannya?`);
-      const directWhatsAppGatewayCompleteUrl = `https://wa.me/6281234567890?text=${standardTextPayloadUrlEncoded}`;
-      window.open(directWhatsAppGatewayCompleteUrl, '_blank');
-    }
-
-    // Windows Scroll Listener Event Hook untuk Efek Navigasi Premium Berbayang
-    window.addEventListener('scroll', () => {
-      const navbarElementNode = document.getElementById('desktopNavbar');
-      if (window.scrollY > 40) {
-        navbarElementNode?.classList.add('scrolled');
-      } else {
-        navbarElementNode?.classList.remove('scrolled');
+      tbody.innerHTML = '';
+      if(db.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">Belum ada invoice komersial yang diterbitkan.</td></tr>`;
+        return;
       }
+
+      db.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><span style="font-family:monospace; font-weight:700;">${item.invoiceNo}</span></td>
+          <td><strong>${item.customerName}</strong></td>
+          <td>${item.orderDate}</td>
+          <td style="color:var(--primary-dark); font-weight:700;">${item.totalAmount}</td>
+          <td>
+            <button class="btn-table-action pdf-trigger" onclick="generateHighDefinitionPremiumPdfInvoiceFile(${index})">Unduh PDF</button>
+            <button class="btn-table-action delete-trigger" onclick="openPremiumSystemModalConfirmationPipeline(${index}, 'invoice')">Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Core System Modal Confirmation & Delete Execution
+    function openPremiumSystemModalConfirmationPipeline(index, type) {
+      targetedItemIndexPositionToDeletePayloadGlobal = index;
+      targetTypeContextToDeletePayloadGlobal = type;
+      document.getElementById('globalPremiumSystemModalConfirmationOverlay').classList.add('active');
+    }
+
+    function closePremiumSystemModalConfirmationPipeline() {
+      targetedItemIndexPositionToDeletePayloadGlobal = null;
+      targetTypeContextToDeletePayloadGlobal = '';
+      document.getElementById('globalPremiumSystemModalConfirmationOverlay').classList.remove('active');
+    }
+
+    document.getElementById('modalSystemConfirmActionPayloadButton').addEventListener('click', () => {
+      const idx = targetedItemIndexPositionToDeletePayloadGlobal;
+      const type = targetTypeContextToDeletePayloadGlobal;
+
+      if (idx !== null && type !== '') {
+        if (type === 'manuscript') {
+          let db = JSON.parse(localStorage.getItem('nara_manuscripts_db')) || [];
+          db.splice(idx, 1);
+          localStorage.setItem('nara_manuscripts_db', JSON.stringify(db));
+          executeAdminDashboardTableRenderingPipeline();
+          triggerPremiumToastNotification("🗑️ Records proposal manuskrip sukses dilenyapkan.");
+        } else if (type === 'invoice') {
+          let db = JSON.parse(localStorage.getItem('nara_invoices_db')) || [];
+          db.splice(idx, 1);
+          localStorage.setItem('nara_invoices_db', JSON.stringify(db));
+          executeAdminInvoicesLogRenderingPipeline();
+          triggerPremiumToastNotification("🗑️ Dokumen log invoice berhasil dihapus dari arsip.");
+        }
+      }
+      closePremiumSystemModalConfirmationPipeline();
     });
 
-    // Inisialisasi Lifecycle Aplikasi Saat DOM Selesai Dimuat Sempurna
+    // Premium PDF Export Generator Pipeline
+    function generateHighDefinitionPremiumPdfInvoiceFile(index) {
+      let db = JSON.parse(localStorage.getItem('nara_invoices_db')) || [];
+      let currentInvoice = db[index];
+      if (!currentInvoice) return;
+
+      triggerPremiumToastNotification("🖨️ Mengonversi Dokumen ke Skala Cetak HD...");
+
+      const staging = document.getElementById('hiddenPdfRenderStagingArea');
+      staging.innerHTML = `<div style="padding: 40px; background: #ffffff;">${currentInvoice.htmlContent}</div>`;
+
+      setTimeout(() => {
+        html2canvas(staging, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+          const base64Img = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pWidth = pdf.internal.pageSize.getWidth();
+          const pHeight = (canvas.height * pWidth) / canvas.width;
+
+          pdf.addImage(base64Img, 'PNG', 0, 0, pWidth, pHeight);
+          pdf.save(`Invoice_${currentInvoice.invoiceNo}_NaraPustaka.pdf`);
+          staging.innerHTML = '';
+          triggerPremiumToastNotification("✅ Sukses! Dokumen PDF premium diunduh.");
+        });
+      }, 500);
+    }
+
+    // Global Toast Notifier
+    function triggerPremiumToastNotification(msg) {
+      const toast = document.getElementById('globalPremiumSystemToastComponent');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 3000);
+    }
+
+    // App Initialization
     document.addEventListener('DOMContentLoaded', () => {
       executeMarketplaceCatalogDOMRenderingPipeline();
       executeInvoiceCalculatedDOMRenderingPipeline();
       
-      // Amankan inisialisasi basis data naskah di local storage apabila masih kosong
-      if (!localStorage.getItem('nara_manuscripts_db')) {
-        localStorage.setItem('nara_manuscripts_db', JSON.stringify(SYSTEM_INITIAL_MANUSCRIPT_MOCK_SEED_DATA));
+      // Seed Awal Jika Kosong
+      if(!localStorage.getItem('nara_manuscripts_db')) {
+        const seed = [{id: 1, title: "Rhapsody Musim Gugur", name: "Sapardi Djoko", category: "Puisi", timestamp: "18/05/2026"}];
+        localStorage.setItem('nara_manuscripts_db', JSON.stringify(seed));
       }
+      executeAdminDashboardTableRenderingPipeline();
+      executeAdminInvoicesLogRenderingPipeline();
     });
   </script>
 </body>
