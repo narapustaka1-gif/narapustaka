@@ -239,53 +239,62 @@
     </div>
 
     <script>
-        const SPREADSHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxIyg6j-EVoGrM5JyAYe2H9T3ztdKLXkeKj3OOAKvZoX3QTAYwqr3B3t-5HiRkWbbYSXA/exec";
-
-        const DATABASE_SEED_BOOKS = [
-            { id: "NARA-001", title: "Meniti Jembatan Estetika Sastra Nusantara", category: "Novel", author: "Nirmala Sari, M.Hum", price: 89000, cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=500", status: "Katalog Segera Terbit" },
-            { id: "NARA-002", title: "Simfoni Bait Sunyi Dan Elegi Malam", category: "Puisi", author: "Pranata Dewa", price: 65000, cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=500", status: "Katalog Segera Terbit" },
-            { id: "NARA-003", title: "Metodologi Pendidikan Transformatif Abad 21", category: "Pendidikan", author: "Prof. Dr. Ahmad Supriyadi", price: 110000, cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=500", status: "Katalog Segera Terbit" },
-            { id: "NARA-004", title: "Arsitektur Kebiasaan Orang-Orang Visioner", category: "Self Improvement", author: "Andi Wijaya, MBA", price: 95000, cover: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=500", status: "Katalog Segera Terbit" },
-            { id: "NARA-005", title: "Strategi Scale-Up Bisnis Di Era Disrupsi AI", category: "Bisnis", author: "Raymond Santoso, CFA", price: 135000, cover: "https://images.unsplash.com/photo-1614849963640-9cc74b2a826f?auto=format&fit=crop&q=80&w=500", status: "Katalog Segera Terbit" },
-            { id: "NARA-006", title: "Manifesto Motivasi: Melampaui Batas Kemustahilan", category: "Motivasi", author: "Merry Utama", price: 88000, cover: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&q=80&w=500", status: "Katalog Segera Terbit" }
-        ];
+        // URL API Google Apps Script milikmu yang sudah aktif CORS-nya
+        const SPREADSHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxi2EN_3I9Zc-RyaaQVvGVxm3mFYkKCu9xuigUyxkgQMXGsWdAxJSwjh0hziRQ_P94pBg/exec";
 
         const DATABASE_SEED_ARTICLES = [
             { id: "ART-01", title: "Siasat Ampuh Mengatasi Kebuntuan Ide (Writer's Block) bagi Sastrawan", date: "18 Mei 2026", category: "Tips Menulis", cover: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=500" },
             { id: "ART-02", title: "Panduan Lengkap Standarisasi & Alur Pengurusan ISBN Perpustakaan Nasional", date: "12 Mei 2026", category: "Dunia Penerbitan", cover: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=500" }
         ];
 
+        // Database lokal sinkronisasi awal
         let db = {
-            books: JSON.parse(localStorage.getItem('np_books')) || DATABASE_SEED_BOOKS,
-            articles: JSON.parse(localStorage.getItem('np_articles')) || DATABASE_SEED_ARTICLES,
-            submissions: JSON.parse(localStorage.getItem('np_submissions')) || [],
-            orders: JSON.parse(localStorage.getItem('np_orders')) || [],
+            books: [],
+            articles: DATABASE_SEED_ARTICLES,
+            submissions: [],
+            orders: [],
             cart: JSON.parse(localStorage.getItem('np_cart')) || [],
-            registeredUsers: JSON.parse(localStorage.getItem('np_registered_users')) || [],
             currentUser: JSON.parse(localStorage.getItem('np_user')) || null
         };
 
-        function commitLocalStorage() {
-            localStorage.setItem('np_books', JSON.stringify(db.books));
-            localStorage.setItem('np_articles', JSON.stringify(db.articles));
-            localStorage.setItem('np_submissions', JSON.stringify(db.submissions));
-            localStorage.setItem('np_orders', JSON.stringify(db.orders));
-            localStorage.setItem('np_cart', JSON.stringify(db.cart));
-            localStorage.setItem('np_registered_users', JSON.stringify(db.registeredUsers));
-            localStorage.setItem('np_user', JSON.stringify(db.currentUser));
-            updateCartIconBadge();
+        // Fungsi Load Data secara Real-time dari spreadsheet via Action 'getAll'
+        async function loadDatabaseFromSpreadsheet() {
+            try {
+                const response = await fetch(`${SPREADSHEET_WEBAPP_URL}?action=getAll`);
+                const result = await response.json();
+                if (result.status === "ok") {
+                    db.books = result.data.books || [];
+                    db.submissions = result.data.submissions || [];
+                    db.orders = result.data.orders || [];
+                    updateCartIconBadge();
+                    // Jika sedang di halaman marketplace atau admin, refresh tampilannya
+                    if (currentPageState === 'marketplace') renderMarketplaceProducts();
+                    if (currentPageState === 'admin') refreshAdminTables();
+                }
+            } catch (error) {
+                console.error("Gagal memuat database dari spreadsheet:", error);
+            }
         }
 
-        async function syncOnlineSpreadsheet(sheetName, dataPayload) {
-            if (!SPREADSHEET_WEBAPP_URL) return;
+        // Fungsi Kirim Data ke API Apps Script menggunakan Method POST (Action-Based)
+        async function postToSpreadsheetAPI(actionName, dataPayload) {
             try {
-                await fetch(SPREADSHEET_WEBAPP_URL, {
+                const response = await fetch(SPREADSHEET_WEBAPP_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sheet: sheetName, data: dataPayload })
+                    headers: { 'Content-Type': 'text/plain' }, // Menggunakan text/plain mencegah preflight CORS error di GAS
+                    body: JSON.stringify({ action: actionName, data: dataPayload })
                 });
-            } catch (error) { console.error("Koneksi eksternal dilewati:", error); }
+                return await response.json();
+            } catch (error) {
+                console.error(`Gagal mengirim data action ${actionName}:`, error);
+                return { status: "error", message: error.toString() };
+            }
+        }
+
+        function commitLocalStorage() {
+            localStorage.setItem('np_cart', JSON.stringify(db.cart));
+            localStorage.setItem('np_user', JSON.stringify(db.currentUser));
+            updateCartIconBadge();
         }
 
         function showToast(msg, type = 'success') {
@@ -368,7 +377,7 @@
             }
         }
         
-        function handleAuthSubmit(e) {
+        async function handleAuthSubmit(e) {
             e.preventDefault();
             const userInput = document.getElementById('auth-username').value;
             const passInput = document.getElementById('auth-password').value;
@@ -380,39 +389,45 @@
                 return;
             }
 
-            const foundUser = db.registeredUsers.find(u => (u.email === userInput || u.phone === userInput) && u.password === passInput);
-            if(foundUser) {
-                db.currentUser = { email: foundUser.email, name: foundUser.name, role: 'user' };
-                commitLocalStorage(); closeLoginModal(); showToast(`Selamat datang kembali, ${foundUser.name}!`);
-                switchPage(currentPageState);
-            } else {
-                showToast("Kredensial tidak terdaftar dalam sistem. Harap buat akun baru.", "error");
+            // Get request login ke API Google Sheets
+            try {
+                const response = await fetch(`${SPREADSHEET_WEBAPP_URL}?action=login&identifier=${encodeURIComponent(userInput)}&password=${encodeURIComponent(passInput)}`);
+                const result = await response.json();
+                
+                if (result.status === "ok") {
+                    db.currentUser = result.user;
+                    commitLocalStorage(); closeLoginModal(); showToast(`Selamat datang kembali, ${result.user.name}!`);
+                    switchPage(currentPageState);
+                } else {
+                    showToast(result.message || "Kredensial salah.", "error");
+                }
+            } catch (err) {
+                showToast("Gagal melakukan verifikasi ke database.", "error");
             }
         }
 
-        function handleAuthRegisterSubmit(e) {
+        async function handleAuthRegisterSubmit(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const phone = document.getElementById('reg-phone').value;
             const password = document.getElementById('reg-password').value;
 
-            if(db.registeredUsers.some(u => u.email === email)) {
-                showToast("Email sudah terdaftar. Silakan login.", "error");
-                return;
+            const newUserPayload = { id: "CUST-" + Date.now(), name, email, phone, password };
+            
+            showToast("Memproses pendaftaran akun...");
+            const res = await postToSpreadsheetAPI("registerUser", newUserPayload);
+            
+            if (res.status === "ok") {
+                db.currentUser = res.user;
+                commitLocalStorage();
+                closeLoginModal();
+                showToast("Akun customer sukses didaftarkan dan terhubung ke spreadsheet!");
+                await loadDatabaseFromSpreadsheet();
+                switchPage(currentPageState);
+            } else {
+                showToast(res.message || "Registrasi gagal.", "error");
             }
-
-            const newUser = { id: "CUST-" + Date.now(), name, email, phone, password, date: new Date().toLocaleDateString('id-ID') };
-            db.registeredUsers.push(newUser);
-            
-            syncOnlineSpreadsheet('users', newUser);
-            
-            db.currentUser = { email: newUser.email, name: newUser.name, role: 'user' };
-            commitLocalStorage();
-            
-            closeLoginModal();
-            showToast("Akun customer sukses didaftarkan dan terhubung!");
-            switchPage(currentPageState);
         }
         
         function handleUserLogout() {
@@ -457,7 +472,6 @@
             }
         }
 
-        /* --- FUNGSI MODAL PENCARIAN GLOBAL --- */
         function openSearchModal() {
             const m = document.getElementById('search-modal'); m.classList.remove('hidden');
             setTimeout(() => m.classList.remove('opacity-0', 'scale-95'), 10);
@@ -482,13 +496,12 @@
                     <img src="${b.cover}" class="w-10 h-14 object-cover rounded shadow-sm">
                     <div>
                         <h4 class="text-xs font-bold text-gray-900">${b.title}</h4>
-                        <p class="text-[10px] text-gray-400 mt-0.5">${b.author} • Rp ${b.price.toLocaleString('id-ID')}</p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">${b.author} • Rp ${Number(b.price).toLocaleString('id-ID')}</p>
                     </div>
                 </div>
             `).join('');
         }
 
-        /* --- KONTEN HALAMAN BERANDA --- */
         function viewHome() {
             let articlesHtml = db.articles.map(art => `
                 <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all">
@@ -552,7 +565,6 @@
             `;
         }
 
-        /* --- KONTEN HALAMAN TENTANG KAMI --- */
         function viewAbout() {
             return `
                 <section class="bg-gray-900 text-white py-20 text-center rounded-b-[2rem] shadow-lg">
@@ -583,7 +595,6 @@
             `;
         }
 
-        /* --- KONTEN HALAMAN LAYANAN --- */
         function viewLayanan() {
             return `
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -593,7 +604,6 @@
                         <p class="text-xs text-gray-500 leading-relaxed">Kami menyediakan ekosistem hulu ke hilir untuk memastikan naskah Anda diolah dengan standar industri terbaik.</p>
                     </div>
 
-                    <!-- Grid Layanan Utama -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch mb-16">
                         <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm text-center">
                             <div class="w-12 h-12 mx-auto bg-[#56B6C6]/10 text-primary rounded-2xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-stamp"></i></div>
@@ -612,7 +622,6 @@
                         </div>
                     </div>
 
-                    <!-- Bagian Paket Terbit (Coming Soon) -->
                     <div class="bg-cream-premium rounded-3xl border border-gray-200/60 p-8 md:p-12 text-center max-w-3xl mx-auto relative overflow-hidden">
                         <div class="absolute top-4 right-4 bg-gray-900 text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">Coming Soon</div>
                         <div class="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-xl mx-auto mb-4"><i class="fa-solid fa-boxes-packing"></i></div>
@@ -624,7 +633,6 @@
             `;
         }
 
-        /* --- KONTEN HALAMAN TOKO BUKU (MARKETPLACE) --- */
         function viewMarketplace() {
             return `
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -661,7 +669,7 @@
             const filtered = cat === 'All' ? db.books : db.books.filter(b => b.category === cat);
             
             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-xs text-gray-400">Belum ada katalog buku di kategori ini.</div>`;
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-xs text-gray-400">Belum ada katalog buku di kategori ini. Silakan tambah lewat Panel Admin.</div>`;
                 return;
             }
 
@@ -678,7 +686,7 @@
                         </div>
                     </div>
                     <div class="p-3 pt-0">
-                        <div class="text-xs font-extrabold text-gray-900 mb-2">Rp ${b.price.toLocaleString('id-ID')}</div>
+                        <div class="text-xs font-extrabold text-gray-900 mb-2">Rp ${Number(b.price).toLocaleString('id-ID')}</div>
                         <button onclick="addToCart('${b.id}')" class="w-full py-2 bg-primary hover:bg-[#47a3b3] text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all"><i class="fa-solid fa-cart-plus mr-1"></i> Beli</button>
                     </div>
                 </div>
@@ -693,13 +701,12 @@
             if(exist) {
                 exist.qty += 1;
             } else {
-                db.cart.push({ id: book.id, title: book.title, price: book.price, cover: book.cover, qty: 1 });
+                db.cart.push({ id: book.id, title: book.title, price: Number(book.price), cover: book.cover, qty: 1 });
             }
             commitLocalStorage();
             showToast(`Berhasil menambahkan "${book.title}" ke keranjang!`);
         }
 
-        /* --- DETAIL MODAL BUKU --- */
         function openDetailModal(bookId) {
             const b = db.books.find(x => x.id === bookId);
             if(!b) return;
@@ -722,7 +729,7 @@
                         </div>
                         <div class="border-t border-gray-100 pt-4">
                             <div class="text-gray-400 font-medium mb-1">Harga Cetak Resmi:</div>
-                            <div class="text-lg font-extrabold text-gray-900">Rp ${b.price.toLocaleString('id-ID')}</div>
+                            <div class="text-lg font-extrabold text-gray-900">Rp ${Number(b.price).toLocaleString('id-ID')}</div>
                         </div>
                         <div class="pt-2 flex gap-3">
                             <button onclick="closeDetailModal(); addToCart('${b.id}')" class="flex-1 py-3 bg-primary hover:bg-[#47a3b3] text-white font-bold rounded-xl uppercase tracking-wider text-[10px] shadow-sm transition-all"><i class="fa-solid fa-cart-plus mr-1"></i> Tambah Keranjang</button>
@@ -738,7 +745,6 @@
             setTimeout(() => m.classList.add('hidden'), 300);
         }
 
-        /* --- HALAMAN KERANJANG DAN CHECKOUT --- */
         function openCart() {
             const m = document.getElementById('detail-modal');
             const body = document.getElementById('detail-modal-body');
@@ -759,14 +765,14 @@
                 return;
             }
 
-            const total = db.cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            const total = db.cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
             let itemsHtml = db.cart.map(item => `
                 <div class="flex items-center justify-between gap-4 py-3 border-b border-gray-50 text-xs">
                     <div class="flex items-center gap-3">
                         <img src="${item.cover}" class="w-10 h-14 object-cover rounded shadow-sm">
                         <div>
                             <h4 class="font-bold text-gray-900 line-clamp-1">${item.title}</h4>
-                            <p class="text-[10px] text-gray-400 mt-0.5">Rp ${item.price.toLocaleString('id-ID')}</p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">Rp ${Number(item.price).toLocaleString('id-ID')}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -819,33 +825,37 @@
             if(body) renderCartItems(body);
         }
 
-        function handleCheckout(e) {
+        async function handleCheckout(e) {
             e.preventDefault();
             const address = document.getElementById('cart-address').value;
-            const total = db.cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            const total = db.cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
 
-            const newOrder = {
+            const orderData = {
                 id: "ORD-" + Date.now(),
                 customer: db.currentUser.name,
                 email: db.currentUser.email,
-                address,
+                address: address,
                 items: db.cart.map(i => `${i.title} (${i.qty}x)`).join(', '),
-                total,
+                total: total,
                 status: "Menunggu Transfer",
                 date: new Date().toLocaleDateString('id-ID')
             };
 
-            db.orders.push(newOrder);
-            syncOnlineSpreadsheet('orders', newOrder);
-            db.cart = [];
-            commitLocalStorage();
-
-            showToast("Pesanan sukses dikirim! Silakan selesaikan pembayaran sesuai nota invoice.");
-            closeDetailModal();
-            switchPage('home');
+            showToast("Mengirim pesanan ke spreadsheet...");
+            const res = await postToSpreadsheetAPI("addOrder", orderData);
+            
+            if(res.status === "ok") {
+                db.cart = [];
+                commitLocalStorage();
+                showToast("Pesanan sukses diproses dan disimpan online!");
+                closeDetailModal();
+                await loadDatabaseFromSpreadsheet();
+                switchPage('home');
+            } else {
+                showToast("Gagal mengirim pesanan: " + res.message, "error");
+            }
         }
 
-        /* --- KONTEN HALAMAN PENGAJUAN NASKAH --- */
         function viewNaskah() {
             return `
                 <section class="max-w-3xl mx-auto px-4 py-12">
@@ -892,7 +902,7 @@
             `;
         }
 
-        function handleManuscriptSubmit(e) {
+        async function handleManuscriptSubmit(e) {
             e.preventDefault();
             const author = document.getElementById('sub-author').value;
             const category = document.getElementById('sub-category').value;
@@ -900,53 +910,26 @@
             const synopsis = document.getElementById('sub-synopsis').value;
             const fileUrl = document.getElementById('sub-url').value;
 
-            const newSubmission = {
+            const submissionData = {
                 id: "SUB-" + Date.now(),
                 author, category, title, synopsis, fileUrl,
                 status: "Menunggu Peninjauan",
                 date: new Date().toLocaleDateString('id-ID')
             };
 
-            db.submissions.push(newSubmission);
-            syncOnlineSpreadsheet('submissions', newSubmission);
-            commitLocalStorage();
-
-            showToast("Naskah Anda sukses dikirim! Tim redaksi akan segera meninjau berkas tersebut.");
-            switchPage('home');
+            showToast("Mengunggah data naskah...");
+            const res = await postToSpreadsheetAPI("addSubmission", submissionData);
+            
+            if (res.status === "ok") {
+                showToast("Naskah Anda sukses dikirim ke Redaksi Nara Pustaka!");
+                await loadDatabaseFromSpreadsheet();
+                switchPage('home');
+            } else {
+                showToast("Gagal mengirim berkas naskah: " + res.message, "error");
+            }
         }
 
-        /* --- DASHBOARD KENDALI ADMIN --- */
         function viewAdminDashboard() {
-            let bookRows = db.books.map(b => `
-                <tr class="border-b border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
-                    <td class="p-3 font-mono font-bold text-gray-900">${b.id}</td>
-                    <td class="p-3 font-bold text-gray-900 max-w-xs truncate">${b.title}</td>
-                    <td class="p-3">${b.author}</td>
-                    <td class="p-3 font-semibold text-primary">Rp ${b.price.toLocaleString('id-ID')}</td>
-                    <td class="p-3"><button onclick="handleAdminDeleteBook('${b.id}')" class="text-rose-500 hover:text-rose-700 font-bold cursor-pointer"><i class="fa-solid fa-trash-can mr-1"></i> Hapus</button></td>
-                </tr>
-            `).join('');
-
-            let submissionRows = db.submissions.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada berkas naskah masuk.</td></tr>` : db.submissions.map(s => `
-                <tr class="border-b border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
-                    <td class="p-3">${s.date}</td>
-                    <td class="p-3 font-bold text-gray-900">${s.title}</td>
-                    <td class="p-3">${s.author} (${s.category})</td>
-                    <td class="p-3 truncate max-w-xs"><a href="${s.fileUrl}" target="_blank" class="text-primary hover:underline font-medium"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka File</a></td>
-                    <td class="p-3"><span class="px-2 py-1 bg-amber-50 text-amber-600 rounded font-bold">${s.status}</span></td>
-                </tr>
-            `).join('');
-
-            let orderRows = db.orders.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada riwayat pesanan buku.</td></tr>` : db.orders.map(o => `
-                <tr class="border-b border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
-                    <td class="p-3 font-mono font-bold text-gray-900">${o.id}</td>
-                    <td class="p-3 font-semibold text-gray-900">${o.customer}</td>
-                    <td class="p-3 max-w-xs truncate">${o.items}</td>
-                    <td class="p-3 font-bold text-primary">Rp ${o.total.toLocaleString('id-ID')}</td>
-                    <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded font-bold">${o.status}</span></td>
-                </tr>
-            `).join('');
-
             return `
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-xs">
                     <div class="bg-gray-900 text-white p-6 rounded-3xl mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg">
@@ -955,14 +938,13 @@
                             <h1 class="text-xl md:text-2xl font-serif-premium font-bold mt-1">Dasbor Kendali Nara Pustaka</h1>
                         </div>
                         <div class="flex gap-4">
-                            <div class="bg-gray-800 px-4 py-2 rounded-xl text-center"><span class="block text-gray-400 text-[10px] font-bold uppercase">Total Produk</span><span class="text-base font-bold text-primary">${db.books.length}</span></div>
-                            <div class="bg-gray-800 px-4 py-2 rounded-xl text-center"><span class="block text-gray-400 text-[10px] font-bold uppercase">Naskah Masuk</span><span class="text-base font-bold text-emerald-400">${db.submissions.length}</span></div>
-                            <div class="bg-gray-800 px-4 py-2 rounded-xl text-center"><span class="block text-gray-400 text-[10px] font-bold uppercase">Pesanan</span><span class="text-base font-bold text-amber-400">${db.orders.length}</span></div>
+                            <div class="bg-gray-800 px-4 py-2 rounded-xl text-center"><span class="block text-gray-400 text-[10px] font-bold uppercase">Total Produk</span><span id="stat-books" class="text-base font-bold text-primary">0</span></div>
+                            <div class="bg-gray-800 px-4 py-2 rounded-xl text-center"><span class="block text-gray-400 text-[10px] font-bold uppercase">Naskah Masuk</span><span id="stat-subs" class="text-base font-bold text-emerald-400">0</span></div>
+                            <div class="bg-gray-800 px-4 py-2 rounded-xl text-center"><span class="block text-gray-400 text-[10px] font-bold uppercase">Pesanan</span><span id="stat-orders" class="text-base font-bold text-amber-400">0</span></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-12">
-                        <!-- Tambah Katalog Buku -->
                         <div class="bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
                             <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider"><i class="fa-solid fa-square-plus text-primary mr-1"></i> Tambah Katalog Buku Baru</h3>
                             <form onsubmit="handleAdminAddBook(event)" class="space-y-4">
@@ -998,7 +980,6 @@
                             </form>
                         </div>
 
-                        <!-- Daftar Buku Toko -->
                         <div class="bg-white border border-gray-200 rounded-3xl shadow-sm lg:col-span-2 overflow-hidden">
                             <div class="p-5 border-b border-gray-100"><h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider"><i class="fa-solid fa-layer-group text-primary mr-1"></i> Manajemen Stok Katalog Buku</h3></div>
                             <div class="overflow-x-auto max-h-[350px]">
@@ -1008,13 +989,12 @@
                                             <th class="p-3">ID</th><th class="p-3">Judul Buku</th><th class="p-3">Penulis</th><th class="p-3">Harga</th><th class="p-3">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody>${bookRows}</tbody>
+                                    <tbody id="adm-books-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Log Berkas Naskah & Pesanan -->
                     <div class="space-y-8">
                         <div class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
                             <div class="p-5 border-b border-gray-100"><h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider"><i class="fa-solid fa-file-invoice text-emerald-500 mr-1"></i> Log Masuk Berkas Naskah Penulis</h3></div>
@@ -1025,7 +1005,7 @@
                                             <th class="p-3">Tanggal</th><th class="p-3">Judul Buku</th><th class="p-3">Pengaju (Genre)</th><th class="p-3">Link Berkas</th><th class="p-3">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody>${submissionRows}</tbody>
+                                    <tbody id="adm-subs-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -1039,7 +1019,7 @@
                                             <th class="p-3">No. Invoice</th><th class="p-3">Nama Pembeli</th><th class="p-3">Buku (Qty)</th><th class="p-3">Total Belanja</th><th class="p-3">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody>${orderRows}</tbody>
+                                    <tbody id="adm-orders-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -1048,7 +1028,57 @@
             `;
         }
 
-        function handleAdminAddBook(e) {
+        // Render data khusus tabel Admin secara asinkronus setelah element HTML dirender
+        function refreshAdminTables() {
+            const bStat = document.getElementById('stat-books');
+            const sStat = document.getElementById('stat-subs');
+            const oStat = document.getElementById('stat-orders');
+            
+            if(bStat) bStat.innerText = db.books.length;
+            if(sStat) sStat.innerText = db.submissions.length;
+            if(oStat) oStat.innerText = db.orders.length;
+
+            const bBody = document.getElementById('adm-books-table-body');
+            if(bBody) {
+                bBody.innerHTML = db.books.map(b => `
+                    <tr class="border-b border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-gray-900">${b.id}</td>
+                        <td class="p-3 font-bold text-gray-900 max-w-xs truncate">${b.title}</td>
+                        <td class="p-3">${b.author}</td>
+                        <td class="p-3 font-semibold text-primary">Rp ${Number(b.price).toLocaleString('id-ID')}</td>
+                        <td class="p-3"><button onclick="handleAdminDeleteBook('${b.id}')" class="text-rose-500 hover:text-rose-700 font-bold cursor-pointer"><i class="fa-solid fa-trash-can mr-1"></i> Hapus</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            const sBody = document.getElementById('adm-subs-table-body');
+            if(sBody) {
+                sBody.innerHTML = db.submissions.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada berkas naskah masuk.</td></tr>` : db.submissions.map(s => `
+                    <tr class="border-b border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
+                        <td class="p-3">${s.date || ''}</td>
+                        <td class="p-3 font-bold text-gray-900">${s.title}</td>
+                        <td class="p-3">${s.author} (${s.category})</td>
+                        <td class="p-3 truncate max-w-xs"><a href="${s.fileUrl}" target="_blank" class="text-primary hover:underline font-medium"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Buka File</a></td>
+                        <td class="p-3"><span class="px-2 py-1 bg-amber-50 text-amber-600 rounded font-bold">${s.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            const oBody = document.getElementById('adm-orders-table-body');
+            if(oBody) {
+                oBody.innerHTML = db.orders.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada riwayat pesanan buku.</td></tr>` : db.orders.map(o => `
+                    <tr class="border-b border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
+                        <td class="p-3 font-mono font-bold text-gray-900">${o.id}</td>
+                        <td class="p-3 font-semibold text-gray-900">${o.customer}</td>
+                        <td class="p-3 max-w-xs truncate">${o.items}</td>
+                        <td class="p-3 font-bold text-primary">Rp ${Number(o.total).toLocaleString('id-ID')}</td>
+                        <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded font-bold">${o.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function handleAdminAddBook(e) {
             e.preventDefault();
             const title = document.getElementById('adm-title').value;
             const author = document.getElementById('adm-author').value;
@@ -1056,26 +1086,57 @@
             const price = parseInt(document.getElementById('adm-price').value);
             const cover = document.getElementById('adm-cover').value;
 
-            const newBook = { id: "NARA-0" + (db.books.length + 1), title, author, category, price, cover, status: "Katalog Segera Terbit" };
-            db.books.push(newBook);
-            commitLocalStorage();
-            showToast(`"${title}" sukses ditambahkan ke katalog toko!`);
-            switchPage('admin');
+            const newBookPayload = { 
+                id: "NARA-0" + (db.books.length + 101), 
+                title, author, category, price, cover, 
+                status: "Katalog Segera Terbit" 
+            };
+
+            showToast("Menyimpan buku baru ke spreadsheet...");
+            const res = await postToSpreadsheetAPI("addBook", newBookPayload);
+            
+            if(res.status === "ok") {
+                showToast(`"${title}" sukses disimpan ke database online!`);
+                await loadDatabaseFromSpreadsheet();
+                switchPage('admin');
+            } else {
+                showToast("Gagal menyimpan buku: " + res.message, "error");
+            }
         }
 
-        function handleAdminDeleteBook(bookId) {
-            if(confirm("Apakah Anda yakin ingin menghapus buku ini dari katalog toko?")) {
-                db.books = db.books.filter(b => b.id !== bookId);
-                commitLocalStorage();
-                showToast("Buku sukses dihapus dari katalog.");
-                switchPage('admin');
+        async function handleAdminDeleteBook(bookId) {
+            if(confirm("Apakah Anda yakin ingin menghapus buku ini secara permanen dari spreadsheet?")) {
+                showToast("Menghapus data di Google Sheets...");
+                
+                try {
+                    const response = await fetch(SPREADSHEET_WEBAPP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ action: "deleteBook", bookId: bookId })
+                    });
+                    const res = await response.json();
+                    
+                    if(res.status === "ok") {
+                        showToast("Buku sukses dihapus dari database online.");
+                        await loadDatabaseFromSpreadsheet();
+                        switchPage('admin');
+                    } else {
+                        showToast("Gagal menghapus: " + res.message, "error");
+                    }
+                } catch (error) {
+                    showToast("Koneksi gagal saat menghapus.", "error");
+                }
             }
         }
 
         /* --- INISIALISASI STRUKTUR APLIKASI UTAMA --- */
-        window.onload = function() {
+        window.onload = async function() {
             updateCartIconBadge();
             rebootAuthViewButtons();
+            
+            // Tarik data segar secara real-time dari Apps Script saat web dibuka
+            await loadDatabaseFromSpreadsheet();
+            
             const lastPage = sessionStorage.getItem('np_last_page') || 'home';
             switchPage(lastPage);
         };
