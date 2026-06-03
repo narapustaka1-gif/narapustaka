@@ -1,101 +1,274 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Invoice & Database - Nara Pustaka</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<style>
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-@media print {
-  .no-print { display: none !important; }
-  body { background-color: white; padding: 0; margin: 0; }
-  .invoice-box { box-shadow: none; border: none; padding: 0; margin: 0; max-width: 100%; }
-  .database-section { display: none !important; }
-}
-/* Modal styling */
-.modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
-.modal-content { background-color: white; margin: 15% auto; padding: 28px; border-radius: 12px; width: 350px; text-align: center; }
-</style>
+  <meta charset="UTF-8">
+  <title>NARA PUSTAKA - SMART INVOICE SYSTEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen py-10 px-4 text-slate-800 antialiased">
-<div class="max-w-4xl mx-auto space-y-8">
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100">
 
-<!-- BAGIAN 1: PEMBUAT INVOICE -->
-<div class="bg-white rounded-xl shadow-md p-8 md:p-12 invoice-box relative border border-slate-200">
+  <!-- HEADER -->
+  <header class="bg-indigo-600 text-white p-4 text-center">
+    <h1 class="text-2xl font-bold">NARA PUSTAKA</h1>
+    <p class="text-sm">Smart Invoice & Logistics System</p>
+    <p id="tanggal" class="mt-2"></p>
+    <p id="noInvoice" class="font-mono"></p>
+  </header>
 
-<!-- HEADER INVOICE -->
-<div class="flex flex-col md:flex-row justify-between items-start border-b border-slate-200 pb-8 mb-8">
-  <!-- ... (bagian header tetap sama) ... -->
-</div>
-
-<!-- FORM DATA PEMBELI -->
-<!-- ... (tetap sama) ... -->
-
-<!-- DAFTAR BUKU / PESANAN -->
-<!-- ... (tetap sama) ... -->
-
-<!-- TOTALAN & RINGKASAN -->
-<div class="flex justify-end border-t border-slate-200 pt-6">
-  <div class="w-80 space-y-3 text-sm bg-slate-50 p-6 rounded-lg border border-slate-200">
-    <div class="flex justify-between text-slate-500 font-medium">
-      <span>Subtotal:</span>
-      <span id="subtotal" class="text-slate-800 font-semibold">Rp 0</span>
+  <!-- FORM PEMBELI -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Data Pembeli</h2>
+    <div class="grid gap-2">
+      <input id="namaPembeli" type="text" placeholder="Nama Pembeli" class="p-2 border rounded">
+      <input id="noHP" type="text" placeholder="Nomor HP" class="p-2 border rounded">
+      <textarea id="alamat" placeholder="Alamat Lengkap" class="p-2 border rounded"></textarea>
     </div>
-    <div class="flex justify-between text-slate-500 font-medium">
-      <span>Ongkos Kirim:</span>
-      <span id="shipping-fee" class="text-slate-800 font-semibold">Rp 0</span>
+  </section>
+
+  <!-- DAFTAR PESANAN -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Daftar Pesanan</h2>
+    <table class="w-full border mb-2" id="tabelPesanan">
+      <thead class="bg-slate-200">
+        <tr>
+          <th>Nama Buku</th><th>Harga</th><th>Qty</th><th>Total</th><th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="tambahBuku()" class="bg-indigo-600 text-white px-4 py-2 rounded">Tambah Buku</button>
+  </section>
+
+  <!-- ONGKIR -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Ongkir</h2>
+    <select id="ongkir" class="p-2 border rounded" onchange="hitungTotal()">
+      <option value="0">Pilih Ekspedisi</option>
+      <option value="15000">Lion Parcel REGPACK - Zona A (Rp15.000)</option>
+      <option value="20000">Lion Parcel REGPACK - Zona B (Rp20.000)</option>
+      <option value="25000">Lion Parcel REGPACK - Zona C (Rp25.000)</option>
+      <option value="30000">Lion Parcel REGPACK - Zona D (Rp30.000)</option>
+    </select>
+  </section>
+
+  <!-- TOTAL PEMBAYARAN -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Total Pembayaran</h2>
+    <p>Subtotal: <span id="subtotal">Rp0</span></p>
+    <p>Ongkir: <span id="ongkirDisplay">Rp0</span></p>
+    <p class="font-bold">Grand Total: <span id="grandTotal">Rp0</span></p>
+  </section>
+
+  <!-- INFORMASI PEMBAYARAN -->
+  <section class="p-4">
+    <div class="border rounded p-4 bg-white dark:bg-slate-800">
+      <h2 class="text-lg font-semibold mb-2">Informasi Pembayaran</h2>
+      <p>BCA - 111-047-0742</p>
+      <p>a.n. Deby Verona</p>
     </div>
-    <div class="flex justify-between text-lg font-bold text-slate-900 border-t border-slate-300 pt-3">
-      <span>Total Bayar:</span>
-      <span id="grand-total" class="text-indigo-600">Rp 0</span>
-    </div>
+  </section>
 
-    <!-- PERUBAHAN 1: INFORMASI PEMBAYARAN -->
-    <div class="mt-4 pt-4 border-t border-slate-300">
-      <h3 class="text-xs font-bold text-slate-500 tracking-wider uppercase mb-2">Informasi Pembayaran</h3>
-      <p class="text-sm text-slate-700 font-medium">Pembayaran (BCA)</p>
-      <p class="text-sm text-slate-700">111-047-0742</p>
-      <p class="text-sm text-slate-700">a.n. Deby Verona</p>
-    </div>
-    <!-- END PERUBAHAN 1 -->
-  </div>
-</div>
+  <!-- ACTION BUTTONS -->
+  <section class="p-4 flex gap-2 flex-wrap">
+    <button onclick="downloadPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded">Download Invoice PDF</button>
+    <button onclick="simpanDatabase()" class="bg-slate-600 text-white px-4 py-2 rounded">Simpan Database</button>
+    <button onclick="exportCSV()" class="bg-green-600 text-white px-4 py-2 rounded">Export CSV</button>
+    <button onclick="toggleDarkMode()" class="bg-yellow-500 text-white px-4 py-2 rounded">Dark Mode</button>
+  </section>
 
-<!-- TOMBOL AKSI UTAMA -->
-<!-- ... (tetap sama) ... -->
+  <!-- DATABASE -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Database Invoice</h2>
+    <table class="w-full border" id="tabelDatabase">
+      <thead class="bg-slate-200">
+        <tr>
+          <th>Tanggal</th><th>No Invoice</th><th>Nama Pembeli</th><th>Ekspedisi</th><th>Total Bayar</th><th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
 
-</div>
+  <!-- LOGISTIK -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Logistik Harian</h2>
+    <div id="logistik"></div>
+  </section>
 
-<!-- BAGIAN 2: CONFIG & DATABASE INVOICE -->
-<!-- ... (tetap sama) ... -->
+  <!-- KONFIGURASI GOOGLE SHEETS -->
+  <section class="p-4">
+    <h2 class="text-lg font-semibold mb-2">Konfigurasi Google Sheets</h2>
+    <input id="scriptURL" type="text" placeholder="Google Apps Script URL" class="p-2 border rounded w-full mb-2">
+    <button onclick="simpanKonfigurasi()" class="bg-indigo-600 text-white px-4 py-2 rounded">Simpan Konfigurasi</button>
+  </section>
 
-<script>
-function downloadPDF() {
-  const invoiceBox = document.querySelector('.invoice-box');
-  const noPrintEls = document.querySelectorAll('.no-print');
-  noPrintEls.forEach(el => el.style.display = 'none');
-  const invNumber = document.getElementById('inv-number').value.replace(/\//g, '_');
-  const opt = {
-    margin: [0,0,0,0],
-    filename: 'Invoice_NaraPustaka_' + invNumber + '.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 3, useCORS: true },
-    jsPDF: { unit: 'in', format: 'a5', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(invoiceBox).save().then(() => {
-    noPrintEls.forEach(el => el.style.display = '');
-    showToast("Invoice berhasil diunduh ke PDF!");
-  });
-}
-</script>
+  <script>
+    // Utility
+    function formatRupiah(num){return 'Rp'+num.toLocaleString('id-ID');}
+    function tanggalHariIni(){return new Date().toLocaleDateString('id-ID');}
+    function generateInvoiceNumber(){
+      let d=new Date();
+      let y=d.getFullYear(),m=('0'+(d.getMonth()+1)).slice(-2),day=('0'+d.getDate()).slice(-2);
+      let counter=localStorage.getItem('invoiceCounter')||0;
+      counter++;
+      localStorage.setItem('invoiceCounter',counter);
+      return `NP-${y}${m}${day}-${String(counter).padStart(4,'0')}`;
+    }
 
-</div>
+    // Init
+    document.getElementById('tanggal').innerText=tanggalHariIni();
+    let noInv=generateInvoiceNumber();
+    document.getElementById('noInvoice').innerText=noInv;
+
+    // Pesanan
+    function tambahBuku(){
+      let tbody=document.querySelector('#tabelPesanan tbody');
+      let row=document.createElement('tr');
+      row.innerHTML=`
+        <td><input type="text" class="p-1 border rounded namaBuku"></td>
+        <td><input type="number" class="p-1 border rounded harga" value="0"></td>
+        <td><input type="number" class="p-1 border rounded qty" value="1"></td>
+        <td class="total">Rp0</td>
+        <td><button onclick="hapusRow(this)" class="bg-red-600 text-white px-2 py-1 rounded">Hapus</button></td>
+      `;
+      tbody.appendChild(row);
+      row.querySelector('.harga').addEventListener('input',hitungTotal);
+      row.querySelector('.qty').addEventListener('input',hitungTotal);
+    }
+    function hapusRow(btn){btn.parentElement.parentElement.remove();hitungTotal();}
+    function hitungTotal(){
+      let subtotal=0;
+      document.querySelectorAll('#tabelPesanan tbody tr').forEach(tr=>{
+        let harga=parseInt(tr.querySelector('.harga').value)||0;
+        let qty=parseInt(tr.querySelector('.qty').value)||0;
+        let total=harga*qty;
+        tr.querySelector('.total').innerText=formatRupiah(total);
+        subtotal+=total;
+      });
+      document.getElementById('subtotal').innerText=formatRupiah(subtotal);
+      let ongkir=parseInt(document.getElementById('ongkir').value)||0;
+      document.getElementById('ongkirDisplay').innerText=formatRupiah(ongkir);
+      document.getElementById('grandTotal').innerText=formatRupiah(subtotal+ongkir);
+    }
+
+    // PDF
+    function downloadPDF(){
+      let element=document.body;
+      html2pdf().set({
+        margin:0,
+        filename:noInv+'.pdf',
+        image:{type:'jpeg',quality:0.98},
+        html2canvas:{scale:3},
+        jsPDF:{unit:'mm',format:'a5',orientation:'portrait'}
+      }).from(element
+                    }).save();
+    }
+
+    // Simpan Database
+    function simpanDatabase(){
+      let nama=document.getElementById('namaPembeli').value;
+      let hp=document.getElementById('noHP').value;
+      let alamat=document.getElementById('alamat').value;
+      if(!nama||!hp||!alamat){alert("Semua data pembeli wajib diisi");return;}
+      let ekspedisi=document.getElementById('ongkir').selectedOptions[0].text;
+      let total=document.getElementById('grandTotal').innerText;
+      let data={tanggal:tanggalHariIni(),no:noInv,nama:nama,hp:hp,alamat:alamat,ekspedisi:ekspedisi,total:total,status:"Belum Dicetak"};
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      db.push(data);
+      localStorage.setItem('dbInvoice',JSON.stringify(db));
+      renderDatabase();
+      renderLogistik();
+      // Kirim ke Google Sheets
+      let url=localStorage.getItem('scriptURL');
+      if(url){
+        fetch(url,{method:'POST',body:JSON.stringify(data)});
+      }
+      alert("Data tersimpan");
+    }
+
+    // Render Database
+    function renderDatabase(){
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      let tbody=document.querySelector('#tabelDatabase tbody');
+      tbody.innerHTML='';
+      db.forEach((d,i)=>{
+        let tr=document.createElement('tr');
+        tr.innerHTML=`<td>${d.tanggal}</td><td>${d.no}</td><td>${d.nama}</td><td>${d.ekspedisi}</td><td>${d.total}</td>
+        <td><button onclick="hapusInvoice(${i})" class="bg-red-600 text-white px-2 py-1 rounded">Hapus</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    function hapusInvoice(i){
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      db.splice(i,1);
+      localStorage.setItem('dbInvoice',JSON.stringify(db));
+      renderDatabase();
+      renderLogistik();
+    }
+
+    // Logistik
+    function renderLogistik(){
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      let container=document.getElementById('logistik');
+      container.innerHTML='';
+      db.forEach((d,i)=>{
+        let div=document.createElement('div');
+        div.className="border p-2 mb-2";
+        div.innerHTML=`<p>No Invoice: ${d.no}</p><p>Nama: ${d.nama}</p><p>No HP: ${d.hp}</p><p>Alamat: ${d.alamat}</p>
+        <p>Ekspedisi: ${d.ekspedisi}</p><p>Total: ${d.total}</p>
+        <p>Status: <span>${d.status}</span></p>
+        <button onclick="toggleStatus(${i})" class="bg-indigo-600 text-white px-2 py-1 rounded">Toggle Status</button>
+        <button onclick="salinLabel(${i})" class="bg-green-600 text-white px-2 py-1 rounded">Salin Label</button>`;
+        container.appendChild(div);
+      });
+    }
+    function toggleStatus(i){
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      db[i].status=db[i].status==="Belum Dicetak"?"Sudah Dicetak":"Belum Dicetak";
+      localStorage.setItem('dbInvoice',JSON.stringify(db));
+      renderLogistik();
+    }
+    function salinLabel(i){
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      let d=db[i];
+      let label=`=== LABEL PENGIRIMAN NARA PUSTAKA ===\nNo Invoice: ${d.no}\nNama: ${d.nama}\nNo HP: ${d.hp}\nAlamat: ${d.alamat}\nEkspedisi: ${d.ekspedisi}\nTotal: ${d.total}`;
+      navigator.clipboard.writeText(label);
+      alert("Label disalin");
+    }
+
+    // Export CSV
+    function exportCSV(){
+      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
+      let csv="Tanggal,No Invoice,Nama,HP,Alamat,Ekspedisi,Total,Status\n";
+      db.forEach(d=>{
+        csv+=`${d.tanggal},${d.no},${d.nama},${d.hp},${d.alamat},${d.ekspedisi},${d.total},${d.status}\n`;
+      });
+      let blob=new Blob([csv],{type:'text/csv'});
+      let a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download="database_invoice.csv";
+      a.click();
+    }
+
+    // Konfigurasi
+    function simpanKonfigurasi(){
+      let url=document.getElementById('scriptURL').value;
+      localStorage.setItem('scriptURL',url);
+      alert("Konfigurasi tersimpan");
+    }
+
+    // Dark Mode
+    function toggleDarkMode(){
+      document.body.classList.toggle('dark');
+    }
+
+    // Load awal
+    renderDatabase();
+    renderLogistik();
+  </script>
 </body>
 </html>
