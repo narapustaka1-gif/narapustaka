@@ -43,17 +43,16 @@
 </head>
 <body class="text-gray-800 antialiased flex flex-col min-h-screen">
 
-    <!-- Global State & Mock DB / Google Apps Script Connection -->
     <script>
         const WA_NUMBER = "6282130872054";
         
-        // Ganti URL di bawah ini dengan Web App URL dari deployment Google Apps Script Anda jika sudah siap
+        // URL Web App dari deployment Google Apps Script Anda
         const GAS_URL = "https://script.google.com/macros/s/AKfycby-H1McqQvoz0FZwBvt2NI0PhSK7Bs36rlUysM6ZUevQF-Aq3fDcoKfbgQiULmhFs78RQ/exec";
 
-        // Struktur state aplikasi global default
+        // Struktur database lokal default
         let db = {
             users: [
-                { id: 1, nama: 'Admin Utama', email: 'narapustaka', phone: '08123456789', password: 'admin 1', role: 'admin', status: 'Aktif' },
+                { id: 1, nama: 'Admin Utama', email: 'admin@narapustaka.com', phone: '08123456789', password: 'admin123', role: 'admin', status: 'Aktif' },
                 { id: 2, nama: 'Penulis Contoh', email: 'penulis@gmail.com', phone: '08987654321', password: '123', role: 'member', status: 'Aktif' },
                 { id: 3, nama: 'Deby Verona', email: 'deby@gmail.com', phone: '082130872054', password: 'deby', role: 'member', status: 'Aktif' }
             ],
@@ -77,20 +76,40 @@
             ]
         };
 
-        // Simpan cadangan data ke localStorage
+        // Memastikan akun Admin Utama selalu aman berada di basis data
+        function ensureAdminExists() {
+            if (!db.users) db.users = [];
+            const hasAdmin = db.users.some(u => u.role === 'admin');
+            if (!hasAdmin) {
+                db.users.push({
+                    id: 1,
+                    nama: 'Admin Utama',
+                    email: 'admin@narapustaka.com',
+                    phone: '08123456789',
+                    password: 'admin123',
+                    role: 'admin',
+                    status: 'Aktif'
+                });
+                saveDb();
+            }
+        }
+
+        // Memuat database lokal dari Local Storage
         if (!localStorage.getItem('np_db')) {
             localStorage.setItem('np_db', JSON.stringify(db));
         } else {
             db = JSON.parse(localStorage.getItem('np_db'));
         }
+        
+        ensureAdminExists();
 
         let currentUser = JSON.parse(localStorage.getItem('np_user')) || null;
 
-        // Integrasi Asinkron Ambil Data dari GAS
         async function loadDatabaseFromGAS() {
             try {
                 if (!GAS_URL || GAS_URL.includes("TARUH_URL_WEB_APP_ANDA_DISINI")) {
                     console.log("Menggunakan Local Storage (URL API Belum dipasang)");
+                    ensureAdminExists();
                     hideLoader();
                     return;
                 }
@@ -98,12 +117,14 @@
                 const json = await response.json();
                 if (json && json.status === 'success') {
                     db = json.data;
+                    ensureAdminExists();
                     localStorage.setItem('np_db', JSON.stringify(db));
                     console.log("Database berhasil dimuat dari Google Sheet:", db);
                 }
             } catch (err) {
                 console.error("Gagal sinkronisasi data dari Google Sheet:", err);
                 showToast("Menggunakan database offline lokal.", true);
+                ensureAdminExists();
             } finally {
                 hideLoader();
                 renderNav();
@@ -111,7 +132,6 @@
             }
         }
 
-        // Integrasi Asinkron Simpan Data ke GAS
         async function saveDb() {
             localStorage.setItem('np_db', JSON.stringify(db));
             const indicator = document.getElementById('save-indicator');
@@ -165,7 +185,6 @@
         <p class="text-gray-600 font-medium animate-pulse">Menghubungkan ke Server...</p>
     </div>
 
-    <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
@@ -226,7 +245,6 @@
     <!-- Print Area for Invoice -->
     <div id="print-area" class="hidden bg-white"></div>
 
-    <!-- Application Logic -->
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -299,17 +317,17 @@
                             <!-- Login Form -->
                             <form id="form-login" onsubmit="handleLogin(event)">
                                 <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email/Username</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
                                     <div class="relative">
                                         <i class="ph ph-envelope absolute left-3 top-3 text-gray-400"></i>
-                                        <input type="text" id="l-email" required class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                                        <input type="text" id="l-email" placeholder="Cth: admin@narapustaka.com" required class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
                                     </div>
                                 </div>
                                 <div class="mb-6">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                                     <div class="relative">
                                         <i class="ph ph-lock-key absolute left-3 top-3 text-gray-400"></i>
-                                        <input type="password" id="l-pass" required class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                                        <input type="password" id="l-pass" placeholder="Password akun Anda" required class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
                                     </div>
                                 </div>
                                 <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-3 rounded-lg font-semibold transition">Masuk</button>
@@ -363,8 +381,8 @@
 
         function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('l-email').value;
-            const pass = document.getElementById('l-pass').value;
+            const email = document.getElementById('l-email').value.trim();
+            const pass = document.getElementById('l-pass').value.trim();
 
             const user = db.users.find(u => String(u.email).toLowerCase() === String(email).toLowerCase() && String(u.password) === String(pass));
             if (user) {
@@ -376,7 +394,7 @@
                 loginUser(user);
                 showToast(`Selamat datang kembali, ${user.nama}!`);
             } else {
-                showToast("Email atau password salah!", true);
+                showToast("Email/Username atau password salah!", true);
             }
         }
 
@@ -434,7 +452,7 @@
             };
         }
 
-        // --- VIEWS ---
+        // --- STREAMING_CHUNK: Menyusun layout halaman dasar & views dinamis ---
         const views = {
             home: () => `
             <!-- Hero -->
@@ -615,7 +633,7 @@
             </div>
             `,
 
-            // --- MEMBER DASHBOARD ---
+            // --- STREAMING_CHUNK: Menyusun dashboard panel untuk member ---
             dashboard: () => {
                 const userNaskah = db.naskah.filter(n => String(n.userId) === String(currentUser.id));
                 const userOrders = db.orders.filter(o => String(o.userId) === String(currentUser.id));
@@ -788,7 +806,7 @@
                                 return `
                                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row gap-6 items-center">
                                     <div class="w-24 h-32 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden shadow-sm">
-                                        <img src="${book?.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=200'}" class="w-full h-full object-cover">
+                                        <img src="${book?.cover || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=200'}" class="w-full h-full object-cover animate-pulse shadow-md" onerror="this.src='https://placehold.co/200x300/e6f5f7/56B6C6?text=Buku';">
                                     </div>
                                     <div class="flex-1 w-full">
                                         <div class="flex justify-between items-start mb-2 flex-col sm:flex-row gap-2">
@@ -854,7 +872,7 @@
                 `;
             },
 
-            // --- ADMIN PANEL ---
+            // --- STREAMING_CHUNK: Menyusun dashboard admin panel ---
             admin: () => `
             <div class="flex min-h-screen bg-gray-100 no-print flex-col md:flex-row">
                 <!-- Admin Sidebar -->
@@ -1217,7 +1235,7 @@
                 return `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition group">
                     <div class="h-64 overflow-hidden relative bg-gray-100">
-                        <img src="${b.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img src="${b.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x600/e6f5f7/56B6C6?text=Buku';">
                     </div>
                     <div class="p-5 flex flex-col justify-between h-56">
                         <div>
@@ -1245,7 +1263,7 @@
             document.getElementById('katalog-grid').innerHTML = renderKatalogItems(filtered);
         }
 
-        // --- POPUPS & MODALS ---
+        // --- STREAMING_CHUNK: Menyusun form interaktif untuk modul kelola katalog ---
         
         // MODAL TAMBAH BUKU (DENGAN FORM PAKET DINAMIS BERANAK)
         function showAddBookModal() {
@@ -1387,7 +1405,6 @@
             renderAdmin('buku');
         }
 
-        // MODAL UBAH BUKU DENGAN PAKET DINAMIS
         function showEditBookModal(id) {
             const b = db.books.find(x => x.id === id);
             const root = document.getElementById('modal-root');
@@ -1658,9 +1675,11 @@
             navigate('naskah_saya');
         }
 
-        // --- ORDER BUKU DENGAN PILIHAN PAKET KHUSUS ---
+        // --- STREAMING_CHUNK: Menyusun modul transaksi form pembelian & layout sukses --
+        
+        // MODAL PEMBELIAN DENGAN REKONSTRUKSI ELEMEN DAN TAMPILAN SESUAI REFERENSI GAMBAR (GUEST & MEMBER SUPPORT)
         function orderBook(bookId) {
-            if (!currentUser) return showAuthModal('Silakan login untuk memesan buku.');
+            if (!currentUser) return showAuthModal('Silakan daftar akun atau login terlebih dahulu untuk memesan buku.');
             const book = db.books.find(b => String(b.id) === String(bookId));
             
             let listPaket = [];
@@ -1669,18 +1688,39 @@
             const root = document.getElementById('modal-root');
             root.innerHTML = `
             <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
-                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
+                    <!-- Close button exactly like reference -->
                     <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+                    
+                    <!-- Title with icon matching image_f4a03e.png -->
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="ph ph-shopping-bag text-primary mr-2"></i> Pemesanan Buku</h3>
+                    
+                    <!-- Book Information Section identical to reference -->
                     <div class="flex gap-4 mb-4 items-center">
-                        <img src="${book.cover}" class="w-16 h-20 object-cover rounded shadow-sm border">
+                        <img src="${book.cover}" class="w-16 h-20 object-cover rounded shadow-sm border" onerror="this.src='https://placehold.co/100x150/e6f5f7/56B6C6?text=Cover';">
                         <div>
                             <h4 class="font-bold text-gray-800">${book.title}</h4>
                             <p class="text-xs text-gray-500">${book.author}</p>
                             <p class="text-sm font-bold text-primary mt-1">Harga Dasar: ${formatRp(book.price)}</p>
                         </div>
                     </div>
+                    
+                    <!-- Form of Purchasing -->
                     <form onsubmit="handleOrderBookWithPackage(event, ${bookId})" class="space-y-4">
+                        
+                        <!-- Form pembeli dinamis: Nama Pembeli -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Nama Penerima</label>
+                            <input type="text" id="order-buyer-name" required value="${currentUser ? currentUser.nama : ''}" placeholder="Tulis nama lengkap penerima..." class="w-full px-3 py-2 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+
+                        <!-- Form pembeli dinamis: No Telepon -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Nomor Telepon / WhatsApp</label>
+                            <input type="text" id="order-buyer-phone" required value="${currentUser ? currentUser.phone : ''}" placeholder="Cth: 08123456789" class="w-full px-3 py-2 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+
+                        <!-- Dropdown Paket Buku -->
                         ${listPaket.length > 0 ? `
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Pilih Paket Buku:</label>
@@ -1690,16 +1730,20 @@
                             </select>
                         </div>` : `<input type="hidden" id="order-package" value="default" data-price="${book.price}">`}
 
+                        <!-- Total preview container identical to image_f4a03e.png -->
                         <div class="p-3 bg-primaryLight rounded-lg">
                             <span class="text-xs text-gray-500 block">Total Harga Item</span>
                             <span id="order-price-preview" class="text-lg font-bold text-primary">${formatRp(book.price)}</span>
                         </div>
 
+                        <!-- Alamat Pengiriman Lengkap -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Alamat Pengiriman Lengkap</label>
                             <textarea id="order-address" rows="3" required placeholder="Tuliskan alamat lengkap pengiriman beserta Kecamatan, Kota, Kode Pos..." class="w-full px-3 py-2 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary"></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition shadow-md shadow-primary/30">Lanjutkan Pemesanan</button>
+                        
+                        <!-- Submit button matching brand color of image_f4a03e.png -->
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition shadow-md shadow-primary/30 text-sm">Lanjutkan Pemesanan</button>
                     </form>
                 </div>
             </div>
@@ -1712,10 +1756,15 @@
             document.getElementById('order-price-preview').innerText = formatRp(parseInt(price));
         }
 
+        // Penanganan Proses Pemesanan Buku & Trigger Success Page Custom
         function handleOrderBookWithPackage(e, bookId) {
             e.preventDefault();
             const book = db.books.find(b => String(b.id) === String(bookId));
             const selectPack = document.getElementById('order-package');
+            
+            // Ambil data-data form pembeli baru
+            const buyerName = document.getElementById('order-buyer-name').value;
+            const buyerPhone = document.getElementById('order-buyer-phone').value;
             const address = document.getElementById('order-address').value;
 
             let packageName = "Buku Saja (Dasar)";
@@ -1726,7 +1775,6 @@
                 if (selectPack.options) {
                     finalPrice = parseInt(selectPack.options[selectPack.selectedIndex].getAttribute('data-price'));
                 } else {
-                    // Hidden input fallback
                     finalPrice = parseInt(selectPack.getAttribute('data-price'));
                 }
             }
@@ -1736,11 +1784,11 @@
 
             db.orders.push({
                 id: invId,
-                userId: currentUser.id,
+                userId: currentUser ? currentUser.id : "guest",
                 bookId: book.id,
-                nama: currentUser.nama,
+                nama: buyerName,
                 address: address,
-                phone: currentUser.phone,
+                phone: buyerPhone,
                 date: dateObj.toISOString().split('T')[0],
                 status: 'Menunggu Ongkir',
                 shippingCost: 0,
@@ -1750,12 +1798,69 @@
             });
 
             saveDb();
-            closeModal();
-            showToast("Pesanan berhasil dibuat! Menunggu admin menghitung ongkir.");
-            navigate('pesanan_saya');
+            
+            // Panggil tampilan baru modul halaman sukses
+            showPurchaseSuccessModal(invId, book.title, finalPrice);
         }
 
-        // --- ADMIN ACTIONS ---
+        // TAMPILAN HALAMAN SUKSES CUSTOM BERDASARKAN PERMINTAAN USER
+        function showPurchaseSuccessModal(invoiceId, bookTitle, totalTagihan) {
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+            <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative text-center">
+                    
+                    <!-- Circle success check header -->
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
+                        <i class="ph-fill ph-check-circle"></i>
+                    </div>
+
+                    <!-- Judul Konfirmasi Sukses -->
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Pemesanan Terkirim!</h3>
+                    
+                    <!-- Keterangan Pesan 1 sesuai permintaan user -->
+                    <p class="text-sm text-gray-600 leading-relaxed bg-primaryLight p-4 rounded-xl border border-primary/20 mb-4 text-center font-medium">
+                        "terimakasih sudah order, tunggu admin kami menghubungi anda untuk proses pembayaran, ya"
+                    </p>
+
+                    <!-- Ringkasan Invoice -->
+                    <div class="bg-gray-50 p-4 rounded-xl text-left text-xs text-gray-500 space-y-1.5 mb-6">
+                        <div class="flex justify-between"><span>No. Invoice:</span><span class="font-mono font-bold text-gray-800">${invoiceId}</span></div>
+                        <div class="flex justify-between"><span>Buku/Paket:</span><span class="font-bold text-gray-800 truncate max-w-[200px]">${bookTitle}</span></div>
+                        <div class="flex justify-between"><span>Total Buku:</span><span class="font-bold text-primary font-semibold">${formatRp(totalTagihan)}</span></div>
+                    </div>
+
+                    <!-- Keterangan Pesan 2 di bawah sesuai permintaan user -->
+                    <p class="text-[11px] text-gray-400 leading-relaxed mb-6 italic block">
+                        * website masih dalam tahap pengembangan, proses pembayaran dilakukan via wa agar aman
+                    </p>
+
+                    <!-- Action buttons -->
+                    <div class="flex flex-col gap-2">
+                        <button onclick="goToWhatsAppForPayment('${invoiceId}', '${bookTitle}')" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-bold transition flex items-center justify-center shadow shadow-green-500/20">
+                            <i class="ph-fill ph-whatsapp-logo text-xl mr-2"></i> Hubungi WA Admin
+                        </button>
+                        <button onclick="closeSuccessAndShowOrders()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold transition text-xs">
+                            Lihat Daftar Pesanan Saya
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+
+            window.goToWhatsAppForPayment = (invoice, title) => {
+                const message = `Halo Nara Pustaka, saya ingin melanjutkan proses pembayaran untuk buku "${title}" dengan No. Invoice: ${invoice}. Mohon informasikan rincian tagihan beserta ongkos kirim. Terima kasih.`;
+                openWA(message);
+                closeSuccessAndShowOrders();
+            };
+
+            window.closeSuccessAndShowOrders = () => {
+                closeModal();
+                navigate('pesanan_saya');
+            };
+        }
+
+        // --- STREAMING_CHUNK: Menyediakan event handlers administratif ---
         window.updateNaskahStatus = function(id, status) {
             const n = db.naskah.find(x => x.id === id);
             if(n) { n.status = status; saveDb(); showToast("Status naskah diperbarui"); }
@@ -1822,71 +1927,340 @@
         }
 
         window.printInvoice = function(id) {
-            const o = db.orders.find(x => x.id === id);
+            const o = db.orders.find(x => String(x.id) === String(id));
             const b = db.books.find(x => String(x.id) === String(o.bookId));
+            if (!o) {
+                showToast("Pesanan tidak ditemukan!", true);
+                return;
+            }
 
-            const printHtml = `
-            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #56B6C6; padding-bottom: 20px; margin-bottom: 20px;">
-                    <div>
-                        <h1 style="color: #56B6C6; margin: 0; font-size: 24px; font-weight: bold;">NARA PUSTAKA</h1>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Kabupaten Bogor, Jawa Barat<br>WhatsApp: +62 821-3087-2054<br>Email: narapustaka1@gmail.com</p>
+            const invoiceHtml = `
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="UTF-8">
+                <title>Invoice - ${o.id}</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+                    body {
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        color: #1e293b;
+                        margin: 0;
+                        padding: 40px;
+                        background-color: #ffffff;
+                    }
+                    .invoice-container {
+                        max-width: 800px;
+                        margin: 0 auto;
+                        border: 1px solid #f1f5f9;
+                        padding: 40px;
+                        border-radius: 20px;
+                        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+                    }
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        border-bottom: 2px solid #f1f5f9;
+                        padding-bottom: 30px;
+                        margin-bottom: 30px;
+                    }
+                    .brand-section h1 {
+                        color: #56B6C6;
+                        font-weight: 800;
+                        font-size: 26px;
+                        margin: 0 0 8px 0;
+                        letter-spacing: -0.5px;
+                    }
+                    .brand-section p {
+                        color: #64748b;
+                        font-size: 12px;
+                        margin: 0;
+                        line-height: 1.6;
+                    }
+                    .meta-section {
+                        text-align: right;
+                    }
+                    .meta-section h2 {
+                        font-size: 30px;
+                        font-weight: 800;
+                        color: #0f172a;
+                        margin: 0 0 8px 0;
+                        letter-spacing: -0.5px;
+                    }
+                    .inv-id {
+                        font-family: monospace;
+                        font-size: 13px;
+                        color: #64748b;
+                        background-color: #f1f5f9;
+                        padding: 4px 8px;
+                        border-radius: 6px;
+                        display: inline-block;
+                        margin-bottom: 8px;
+                    }
+                    .inv-date {
+                        font-size: 13px;
+                        color: #64748b;
+                        margin: 0;
+                    }
+                    .badge {
+                        display: inline-block;
+                        padding: 6px 14px;
+                        border-radius: 9999px;
+                        font-size: 11px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        margin-top: 10px;
+                    }
+                    .badge-pending { background-color: #fef3c7; color: #d97706; }
+                    .badge-paid { background-color: #dcfce7; color: #15803d; }
+                    .badge-unpaid { background-color: #fee2e2; color: #b91c1c; }
+                    
+                    .billing-box {
+                        background: #f8fafc;
+                        padding: 20px;
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                        margin-bottom: 30px;
+                    }
+                    .billing-box h3 {
+                        font-size: 11px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        color: #64748b;
+                        margin: 0 0 10px 0;
+                        letter-spacing: 0.5px;
+                    }
+                    .billing-box p {
+                        font-size: 13px;
+                        margin: 0 0 6px 0;
+                        line-height: 1.5;
+                        color: #475569;
+                    }
+                    .billing-box .client-name {
+                        font-weight: 700;
+                        color: #0f172a;
+                        font-size: 15px;
+                    }
+                    
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 30px;
+                    }
+                    th {
+                        background-color: #f8fafc;
+                        color: #475569;
+                        font-size: 11px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        padding: 12px 16px;
+                        text-align: left;
+                        border-bottom: 2px solid #e2e8f0;
+                        letter-spacing: 0.5px;
+                    }
+                    td {
+                        padding: 16px;
+                        border-bottom: 1px solid #f1f5f9;
+                        font-size: 14px;
+                        color: #334155;
+                    }
+                    .text-right { text-align: right; }
+                    .font-bold { font-weight: 700; }
+                    
+                    .totals-table {
+                        margin-left: auto;
+                        width: 350px;
+                        margin-bottom: 40px;
+                    }
+                    .totals-table td {
+                        padding: 10px 16px;
+                        border-bottom: 1px solid #f1f5f9;
+                        font-size: 13px;
+                    }
+                    .totals-table .grand-total-row td {
+                        border-bottom: none;
+                        font-size: 18px;
+                        font-weight: 800;
+                        color: #56B6C6;
+                        background-color: #e6f5f7;
+                    }
+                    .totals-table .grand-total-row td:first-child {
+                        border-top-left-radius: 10px;
+                        border-bottom-left-radius: 10px;
+                    }
+                    .totals-table .grand-total-row td:last-child {
+                        border-top-right-radius: 10px;
+                        border-bottom-right-radius: 10px;
+                    }
+
+                    .payment-box {
+                        background: #f0fdfa;
+                        border: 1px dashed #56B6C6;
+                        padding: 24px;
+                        border-radius: 16px;
+                        margin-bottom: 30px;
+                    }
+                    .payment-box h3 {
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #4599a6;
+                        margin: 0 0 16px 0;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    .payment-grid {
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 15px;
+                    }
+                    .payment-item {
+                        font-size: 13px;
+                    }
+                    .payment-label {
+                        color: #64748b;
+                        font-size: 10px;
+                        text-transform: uppercase;
+                        font-weight: 700;
+                        margin-bottom: 4px;
+                    }
+                    .payment-value {
+                        font-weight: 700;
+                        color: #0f172a;
+                        font-size: 14px;
+                    }
+                    
+                    .footer {
+                        text-align: center;
+                        border-top: 1px solid #f1f5f9;
+                        padding-top: 30px;
+                        margin-top: 40px;
+                        color: #94a3b8;
+                        font-size: 12px;
+                    }
+                    .footer p { margin: 0 0 6px 0; }
+                    .footer .tagline {
+                        font-style: italic;
+                        color: #64748b;
+                        font-weight: 600;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="invoice-container">
+                    <div class="header">
+                        <div class="brand-section">
+                            <h1>NARA PUSTAKA</h1>
+                            <p>Penerbit Buku Profesional & Mandiri<br>Bogor Regency, West Java, Indonesia<br>WhatsApp: +62 821-3087-2054<br>Email: narapustaka1@gmail.com</p>
+                        </div>
+                        <div class="meta-section">
+                            <h2>INVOICE</h2>
+                            <div class="inv-id"># ${o.id}</div>
+                            <div class="inv-date">Tanggal: ${o.date}</div>
+                            <div>
+                                <span class="badge ${
+                                    o.status === 'Selesai' ? 'badge-paid' : 
+                                    o.status === 'Menunggu Pembayaran' ? 'badge-unpaid' : 'badge-pending'
+                                }">
+                                    ${o.status}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div style="text-align: right;">
-                        <h2 style="margin: 0; color: #333;">INVOICE</h2>
-                        <p style="margin: 5px 0 0 0; font-weight: bold;"># ${o.id}</p>
-                        <p style="margin: 2px 0 0 0; color: #666; font-size: 12px;">Tanggal: ${o.date}</p>
+
+                    <div class="billing-box">
+                        <h3>Ditagihkan Kepada:</h3>
+                        <p class="client-name">${o.nama}</p>
+                        <p>${o.address}</p>
+                        <p>WA: ${o.phone}</p>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Deskripsi Item</th>
+                                <th class="text-right" style="width: 150px;">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="font-bold" style="color: #0f172a; font-size: 15px;">${b ? b.title : 'Karya Buku'}</span><br>
+                                    <span style="font-size: 12px; color: #64748b;">Penulis: ${b ? b.author : 'Nara Pustaka'}</span><br>
+                                    ${o.packageName ? `<span style="font-size: 11px; font-weight: 600; background: #e6f5f7; color: #4599a6; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 5px;">Paket: ${o.packageName}</span>` : ''}
+                                </td>
+                                <td class="text-right font-bold" style="color: #0f172a;">${formatRp(o.total)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="totals-table">
+                        <tbody>
+                            <tr>
+                                <td style="color: #64748b;">Subtotal Jual</td>
+                                <td class="text-right font-bold" style="color: #334155;">${formatRp(o.total)}</td>
+                            </tr>
+                            <tr>
+                                <td style="color: #64748b;">Biaya Pengiriman (Ongkir)</td>
+                                <td class="text-right font-bold" style="color: #334155;">${o.shippingCost ? formatRp(o.shippingCost) : 'Menunggu Perhitungan'}</td>
+                            </tr>
+                            <tr class="grand-total-row">
+                                <td>Total Tagihan</td>
+                                <td class="text-right">${formatRp(Number(o.total) + Number(o.shippingCost))}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="payment-box">
+                        <h3>Instruksi Pembayaran (Transfer Bank)</h3>
+                        <div class="payment-grid">
+                            <div class="payment-item">
+                                <div class="payment-label">Bank Penerima</div>
+                                <div class="payment-value">Bank Syariah Indonesia (BSI)</div>
+                            </div>
+                            <div class="payment-item">
+                                <div class="payment-label">Nomor Rekening</div>
+                                <div class="payment-value" style="font-family: monospace; font-size: 16px; letter-spacing: 0.5px;">7213087205</div>
+                            </div>
+                            <div class="payment-item">
+                                <div class="payment-label">Atas Nama</div>
+                                <div class="payment-value">DEBY VERONA</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <p class="tagline">"Turning Manuscripts Into Meaningful Books"</p>
+                        <p>&copy; ${new Date().getFullYear()} Nara Pustaka. All Rights Reserved.</p>
                     </div>
                 </div>
-
-                <div style="margin-bottom: 30px;">
-                    <h3 style="font-size: 14px; margin-bottom: 5px; color: #666;">Ditagihkan Kepada:</h3>
-                    <p style="margin: 0; font-weight: bold;">${o.nama}</p>
-                    <p style="margin: 2px 0 0 0; font-size: 14px;">${o.address}</p>
-                    <p style="margin: 2px 0 0 0; font-size: 14px;">WA: ${o.phone}</p>
-                </div>
-
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                    <thead>
-                        <tr style="background-color: #f8f9fa;">
-                            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Deskripsi Item</th>
-                            <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;">
-                                Buku: ${b ? b.title : 'Judul Buku'} (Penulis: ${b ? b.author : 'Penulis'})
-                                ${o.packageName ? `<br><small style="color:#56B6C6; font-weight:bold;">Paket: ${o.packageName}</small>` : ''}
-                            </td>
-                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatRp(o.total)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;">Biaya Pengiriman (Ongkir)</td>
-                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatRp(o.shippingCost)}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">TOTAL TAGIHAN</td>
-                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #56B6C6; font-size: 18px;">${formatRp(Number(o.total) + Number(o.shippingCost))}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div style="text-align: center; margin-top: 50px; color: #666; font-size: 12px;">
-                    <p>Terima kasih atas pesanan Anda.</p>
-                    <p>"Turning Manuscripts Into Meaningful Books"</p>
-                </div>
-            </div>
+            </body>
+            </html>
             `;
 
-            const pa = document.getElementById('print-area');
-            pa.innerHTML = printHtml;
-            pa.classList.remove('hidden');
-            window.print();
-            pa.classList.add('hidden');
+            let iframe = document.getElementById('print-iframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'print-iframe';
+                iframe.style.position = 'absolute';
+                iframe.style.width = '0px';
+                iframe.style.height = '0px';
+                iframe.style.border = 'none';
+                document.body.appendChild(iframe);
+            }
+
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write(invoiceHtml);
+            doc.close();
+
+            iframe.contentWindow.focus();
+            setTimeout(() => {
+                iframe.contentWindow.print();
+            }, 500);
         }
 
-        // --- INIT APP ---
+        // --- STREAMING_CHUNK: Membuka inisialisasi boot up aplikasi ---
         window.onload = () => {
             loadDatabaseFromGAS();
         };
