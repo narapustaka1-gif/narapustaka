@@ -6,7 +6,7 @@
     <title>Nara Pustaka - Penerbit Buku Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -21,9 +21,8 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(86, 182, 198, 0.2); }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Print Styles for Admin Invoice */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
@@ -31,57 +30,140 @@
             .no-print { display: none !important; }
         }
         
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #56B6C6; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #4599a6; }
+        
+        #loader-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
     </style>
 </head>
 <body class="text-gray-800 antialiased flex flex-col min-h-screen">
 
-    <!-- Global State & Mock DB -->
+    <!-- Global State & Mock DB / Google Apps Script Connection -->
     <script>
         const WA_NUMBER = "6282130872054";
+        
+        // Ganti URL di bawah ini dengan Web App URL dari deployment Google Apps Script Anda jika sudah siap
         const GAS_URL = "https://script.google.com/macros/s/AKfycby-H1McqQvoz0FZwBvt2NI0PhSK7Bs36rlUysM6ZUevQF-Aq3fDcoKfbgQiULmhFs78RQ/exec";
 
-        // Mock Database Initializer (LocalStorage)
+        // Struktur state aplikasi global default
+        let db = {
+            users: [
+                { id: 1, nama: 'Admin Utama', email: 'narapustaka', phone: '08123456789', password: 'admin 1', role: 'admin', status: 'Aktif' },
+                { id: 2, nama: 'Penulis Contoh', email: 'penulis@gmail.com', phone: '08987654321', password: '123', role: 'member', status: 'Aktif' },
+                { id: 3, nama: 'Deby Verona', email: 'deby@gmail.com', phone: '082130872054', password: 'deby', role: 'member', status: 'Aktif' }
+            ],
+            books: [
+                { id: 1, title: 'Senja di Batas Kota', author: 'Ahmad Tohari', isbn: '978-602-1234-56-7', pages: 210, year: 2023, price: 85000, stock: 50, cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop', synopsis: 'Kisah perjalanan seorang perantau yang kembali ke kampung halaman.', packages: JSON.stringify([{name: 'Paket Hemat (Buku Saja)', price: 85000}, {name: 'Paket Bundling (Buku + TTD + Pembatas)', price: 110000}]) },
+                { id: 2, title: 'Menyemai Harapan', author: 'Rina S.', isbn: '978-602-9876-54-3', pages: 150, year: 2024, price: 75000, stock: 120, cover: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=400&auto=format&fit=crop', synopsis: 'Kumpulan esai motivasi untuk anak muda.', packages: '[]' },
+                { id: 3, title: 'Dunia Dalam Angka', author: 'Dr. Budi', isbn: '978-602-1111-22-2', pages: 300, year: 2023, price: 120000, stock: 15, cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop', synopsis: 'Pengantar statistika dasar yang mudah dipahami.', packages: '[]' }
+            ],
+            naskah: [
+                { id: 1, userId: 2, judul: 'Rindu Tak Bersuara', genre: 'Fiksi', status: 'Layout', date: '2024-05-10', notes: 'Desain layout bab 1 sudah siap disepakati.' },
+                { id: 2, userId: 3, judul: 'Melangkah Di Antara Bintang', genre: 'Fiksi', status: 'Menunggu Review', date: '2024-05-15', notes: '' }
+            ],
+            orders: [
+                { id: 'INV-NP-202405-001', userId: 2, bookId: 1, nama: 'Penulis Contoh', address: 'Jl. Merdeka No 1, Bogor', phone: '08987654321', date: '2024-05-12', status: 'Menunggu Pembayaran', shippingCost: 15000, total: 85000, resi: '', packageName: 'Paket Hemat (Buku Saja)' }
+            ],
+            announcements: [
+                { id: 1, title: 'Selamat Datang di Nara Pustaka', date: '2024-05-01', content: 'Platform manajemen penerbitan mandiri kini telah aktif seutuhnya. Kirimkan naskah terbaik Anda dan nikmati proses penerbitan transparan!' }
+            ],
+            tickets: [
+                { id: 1, userId: 2, subject: 'Pertanyaan tentang Pengurusan ISBN', message: 'Berapa lama proses pengurusan ISBN biasanya berlangsung?', status: 'Terbuka', reply: 'Biasanya memakan waktu 5-10 hari kerja setelah naskah layout lolos verifikasi Perpusnas.', date: '2024-05-13' }
+            ]
+        };
+
+        // Simpan cadangan data ke localStorage
         if (!localStorage.getItem('np_db')) {
-            const initialDb = {
-                users: [
-                    { id: 1, nama: 'Admin Utama', email: 'narapustaka', phone: '08123456789', password: 'admin 1', role: 'admin', status: 'Aktif' },
-                    { id: 2, nama: 'Penulis Contoh', email: 'penulis@gmail.com', phone: '08987654321', password: '123', role: 'member', status: 'Aktif' },
-                    { id: 3, nama: 'Deby Verona', email: 'deby@gmail.com', phone: '082130872054', password: 'deby', role: 'member', status: 'Aktif' }
-                ],
-                books: [
-                    { id: 1, title: 'Senja di Batas Kota', author: 'Ahmad Tohari', isbn: '978-602-1234-56-7', pages: 210, year: 2023, price: 85000, stock: 50, cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop', synopsis: 'Kisah perjalanan seorang perantau yang kembali ke kampung halaman.' },
-                    { id: 2, title: 'Menyemai Harapan', author: 'Rina S.', isbn: '978-602-9876-54-3', pages: 150, year: 2024, price: 75000, stock: 120, cover: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=400&auto=format&fit=crop', synopsis: 'Kumpulan esai motivasi untuk anak muda.' },
-                    { id: 3, title: 'Dunia Dalam Angka', author: 'Dr. Budi', isbn: '978-602-1111-22-2', pages: 300, year: 2023, price: 120000, stock: 15, cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop', synopsis: 'Pengantar statistika dasar yang mudah dipahami.' }
-                ],
-                naskah: [
-                    { id: 1, userId: 2, judul: 'Rindu Tak Bersuara', genre: 'Fiksi', status: 'Layout', date: '2024-05-10', notes: 'Desain layout bab 1 sudah siap disepakati.' },
-                    { id: 2, userId: 3, judul: 'Melangkah Di Antara Bintang', genre: 'Fiksi', status: 'Menunggu Review', date: '2024-05-15', notes: '' }
-                ],
-                orders: [
-                    { id: 'INV-NP-202405-001', userId: 2, bookId: 1, nama: 'Penulis Contoh', address: 'Jl. Merdeka No 1, Bogor', phone: '08987654321', date: '2024-05-12', status: 'Menunggu Pembayaran', shippingCost: 15000, total: 85000, resi: '' }
-                ],
-                announcements: [
-                    { id: 1, title: 'Selamat Datang di Nara Pustaka', date: '2024-05-01', content: 'Platform manajemen penerbitan mandiri kini telah aktif seutuhnya. Kirimkan naskah terbaik Anda dan nikmati proses penerbitan transparan!' }
-                ],
-                tickets: [
-                    { id: 1, userId: 2, subject: 'Pertanyaan tentang Pengurusan ISBN', message: 'Berapa lama proses pengurusan ISBN biasanya berlangsung?', status: 'Terbuka', reply: 'Biasanya memakan waktu 5-10 hari kerja setelah naskah layout lolos verifikasi Perpusnas.', date: '2024-05-13' }
-                ]
-            };
-            localStorage.setItem('np_db', JSON.stringify(initialDb));
+            localStorage.setItem('np_db', JSON.stringify(db));
+        } else {
+            db = JSON.parse(localStorage.getItem('np_db'));
         }
 
-        let db = JSON.parse(localStorage.getItem('np_db'));
         let currentUser = JSON.parse(localStorage.getItem('np_user')) || null;
 
-        function saveDb() { localStorage.setItem('np_db', JSON.stringify(db)); }
-        function loginUser(user) { currentUser = user; localStorage.setItem('np_user', JSON.stringify(user)); renderNav(); navigate(user.role === 'admin' ? 'admin' : 'dashboard'); }
-        function logoutUser() { currentUser = null; localStorage.removeItem('np_user'); renderNav(); navigate('home'); }
+        // Integrasi Asinkron Ambil Data dari GAS
+        async function loadDatabaseFromGAS() {
+            try {
+                if (!GAS_URL || GAS_URL.includes("TARUH_URL_WEB_APP_ANDA_DISINI")) {
+                    console.log("Menggunakan Local Storage (URL API Belum dipasang)");
+                    hideLoader();
+                    return;
+                }
+                const response = await fetch(GAS_URL);
+                const json = await response.json();
+                if (json && json.status === 'success') {
+                    db = json.data;
+                    localStorage.setItem('np_db', JSON.stringify(db));
+                    console.log("Database berhasil dimuat dari Google Sheet:", db);
+                }
+            } catch (err) {
+                console.error("Gagal sinkronisasi data dari Google Sheet:", err);
+                showToast("Menggunakan database offline lokal.", true);
+            } finally {
+                hideLoader();
+                renderNav();
+                navigate(window.location.hash ? window.location.hash.substring(1) : 'home');
+            }
+        }
+
+        // Integrasi Asinkron Simpan Data ke GAS
+        async function saveDb() {
+            localStorage.setItem('np_db', JSON.stringify(db));
+            const indicator = document.getElementById('save-indicator');
+            if (indicator) indicator.style.opacity = '1';
+
+            try {
+                if (!GAS_URL || GAS_URL.includes("TARUH_URL_WEB_APP_ANDA_DISINI")) {
+                    if (indicator) setTimeout(() => indicator.style.opacity = '0', 1000);
+                    return;
+                }
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(db)
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    console.log("Database berhasil disinkronkan ke Google Sheet.");
+                }
+            } catch (err) {
+                console.error("Gagal menyinkronkan ke Google Sheets:", err);
+                showToast("Gagal menyimpan ke cloud. Perubahan disimpan secara lokal.", true);
+            } finally {
+                if (indicator) setTimeout(() => indicator.style.opacity = '0', 800);
+            }
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('loader-overlay');
+            if (loader) loader.style.display = 'none';
+        }
+
+        function loginUser(user) { 
+            currentUser = user; 
+            localStorage.setItem('np_user', JSON.stringify(user)); 
+            renderNav(); 
+            navigate(user.role === 'admin' ? 'admin' : 'dashboard'); 
+        }
+
+        function logoutUser() { 
+            currentUser = null; 
+            localStorage.removeItem('np_user'); 
+            renderNav(); 
+            navigate('home'); 
+        }
     </script>
+
+    <!-- Initial Loader -->
+    <div id="loader-overlay">
+        <i class="ph-duotone ph-spinner-gap animate-spin text-5xl text-primary mb-4"></i>
+        <p class="text-gray-600 font-medium animate-pulse">Menghubungkan ke Server...</p>
+    </div>
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
@@ -90,9 +172,10 @@
                 <div class="flex items-center cursor-pointer" onclick="navigate('home')">
                     <i class="ph-fill ph-book-open text-primary text-3xl mr-2"></i>
                     <span class="font-bold text-xl tracking-tight text-gray-800">Nara Pustaka</span>
+                    <span id="save-indicator" class="ml-4 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full opacity-0 transition-opacity"><i class="ph ph-cloud-arrow-up"></i> Sinkronisasi Cloud...</span>
                 </div>
                 <div class="hidden md:flex space-x-8 items-center" id="nav-links">
-                    <!-- Nav links will be rendered via JS based on auth -->
+                    <!-- Links dimuat via JS -->
                 </div>
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden flex items-center">
@@ -111,7 +194,7 @@
     <!-- Main Content Area -->
     <main id="app" class="flex-grow pt-20 fade-in"></main>
 
-    <!-- Footer (English as requested) -->
+    <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-12 pb-8 border-t-4 border-primary mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -140,38 +223,45 @@
     <!-- Modals Container -->
     <div id="modal-root"></div>
 
+    <!-- Print Area for Invoice -->
+    <div id="print-area" class="hidden bg-white"></div>
+
     <!-- Application Logic -->
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // --- UTILS ---
+        //--- UTILS
         const formatRp = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         const openWA = (text) => window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
-        
+
         // --- ROUTER ---
         const app = document.getElementById('app');
-        
+
         function navigate(view, params = null) {
             window.scrollTo(0, 0);
+            window.location.hash = view;
             document.getElementById('mobile-menu').classList.add('hidden');
-            
+
             // Security check
             if (view === 'dashboard' && (!currentUser || currentUser.role !== 'member')) return showAuthModal('Silakan daftar akun atau login terlebih dahulu untuk menggunakan fitur ini.');
             if (view === 'admin' && (!currentUser || currentUser.role !== 'admin')) return navigate('home');
 
             app.innerHTML = '<div class="flex justify-center items-center h-64"><i class="ph-duotone ph-spinner-gap animate-spin text-4xl text-primary"></i></div>';
-            
+
             setTimeout(() => {
-                app.innerHTML = views[view](params);
-                app.className = 'flex-grow pt-20 fade-in'; // Reset animation
+                if (views[view]) {
+                    app.innerHTML = views[view](params);
+                } else {
+                    app.innerHTML = views['home']();
+                }
+                app.className = 'flex-grow pt-20 fade-in';
             }, 100);
         }
 
-        // --- NAVIGATION RENDERER ---
+        //--- NAVIGATION RENDERER
         function renderNav() {
             const deskNav = document.getElementById('nav-links');
             const mobNav = document.getElementById('mobile-nav-links');
-            
             let links = `
                 <a href="#" onclick="navigate('home')" class="text-gray-600 hover:text-primary transition font-medium">Beranda</a>
                 <a href="#" onclick="navigate('katalog')" class="text-gray-600 hover:text-primary transition font-medium">Katalog Buku</a>
@@ -192,26 +282,24 @@
             mobNav.innerHTML = links;
         }
 
-        // --- AUTH MODALS ---
+        // --- AUTH MODALS
         function showAuthModal(message = '') {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
                 <div class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center backdrop-blur-sm fade-in" id="auth-overlay">
                     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
                         <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
-                        
                         <div class="flex border-b">
                             <button onclick="toggleAuthTab('login')" id="tab-login" class="flex-1 py-4 font-semibold text-primary border-b-2 border-primary">Masuk</button>
                             <button onclick="toggleAuthTab('register')" id="tab-register" class="flex-1 py-4 font-semibold text-gray-400 border-b-2 border-transparent">Daftar</button>
                         </div>
-
                         <div class="p-8">
-                            ${message ? `<div class="mb-4 p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm flex items-start"><i class="ph-fill ph-warning-circle text-lg mr-2"></i> ${message}</div>` : ''}
+                            ${message ? `<div class="mb-4 p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm flex items-start"><i class="ph-fill ph-warning-circle text-lg mr-2"></i>${message}</div>` : ''}
                             
                             <!-- Login Form -->
                             <form id="form-login" onsubmit="handleLogin(event)">
                                 <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email/Username</label>
                                     <div class="relative">
                                         <i class="ph ph-envelope absolute left-3 top-3 text-gray-400"></i>
                                         <input type="text" id="l-email" required class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
@@ -277,8 +365,8 @@
             e.preventDefault();
             const email = document.getElementById('l-email').value;
             const pass = document.getElementById('l-pass').value;
-            
-            const user = db.users.find(u => u.email === email && u.password === pass);
+
+            const user = db.users.find(u => String(u.email).toLowerCase() === String(email).toLowerCase() && String(u.password) === String(pass));
             if (user) {
                 if (user.status === 'Nonaktif') {
                     showToast("Akun Anda telah dinonaktifkan oleh administrator.", true);
@@ -295,7 +383,7 @@
         function handleRegister(e) {
             e.preventDefault();
             const email = document.getElementById('r-email').value;
-            if(db.users.find(u => u.email === email)) return showToast("Email sudah terdaftar!", true);
+            if(db.users.find(u => String(u.email).toLowerCase() === String(email).toLowerCase())) return showToast("Email sudah terdaftar!", true);
 
             const newUser = {
                 id: Date.now(),
@@ -318,7 +406,7 @@
             const bgClass = isError ? 'bg-red-600' : 'bg-gray-800';
             const iconClass = isError ? 'ph-warning-circle' : 'ph-check-circle';
             const textClass = isError ? 'text-white' : 'text-primary';
-            
+
             toast.className = `fixed bottom-5 right-5 ${bgClass} text-white px-6 py-3 rounded-lg shadow-xl z-[200] fade-in flex items-center`;
             toast.innerHTML = `<i class="ph-fill ${iconClass} ${textClass} text-xl mr-3"></i> ${msg}`;
             document.body.appendChild(toast);
@@ -349,223 +437,190 @@
         // --- VIEWS ---
         const views = {
             home: () => `
-                <!-- Hero -->
-                <section class="relative bg-primaryLight overflow-hidden">
-                    <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'none\\' fill-rule=\\'evenodd\\'%3E%3Cg fill=\\'%2356B6C6\\' fill-opacity=\\'1\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative flex flex-col md:flex-row items-center">
-                        <div class="md:w-1/2 pr-0 md:pr-12 text-center md:text-left mb-10 md:mb-0">
-                            <span class="inline-block py-1 px-3 rounded-full bg-white text-primary text-sm font-semibold tracking-wider mb-4 border border-primary/20">PENERBIT INDEPENDEN PROFESIONAL</span>
-                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                                Wujudkan Naskah Menjadi <span class="text-primary">Buku Berkualitas</span>
-                            </h1>
-                            <p class="text-lg text-gray-600 mb-8 leading-relaxed">Nara Pustaka membantu penulis menerbitkan karya secara profesional mulai dari penyuntingan, desain, ISBN, pencetakan, hingga distribusi buku.</p>
-                            <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                                <button onclick="navigate('layanan')" class="bg-primary hover:bg-primaryDark text-white px-8 py-4 rounded-full font-bold text-lg transition shadow-xl shadow-primary/30 flex items-center justify-center">
-                                    Mulai Terbitkan <i class="ph-bold ph-arrow-right ml-2"></i>
-                                </button>
-                                <button onclick="navigate('katalog')" class="bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 px-8 py-4 rounded-full font-bold text-lg transition flex items-center justify-center">
-                                    Lihat Katalog Buku
-                                </button>
-                            </div>
-                        </div>
-                        <div class="md:w-1/2 relative">
-                            <div class="absolute inset-0 bg-primary rounded-full blur-3xl opacity-20 transform scale-90 translate-x-10 translate-y-10"></div>
-                            <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop" alt="Buku" class="rounded-2xl shadow-2xl relative z-10 border-4 border-white transform rotate-2 hover:rotate-0 transition duration-500">
+            <!-- Hero -->
+            <section class="relative bg-primaryLight overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 pr-0 md:pr-12 text-center md:text-left mb-10 md:mb-0">
+                        <span class="inline-block py-1 px-3 rounded-full bg-white text-primary text-sm font-semibold tracking-wider mb-4 border border-primary/20">PENERBIT INDEPENDEN PROFESIONAL</span>
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                            Wujudkan Naskah Menjadi <span class="text-primary">Buku Berkualitas</span>
+                        </h1>
+                        <p class="text-lg text-gray-600 mb-8 leading-relaxed">Nara Pustaka membantu penulis menerbitkan karya secara profesional mulai dari penyuntingan, desain, ISBN, pencetakan, hingga distribusi buku.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                            <button onclick="navigate('layanan')" class="bg-primary hover:bg-primaryDark text-white px-8 py-4 rounded-full font-bold text-lg transition shadow-xl shadow-primary/30 flex items-center justify-center">
+                                Mulai Terbitkan <i class="ph-bold ph-arrow-right ml-2"></i>
+                            </button>
+                            <button onclick="navigate('katalog')" class="bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 px-8 py-4 rounded-full font-bold text-lg transition flex items-center justify-center">
+                                Lihat Katalog Buku
+                            </button>
                         </div>
                     </div>
-                </section>
+                    <div class="md:w-1/2 relative">
+                        <div class="absolute inset-0 bg-primary rounded-full blur-3xl opacity-20 transform scale-90 translate-x-10 translate-y-10"></div>
+                        <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop" alt="Buku" class="rounded-2xl shadow-2xl relative z-10 border-4 border-white transform rotate-2 hover:rotate-0 transition duration-500">
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Alur -->
+            <section class="py-20 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 text-center">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-12">Alur Penerbitan yang Mudah</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                            <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+                            <h3 class="font-bold text-lg mb-2">Kirim Naskah</h3>
+                            <p class="text-sm text-gray-500">Daftar akun dan kirim naskah mentah Anda melalui dashboard.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+                            <h3 class="font-bold text-lg mb-2">Proses Redaksi</h3>
+                            <p class="text-sm text-gray-500">Tim kami melakukan editing, layout, dan desain cover memukau.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+                            <h3 class="font-bold text-lg mb-2">Legal & Cetak</h3>
+                            <p class="text-sm text-gray-500">Pengurusan ISBN resmi dan pencetakan buku berkualitas tinggi.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">4</div>
+                            <h3 class="font-bold text-lg mb-2">Buku Terbit</h3>
+                            <p class="text-sm text-gray-500">Buku siap dikirim dan didistribusikan ke pembaca.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                <!-- Alur -->
-                <section class="py-20 bg-gray-50">
-                    <div class="max-w-7xl mx-auto px-4 text-center">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-12">Alur Penerbitan yang Mudah</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
-                                <h3 class="font-bold text-lg mb-2">Kirim Naskah</h3>
-                                <p class="text-sm text-gray-500">Daftar akun dan kirim naskah mentah Anda melalui dashboard.</p>
-                            </div>
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
-                                <h3 class="font-bold text-lg mb-2">Proses Redaksi</h3>
-                                <p class="text-sm text-gray-500">Tim kami melakukan editing, layout, dan desain cover memukau.</p>
-                            </div>
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
-                                <h3 class="font-bold text-lg mb-2">Legal & Cetak</h3>
-                                <p class="text-sm text-gray-500">Pengurusan ISBN resmi dan pencetakan buku berkualitas tinggi.</p>
-                            </div>
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">4</div>
-                                <h3 class="font-bold text-lg mb-2">Buku Terbit</h3>
-                                <p class="text-sm text-gray-500">Buku siap dikirim dan didistribusikan ke pembaca.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- CTA -->
-                <section class="py-20 bg-primary">
-                    <div class="max-w-4xl mx-auto text-center px-4">
-                        <h2 class="text-3xl font-bold text-white mb-6">Siap Mengubah Naskah Anda Menjadi Buku?</h2>
-                        <p class="text-white/80 mb-8 text-lg">Konsultasikan kebutuhan penerbitan Anda dengan tim kami. Gratis!</p>
-                        <button onclick="openWA('Halo Nara Pustaka, saya ingin konsultasi mengenai penerbitan buku.')" class="bg-white text-primary hover:bg-gray-100 px-8 py-4 rounded-full font-bold text-lg transition flex items-center mx-auto">
-                            <i class="ph-fill ph-whatsapp-logo text-2xl mr-2 text-green-500"></i> Chat via WhatsApp
-                        </button>
-                    </div>
-                </section>
+            <!-- CTA -->
+            <section class="py-20 bg-primary">
+                <div class="max-w-4xl mx-auto text-center px-4">
+                    <h2 class="text-3xl font-bold text-white mb-6">Siap Mengubah Naskah Anda Menjadi Buku?</h2>
+                    <p class="text-white/80 mb-8 text-lg">Konsultasikan kebutuhan penerbitan Anda dengan tim kami. Gratis!</p>
+                    <button onclick="openWA('Halo Nara Pustaka, saya ingin konsultasi mengenai penerbitan buku.')" class="bg-white text-primary hover:bg-gray-100 px-8 py-4 rounded-full font-bold text-lg transition flex items-center mx-auto shadow-lg">
+                        <i class="ph-fill ph-whatsapp-logo text-2xl mr-2 text-green-500"></i> Chat via WhatsApp
+                    </button>
+                </div>
+            </section>
             `,
             layanan: () => `
-                <div class="max-w-7xl mx-auto px-4 py-12">
-                    <h1 class="text-4xl font-bold text-gray-800 mb-4 text-center">Layanan Kami</h1>
-                    <p class="text-gray-500 text-center mb-12 max-w-2xl mx-auto">Solusi penerbitan ujung ke ujung. Kami menangani segala hal teknis agar Anda bisa fokus menulis karya hebat berikutnya.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        ${[
-                            { i: 'pen-nib', t: 'Editing Naskah', d: 'Penyuntingan menyeluruh untuk memperbaiki tata bahasa, struktur, dan alur cerita tanpa mengubah gaya bahasa penulis.' },
-                            { i: 'text-aa', t: 'Proofreading', d: 'Pemeriksaan akhir untuk menghilangkan typo, kesalahan ejaan, dan tanda baca sebelum buku dicetak.' },
-                            { i: 'columns', t: 'Layout Buku', d: 'Penataan letak isi buku (typesetting) yang elegan, nyaman dibaca, dan sesuai standar penerbitan profesional.' },
-                            { i: 'image', t: 'Desain Sampul', d: 'Pembuatan desain cover yang menarik, merepresentasikan isi buku, dan memiliki nilai jual di pasaran.' },
-                            { i: 'barcode', t: 'Pengurusan ISBN', d: 'Kami mengurus pendaftaran ISBN (International Standard Book Number) dan barcode resmi dari Perpusnas.' },
-                            { i: 'printer', t: 'Pencetakan Buku', d: 'Cetak buku sistem Print on Demand (POD) maupun offset dengan pilihan kertas berkualitas (Bookpaper, HVS, Artpaper).' },
-                            { i: 'chats-teardrop', t: 'Konsultasi Penerbitan', d: 'Layanan konsultasi naskah interaktif dengan tim ahli kami untuk menentukan arah pemasaran serta format naskah Anda.' }
-                        ].map(s => `
-                            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition">
-                                <div class="w-14 h-14 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-3xl mb-6">
-                                    <i class="ph-duotone ph-${s.i}"></i>
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-3">${s.t}</h3>
-                                <p class="text-gray-600 leading-relaxed">${s.d}</p>
-                            </div>
-                        `).join('')}
+            <div class="max-w-7xl mx-auto px-4 py-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4 text-center">Layanan Kami</h1>
+                <p class="text-gray-500 text-center mb-12 max-w-2xl mx-auto">Solusi penerbitan ujung ke ujung. Kami menangani segala hal teknis agar Anda bisa fokus menulis karya hebat berikutnya.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    ${[
+                        { i: 'pen-nib', t: 'Editing Naskah', d: 'Penyuntingan menyeluruh untuk memperbaiki tata bahasa, struktur, dan alur cerita tanpa mengubah gaya bahasa penulis.' },
+                        { i: 'text-aa', t: 'Proofreading', d: 'Pemeriksaan akhir untuk menghilangkan typo, kesalahan ejaan, dan tanda baca sebelum buku dicetak.' },
+                        { i: 'columns', t: 'Layout Buku', d: 'Penataan letak isi buku (typesetting) yang elegan, nyaman dibaca, dan sesuai standar penerbitan profesional.' },
+                        { i: 'image', t: 'Desain Sampul', d: 'Pembuatan desain cover yang menarik, merepresentasikan isi buku, dan memiliki nilai jual di pasaran.' },
+                        { i: 'barcode', t: 'Pengurusan ISBN', d: 'Kami mengurus pendaftaran ISBN (International Standard Book Number) dan barcode resmi dari Perpusnas.' },
+                        { i: 'printer', t: 'Pencetakan Buku', d: 'Cetak buku sistem Print on Demand (POD) maupun offset dengan pilihan kertas berkualitas (Bookpaper, HVS, Artpaper).' },
+                        { i: 'chats-teardrop', t: 'Konsultasi Penerbitan', d: 'Layanan konsultasi naskah interaktif dengan tim ahli kami untuk menentukan arah pemasaran serta format naskah Anda.' }
+                    ].map(s => `
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition">
+                        <div class="w-14 h-14 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-3xl mb-6">
+                            <i class="ph-duotone ph-${s.i}"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">${s.t}</h3>
+                        <p class="text-gray-600 leading-relaxed">${s.d}</p>
                     </div>
+                    `).join('')}
                 </div>
+            </div>
             `,
             tentang: () => `
-                <div class="max-w-5xl mx-auto px-4 py-16">
-                    <h1 class="text-4xl font-bold text-gray-800 text-center mb-12">Tentang Nara Pustaka</h1>
-                    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm mb-12">
-                        <h2 class="text-2xl font-bold text-primary mb-4">Profil Kami</h2>
-                        <p class="text-gray-600 leading-relaxed mb-6">
-                            Nara Pustaka adalah penerbit independen yang berkomitmen membantu penulis mewujudkan karya terbaiknya menjadi buku yang layak terbit, profesional, dan dapat menjangkau lebih banyak pembaca.
-                        </p>
-                        <p class="text-gray-600 leading-relaxed">
-                            Kami menyediakan layanan penerbitan yang transparan, berkualitas, dan berorientasi pada perkembangan literasi Indonesia.
-                        </p>
+            <div class="max-w-5xl mx-auto px-4 py-16">
+                <h1 class="text-4xl font-bold text-gray-800 text-center mb-12">Tentang Nara Pustaka</h1>
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm mb-12">
+                    <h2 class="text-2xl font-bold text-primary mb-4">Profil Kami</h2>
+                    <p class="text-gray-600 leading-relaxed mb-6">Nara Pustaka adalah penerbit independen yang berkomitmen membantu penulis mewujudkan karya terbaiknya menjadi buku yang layak terbit, profesional, dan dapat menjangkau lebih banyak pembaca.</p>
+                    <p class="text-gray-600 leading-relaxed">Kami menyediakan layanan penerbitan yang transparan, berkualitas, dan berorientasi pada perkembangan literasi Indonesia.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="ph-fill ph-eye text-primary mr-2"></i> Visi</h3>
+                        <p class="text-gray-600 leading-relaxed">Menjadi penerbit terpercaya yang mendukung perkembangan literasi Indonesia melalui penerbitan karya-karya berkualitas, inovatif, dan berdampak positif bagi masyarakat.</p>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="ph-fill ph-eye text-primary mr-2"></i> Visi</h3>
-                            <p class="text-gray-600 leading-relaxed">
-                                Menjadi penerbit terpercaya yang mendukung perkembangan literasi Indonesia melalui penerbitan karya-karya berkualitas, inovatif, dan berdampak positif bagi masyarakat.
-                            </p>
-                        </div>
-                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="ph-fill ph-target text-primary mr-2"></i> Misi</h3>
-                            <ul class="text-gray-600 space-y-2 list-decimal list-inside">
-                                <li>Memberikan layanan penerbitan yang profesional dan transparan.</li>
-                                <li>Mendampingi penulis dalam setiap tahapan penerbitan.</li>
-                                <li>Menghasilkan buku berkualitas yang bermanfaat bagi masyarakat.</li>
-                                <li>Mendukung perkembangan budaya literasi Indonesia.</li>
-                                <li>Membangun hubungan jangka panjang dengan penulis, pembaca, dan mitra penerbitan.</li>
-                            </ul>
-                        </div>
+                    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="ph-fill ph-target text-primary mr-2"></i> Misi</h3>
+                        <ul class="text-gray-600 space-y-2 list-decimal list-inside">
+                            <li>Memberikan layanan penerbitan yang profesional dan transparan.</li>
+                            <li>Mendampingi penulis dalam setiap tahapan penerbitan.</li>
+                            <li>Menghasilkan buku berkualitas yang bermanfaat bagi masyarakat.</li>
+                        </ul>
                     </div>
                 </div>
+            </div>
             `,
             kontak: () => `
-                <div class="max-w-7xl mx-auto px-4 py-16">
-                    <h1 class="text-4xl font-bold text-gray-800 text-center mb-4">Hubungi Kami</h1>
-                    <p class="text-gray-500 text-center mb-12 max-w-xl mx-auto">Ada pertanyaan atau butuh bantuan lebih lanjut? Sampaikan pesan Anda secara langsung kepada kami.</p>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                        <div class="space-y-8">
-                            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4 flex-shrink-0">
-                                    <i class="ph ph-map-pin"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800 mb-1">Alamat Kantor</h4>
-                                    <p class="text-gray-600">Kabupaten Bogor, Jawa Barat, Indonesia</p>
-                                </div>
+            <div class="max-w-7xl mx-auto px-4 py-16">
+                <h1 class="text-4xl font-bold text-gray-800 text-center mb-4">Hubungi Kami</h1>
+                <p class="text-gray-500 text-center mb-12 max-w-xl mx-auto">Ada pertanyaan atau butuh bantuan lebih lanjut? Sampaikan pesan Anda secara langsung kepada kami.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-8">
+                        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start">
+                            <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4 flex-shrink-0">
+                                <i class="ph ph-map-pin"></i>
                             </div>
-                            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4 flex-shrink-0">
-                                    <i class="ph ph-whatsapp-logo"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800 mb-1">WhatsApp Resmi</h4>
-                                    <a href="https://wa.me/${WA_NUMBER}" class="text-primary hover:underline font-semibold block">+62 821-3087-2054</a>
-                                </div>
-                            </div>
-                            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4 flex-shrink-0">
-                                    <i class="ph ph-envelope"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800 mb-1">Email Redaksi</h4>
-                                    <a href="mailto:narapustaka1@gmail.com" class="text-primary hover:underline block">narapustaka1@gmail.com</a>
-                                </div>
-                            </div>
-                            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start">
-                                <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4 flex-shrink-0">
-                                    <i class="ph ph-clock"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-800 mb-1">Jam Operasional</h4>
-                                    <p class="text-gray-600">Senin - Jumat: 08.00 - 17.00 WIB</p>
-                                    <p class="text-gray-500 text-sm">Sabtu - Minggu: Libur</p>
-                                </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 mb-1">Alamat Kantor</h4>
+                                <p class="text-gray-600">Kabupaten Bogor, Jawa Barat, Indonesia</p>
                             </div>
                         </div>
-
-                        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg">
-                            <h3 class="font-bold text-xl text-gray-800 mb-6">Kirim Pesan Instan</h3>
-                            <form onsubmit="event.preventDefault(); showToast('Pesan berhasil terkirim! Terima kasih.'); this.reset();" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                                    <input type="text" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                    <input type="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Isi Pesan</label>
-                                    <textarea rows="4" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
-                                </div>
-                                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-3 rounded-lg font-bold transition">Kirim Pesan</button>
-                            </form>
+                        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-start">
+                            <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4 flex-shrink-0">
+                                <i class="ph ph-whatsapp-logo"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 mb-1">WhatsApp Resmi</h4>
+                                <a href="https://wa.me/${WA_NUMBER}" class="text-primary hover:underline font-semibold block">+62 821-3087-2054</a>
+                            </div>
                         </div>
                     </div>
+                    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg">
+                        <h3 class="font-bold text-xl text-gray-800 mb-6">Kirim Pesan Instan</h3>
+                        <form onsubmit="event.preventDefault(); showToast('Pesan berhasil terkirim! Terima kasih.'); this.reset();" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                <input type="text" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Isi Pesan</label>
+                                <textarea rows="4" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-3 rounded-lg font-bold transition">Kirim Pesan</button>
+                        </form>
+                    </div>
                 </div>
+            </div>
             `,
             katalog: () => `
-                <div class="max-w-7xl mx-auto px-4 py-12 bg-gray-50 min-h-screen">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-                        <div>
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Katalog Buku</h1>
-                            <p class="text-gray-500">Temukan karya-karya terbaik dari penulis Nara Pustaka.</p>
-                        </div>
-                        <div class="relative w-full md:w-80">
-                            <i class="ph ph-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" id="katalog-search" oninput="searchKatalog(this.value)" placeholder="Cari judul atau penulis..." class="w-full pl-10 pr-4 py-2.5 border rounded-full focus:ring-2 focus:ring-primary outline-none shadow-sm bg-white">
-                        </div>
+            <div class="max-w-7xl mx-auto px-4 py-12 bg-gray-50 min-h-screen">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Katalog Buku</h1>
+                        <p class="text-gray-500">Temukan karya-karya terbaik dari penulis Nara Pustaka.</p>
                     </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="katalog-grid">
-                        ${renderKatalogItems(db.books)}
+                    <div class="relative w-full md:w-80">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="katalog-search" oninput="searchKatalog(this.value)" placeholder="Cari judul atau penulis..." class="w-full pl-10 pr-4 py-2.5 border rounded-full focus:ring-2 focus:ring-primary outline-none shadow-sm bg-white">
                     </div>
                 </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="katalog-grid">
+                    ${renderKatalogItems(db.books)}
+                </div>
+            </div>
             `,
-            
+
             // --- MEMBER DASHBOARD ---
             dashboard: () => {
-                const userNaskah = db.naskah.filter(n => n.userId === currentUser.id);
-                const userOrders = db.orders.filter(o => o.userId === currentUser.id);
-                const myTickets = db.tickets.filter(t => t.userId === currentUser.id);
-                
+                const userNaskah = db.naskah.filter(n => String(n.userId) === String(currentUser.id));
+                const userOrders = db.orders.filter(o => String(o.userId) === String(currentUser.id));
+                const myTickets = db.tickets.filter(t => String(t.userId) === String(currentUser.id));
+
                 return `
                 <div class="flex min-h-[calc(100vh-80px)] bg-gray-50 flex-col md:flex-row">
                     <!-- Sidebar -->
@@ -587,7 +642,6 @@
                             <button onclick="logoutUser()" class="w-full text-left px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 font-medium flex items-center mt-8 border-t"><i class="ph ph-sign-out mr-3 text-lg"></i> Keluar</button>
                         </div>
                     </aside>
-
                     <!-- Content -->
                     <div class="flex-1 p-6 md:p-8 space-y-8">
                         <div>
@@ -595,7 +649,7 @@
                             <p class="text-gray-500 text-sm">Kelola proses penerbitan karya naskah buku Anda di sini.</p>
                         </div>
                         
-                        <!-- Pengumuman -->
+                        <!-- Announcements -->
                         ${db.announcements.length > 0 ? `
                         <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-start">
                             <i class="ph-fill ph-megaphone text-blue-500 text-2xl mr-4 mt-0.5"></i>
@@ -630,7 +684,7 @@
                             </div>
                         </div>
 
-                        <!-- Panel Progres Aktif Terakhir -->
+                        <!-- Active Progress Tracker -->
                         ${userNaskah.length > 0 ? `
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                             <h3 class="font-bold text-gray-800 mb-4 flex items-center"><i class="ph ph-chart-line-up mr-2 text-primary"></i> Pelacakan Naskah Terbaru: <span class="text-primary ml-1">"${userNaskah[userNaskah.length-1].judul}"</span></h3>
@@ -639,7 +693,6 @@
                         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
                             <i class="ph ph-book-open text-4xl text-gray-300 mb-3"></i>
                             <h3 class="font-bold text-gray-800 mb-2">Mulai Menerbitkan Karya Pertama Anda</h3>
-                            <p class="text-gray-500 mb-6 text-sm max-w-md mx-auto">Nara Pustaka siap mendampingi karya Anda dari naskah mentah hingga menjadi buku fisik ber-ISBN resmi.</p>
                             <button onclick="navigate('kirim_naskah')" class="bg-primary hover:bg-primaryDark text-white px-6 py-2.5 rounded-lg font-bold transition">Kirim Naskah Baru</button>
                         </div>`}
                     </div>
@@ -647,50 +700,39 @@
                 `;
             },
             kirim_naskah: () => `
-                <div class="flex min-h-[calc(100vh-80px)] bg-gray-50 flex-col md:flex-row">
-                    <aside class="w-full md:w-64 bg-white border-r flex-shrink-0 p-4">
-                        <button onclick="navigate('dashboard')" class="w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 font-medium flex items-center"><i class="ph ph-arrow-left mr-3 text-lg"></i> Kembali</button>
-                    </aside>
-                    <div class="flex-1 p-6 md:p-8 max-w-4xl">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Kirim Naskah Baru</h2>
-                        <p class="text-gray-500 mb-8">Lengkapi detail buku dan unggah file naskah Anda untuk proses evaluasi redaksi.</p>
-                        
-                        <form onsubmit="submitNaskah(event)" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Buku</label>
-                                    <input type="text" id="n-judul" required class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori / Genre</label>
-                                    <select id="n-genre" class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white">
-                                        <option value="Fiksi">Fiksi (Novel, Cerpen, Puisi)</option>
-                                        <option value="Non-Fiksi">Non-Fiksi (Biografi, Esai, Panduan)</option>
-                                        <option value="Akademik">Akademik (Buku Ajar, Referensi)</option>
-                                        <option value="Religi">Religi & Spiritual</option>
-                                    </select>
-                                </div>
+            <div class="flex min-h-[calc(100vh-80px)] bg-gray-50 flex-col md:flex-row">
+                <aside class="w-full md:w-64 bg-white border-r flex-shrink-0 p-4">
+                    <button onclick="navigate('dashboard')" class="w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 font-medium flex items-center"><i class="ph ph-arrow-left mr-3 text-lg"></i> Kembali</button>
+                </aside>
+                <div class="flex-1 p-6 md:p-8 max-w-4xl">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Kirim Naskah Baru</h2>
+                    <form onsubmit="submitNaskah(event)" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Buku</label>
+                                <input type="text" id="n-judul" required class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Sinopsis Singkat</label>
-                                <textarea id="n-sinopsis" rows="5" required placeholder="Tuliskan gambaran ringkas isi naskah Anda..." class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori / Genre</label>
+                                <select id="n-genre" class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white">
+                                    <option value="Fiksi">Fiksi (Novel, Cerpen, Puisi)</option>
+                                    <option value="Non-Fiksi">Non-Fiksi (Biografi, Esai, Panduan)</option>
+                                    <option value="Akademik">Akademik (Buku Ajar, Referensi)</option>
+                                    <option value="Religi">Religi & Spiritual</option>
+                                </select>
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Unggah File Naskah</label>
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition cursor-pointer relative">
-                                    <input type="file" id="n-file" required class="absolute inset-0 opacity-0 cursor-pointer">
-                                    <i class="ph-duotone ph-cloud-arrow-up text-5xl text-gray-400 mb-2"></i>
-                                    <p class="text-sm font-medium text-gray-600">Pilih berkas dari komputer Anda</p>
-                                    <p class="text-xs text-gray-400 mt-1">Format dokumen didukung: PDF, DOCX, DOC (Maksimal 15 MB)</p>
-                                </div>
-                            </div>
-                            <button type="submit" class="bg-primary hover:bg-primaryDark text-white px-8 py-3 rounded-lg font-bold transition w-full">Ajukan Naskah</button>
-                        </form>
-                    </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sinopsis Singkat</label>
+                            <textarea id="n-sinopsis" rows="5" required class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="bg-primary hover:bg-primaryDark text-white px-8 py-3 rounded-lg font-bold transition w-full">Ajukan Naskah</button>
+                    </form>
                 </div>
+            </div>
             `,
             naskah_saya: () => {
-                const myNaskah = db.naskah.filter(n => n.userId === currentUser.id);
+                const myNaskah = db.naskah.filter(n => String(n.userId) === String(currentUser.id));
                 return `
                 <div class="flex min-h-[calc(100vh-80px)] bg-gray-50 flex-col md:flex-row">
                     <aside class="w-full md:w-64 bg-white border-r flex-shrink-0 p-4">
@@ -704,7 +746,6 @@
                             </div>
                             <button onclick="navigate('kirim_naskah')" class="bg-primary hover:bg-primaryDark text-white px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center"><i class="ph ph-plus mr-1.5"></i> Kirim Naskah</button>
                         </div>
-                        
                         <div class="space-y-6">
                             ${myNaskah.length === 0 ? `<div class="bg-white p-12 text-center text-gray-500 rounded-xl border">Belum ada naskah yang diajukan.</div>` : 
                             myNaskah.map(n => `
@@ -729,10 +770,10 @@
                         </div>
                     </div>
                 </div>
-            `;
+                `;
             },
             pesanan_saya: () => {
-                const myOrders = db.orders.filter(o => o.userId === currentUser.id);
+                const myOrders = db.orders.filter(o => String(o.userId) === String(currentUser.id));
                 return `
                 <div class="flex min-h-[calc(100vh-80px)] bg-gray-50 flex-col md:flex-row">
                     <aside class="w-full md:w-64 bg-white border-r flex-shrink-0 p-4">
@@ -740,12 +781,10 @@
                     </aside>
                     <div class="flex-1 p-6 md:p-8">
                         <h2 class="text-2xl font-bold text-gray-800 mb-2">Pesanan Buku Saya</h2>
-                        <p class="text-gray-500 mb-6">Kelola pemesanan, verifikasi ongkos kirim, dan cek resi pengiriman.</p>
-                        
                         <div class="space-y-4">
                             ${myOrders.length === 0 ? `<div class="bg-white p-8 text-center text-gray-500 rounded-xl border">Belum ada pesanan buku. <a href="#" onclick="navigate('katalog')" class="text-primary hover:underline font-semibold">Beli buku di katalog</a></div>` : 
                             myOrders.map(o => {
-                                const book = db.books.find(b => b.id == o.bookId);
+                                const book = db.books.find(b => String(b.id) === String(o.bookId));
                                 return `
                                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row gap-6 items-center">
                                     <div class="w-24 h-32 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden shadow-sm">
@@ -756,25 +795,27 @@
                                             <div>
                                                 <p class="text-xs text-gray-400 mb-1 font-mono">${o.id} • ${o.date}</p>
                                                 <h3 class="font-bold text-lg text-gray-800">${book?.title || 'Buku Tidak Diketahui'}</h3>
+                                                ${o.packageName ? `<p class="text-xs text-primaryDark font-medium bg-primaryLight inline-block px-2 py-0.5 rounded-full mt-1">Paket: ${o.packageName}</p>` : ''}
                                             </div>
                                             <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">${o.status}</span>
                                         </div>
                                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 bg-gray-50 p-4 rounded-lg text-sm">
-                                            <div><span class="text-gray-500 block text-xs">Harga Buku</span><span class="font-medium text-gray-800">${formatRp(o.total)}</span></div>
-                                            <div><span class="text-gray-500 block text-xs">Ongkos Kirim</span><span class="font-medium text-gray-800">${o.shippingCost ? formatRp(o.shippingCost) : 'Menunggu Perhitungan Ongkir'}</span></div>
-                                            <div class="col-span-2 md:col-span-1"><span class="text-gray-500 block text-xs">Total Tagihan</span><span class="font-bold text-primary text-base">${formatRp(o.total + o.shippingCost)}</span></div>
+                                            <div><span class="text-gray-500 block text-xs">Harga Buku/Paket</span><span class="font-medium text-gray-800">${formatRp(o.total)}</span></div>
+                                            <div><span class="text-gray-500 block text-xs">Ongkos Kirim</span><span class="font-medium text-gray-800">${o.shippingCost ? formatRp(o.shippingCost) : 'Menunggu Perhitungan'}</span></div>
+                                            <div class="col-span-2 md:col-span-1"><span class="text-gray-500 block text-xs">Total Tagihan</span><span class="font-bold text-primary text-base">${formatRp(Number(o.total) + Number(o.shippingCost))}</span></div>
                                         </div>
                                         ${o.resi ? `<div class="mt-3 text-sm text-green-700 bg-green-50 p-3 rounded-lg border border-green-200 flex items-center"><i class="ph-bold ph-truck mr-2 text-lg"></i> Nomor Resi Pengiriman: <strong class="ml-1 font-mono">${o.resi}</strong></div>` : ''}
                                     </div>
                                 </div>
-                            `}).join('')}
+                                `
+                            }).join('')}
                         </div>
                     </div>
                 </div>
-            `;
+                `;
             },
             tiket_bantuan: () => {
-                const myTickets = db.tickets.filter(t => t.userId === currentUser.id);
+                const myTickets = db.tickets.filter(t => String(t.userId) === String(currentUser.id));
                 return `
                 <div class="flex min-h-[calc(100vh-80px)] bg-gray-50 flex-col md:flex-row">
                     <aside class="w-full md:w-64 bg-white border-r flex-shrink-0 p-4">
@@ -788,25 +829,24 @@
                             </div>
                             <button onclick="showCreateTicketModal()" class="bg-primary hover:bg-primaryDark text-white px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center"><i class="ph ph-plus mr-1.5"></i> Buat Tiket</button>
                         </div>
-
                         <div class="space-y-4">
                             ${myTickets.length === 0 ? `<div class="bg-white p-8 text-center text-gray-500 rounded-xl border">Belum ada tiket pertanyaan.</div>` : 
                             myTickets.map(t => `
-                                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <span class="text-xs text-gray-400 font-mono">${t.date}</span>
-                                            <h3 class="font-bold text-lg text-gray-800">${t.subject}</h3>
-                                        </div>
-                                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full ${t.status === 'Terbuka' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">${t.status}</span>
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <span class="text-xs text-gray-400 font-mono">${t.date}</span>
+                                        <h3 class="font-bold text-lg text-gray-800">${t.subject}</h3>
                                     </div>
-                                    <p class="text-gray-600 text-sm"><strong>Pertanyaan:</strong> ${t.message}</p>
-                                    ${t.reply ? `
-                                    <div class="p-3 bg-primaryLight/50 text-gray-700 text-sm rounded-lg border-l-4 border-primary">
-                                        <strong>Jawaban Admin:</strong> ${t.reply}
-                                    </div>` : `
-                                    <div class="text-xs text-yellow-600 bg-yellow-50 p-2 rounded-lg inline-block"><i class="ph ph-clock mr-1"></i> Menunggu balasan admin...</div>`}
+                                    <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full ${t.status === 'Terbuka' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">${t.status}</span>
                                 </div>
+                                <p class="text-gray-600 text-sm"><strong>Pertanyaan:</strong> ${t.message}</p>
+                                ${t.reply ? `
+                                <div class="p-3 bg-primaryLight/50 text-gray-700 text-sm rounded-lg border-l-4 border-primary">
+                                    <strong>Jawaban Admin:</strong> ${t.reply}
+                                </div>` : `
+                                <div class="text-xs text-yellow-600 bg-yellow-50 p-2 rounded-lg inline-block"><i class="ph ph-clock mr-1"></i> Menunggu balasan admin...</div>`}
+                            </div>
                             `).join('')}
                         </div>
                     </div>
@@ -814,35 +854,33 @@
                 `;
             },
 
-            // --- ADMIN DASHBOARD ---
+            // --- ADMIN PANEL ---
             admin: () => `
-                <div class="flex min-h-screen bg-gray-100 no-print flex-col md:flex-row">
-                    <!-- Admin Sidebar -->
-                    <aside class="w-full md:w-64 bg-gray-900 text-white flex-shrink-0">
-                        <div class="p-6 border-b border-gray-800 flex items-center">
-                            <i class="ph-fill ph-shield-check text-primary text-2xl mr-2"></i>
-                            <div>
-                                <h2 class="font-bold text-base leading-none text-white">Admin Panel</h2>
-                                <p class="text-[10px] text-gray-400 mt-1">Nara Pustaka</p>
-                            </div>
+            <div class="flex min-h-screen bg-gray-100 no-print flex-col md:flex-row">
+                <!-- Admin Sidebar -->
+                <aside class="w-full md:w-64 bg-gray-900 text-white flex-shrink-0">
+                    <div class="p-6 border-b border-gray-800 flex items-center">
+                        <i class="ph-fill ph-shield-check text-primary text-2xl mr-2"></i>
+                        <div>
+                            <h2 class="font-bold text-base leading-none text-white">Admin Panel</h2>
+                            <p class="text-[10px] text-gray-400 mt-1">Nara Pustaka</p>
                         </div>
-                        <div class="py-4 px-2 space-y-1">
-                            <button onclick="renderAdmin('overview')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-chart-pie-slice mr-3 text-lg"></i> Dashboard</button>
-                            <button onclick="renderAdmin('naskah')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-files mr-3 text-lg"></i> Kelola Naskah</button>
-                            <button onclick="renderAdmin('pesanan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-shopping-cart mr-3 text-lg"></i> Pesanan & Invoice</button>
-                            <button onclick="renderAdmin('buku')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-books mr-3 text-lg"></i> Kelola Buku</button>
-                            <button onclick="renderAdmin('member')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-users mr-3 text-lg"></i> Kelola Member</button>
-                            <button onclick="renderAdmin('admin_tickets')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-ticket mr-3 text-lg"></i> Tiket Pertanyaan</button>
-                            <button onclick="logoutUser()" class="w-full text-left px-4 py-3 rounded-lg text-red-400 hover:bg-red-950 mt-8 transition flex items-center font-medium"><i class="ph ph-sign-out mr-3 text-lg"></i> Logout Admin</button>
-                        </div>
-                    </aside>
-                    <!-- Admin Content Area -->
-                    <div class="flex-1 overflow-y-auto" id="admin-content">
-                        ${adminViews.overview()}
                     </div>
+                    <div class="py-4 px-2 space-y-1">
+                        <button onclick="renderAdmin('overview')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-chart-pie-slice mr-3 text-lg"></i> Dashboard</button>
+                        <button onclick="renderAdmin('naskah')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-files mr-3 text-lg"></i> Kelola Naskah</button>
+                        <button onclick="renderAdmin('pesanan')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-shopping-cart mr-3 text-lg"></i> Pesanan & Invoice</button>
+                        <button onclick="renderAdmin('buku')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-books mr-3 text-lg"></i> Kelola Buku</button>
+                        <button onclick="renderAdmin('member')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-users mr-3 text-lg"></i> Kelola Member</button>
+                        <button onclick="renderAdmin('admin_tickets')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition flex items-center font-medium"><i class="ph ph-ticket mr-3 text-lg"></i> Tiket Pertanyaan</button>
+                        <button onclick="logoutUser()" class="w-full text-left px-4 py-3 rounded-lg text-red-400 hover:bg-red-950 mt-8 transition flex items-center font-medium"><i class="ph ph-sign-out mr-3 text-lg"></i> Logout Admin</button>
+                    </div>
+                </aside>
+                <!-- Admin Content Area -->
+                <div class="flex-1 overflow-y-auto" id="admin-content">
+                    ${adminViews.overview()}
                 </div>
-                <!-- Print Area for Invoice -->
-                <div id="print-area" class="hidden bg-white"></div>
+            </div>
             `
         };
 
@@ -853,14 +891,13 @@
 
         const adminViews = {
             overview: () => {
-                const totalRevenues = db.orders.reduce((sum, o) => sum + o.total, 0);
+                const totalRevenues = db.orders.reduce((sum, o) => sum + Number(o.total), 0);
                 return `
                 <div class="p-6 md:p-8 space-y-8">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-800">Dashboard Utama Admin</h1>
                         <p class="text-gray-500 text-sm">Pantau statistik operasional dan penjualan penerbitan secara real-time.</p>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
                             <div class="w-12 h-12 bg-primaryLight text-primary rounded-xl flex items-center justify-center text-2xl mr-4"><i class="ph-bold ph-files"></i></div>
@@ -891,335 +928,245 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Naskah Terbaru -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-                            <h3 class="font-bold text-lg text-gray-800 flex items-center justify-between">
-                                <span><i class="ph ph-file-text mr-1 text-primary"></i> Pengajuan Naskah Terbaru</span>
-                                <button onclick="renderAdmin('naskah')" class="text-xs text-primary hover:underline">Kelola Semua</button>
-                            </h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm border-collapse">
-                                    <thead>
-                                        <tr class="bg-gray-50 border-b text-gray-500">
-                                            <th class="p-3">Judul</th>
-                                            <th class="p-3">Genre</th>
-                                            <th class="p-3">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${db.naskah.slice(0, 4).map(n => `
-                                            <tr class="border-b">
-                                                <td class="p-3 font-semibold text-gray-700">${n.judul}</td>
-                                                <td class="p-3 text-gray-500">${n.genre}</td>
-                                                <td class="p-3"><span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-yellow-100 text-yellow-800">${n.status}</span></td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Pesanan Terbaru -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-                            <h3 class="font-bold text-lg text-gray-800 flex items-center justify-between">
-                                <span><i class="ph ph-shopping-bag mr-1 text-primary"></i> Pesanan Buku Terbaru</span>
-                                <button onclick="renderAdmin('pesanan')" class="text-xs text-primary hover:underline">Kelola Semua</button>
-                            </h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm border-collapse">
-                                    <thead>
-                                        <tr class="bg-gray-50 border-b text-gray-500">
-                                            <th class="p-3">Invoice</th>
-                                            <th class="p-3">Pemesan</th>
-                                            <th class="p-3">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${db.orders.slice(0, 4).map(o => `
-                                            <tr class="border-b">
-                                                <td class="p-3 font-mono text-xs">${o.id}</td>
-                                                <td class="p-3 font-medium text-gray-700">${o.nama}</td>
-                                                <td class="p-3 font-bold text-primary">${formatRp(o.total + o.shippingCost)}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 `;
             },
             naskah: () => `
-                <div class="p-6 md:p-8">
-                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Kelola Naskah Masuk</h1>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-4 font-semibold text-gray-600">Tgl & Penulis</th>
-                                    <th class="p-4 font-semibold text-gray-600">Judul Naskah</th>
-                                    <th class="p-4 font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 font-semibold text-gray-600">Aksi</th>
+            <div class="p-6 md:p-8">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Kelola Naskah Masuk</h1>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="p-4 font-semibold text-gray-600">Tgl & Penulis</th>
+                                <th class="p-4 font-semibold text-gray-600">Judul Naskah</th>
+                                <th class="p-4 font-semibold text-gray-600">Status</th>
+                                <th class="p-4 font-semibold text-gray-600">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${db.naskah.map(n => {
+                                const user = db.users.find(u => String(u.id) === String(n.userId));
+                                return `
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4">
+                                        <div class="text-xs text-gray-400 font-mono">${n.date}</div>
+                                        <div class="font-bold text-gray-800">${user?.nama || 'Unknown'}</div>
+                                        <a href="https://wa.me/${user?.phone}" target="_blank" class="text-xs text-green-600 hover:underline inline-flex items-center mt-1"><i class="ph ph-whatsapp-logo mr-0.5 text-base"></i> Hubungi</a>
+                                    </td>
+                                    <td class="p-4">
+                                        <span class="font-bold text-gray-800 text-base">${n.judul}</span><br>
+                                        <span class="text-gray-500 font-medium">${n.genre}</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <select onchange="updateNaskahStatus(${n.id}, this.value)" class="border rounded-lg p-1.5 bg-white focus:ring-2 focus:ring-primary outline-none text-xs">
+                                            ${['Menunggu Review', 'Editing', 'Layout', 'Desain Cover', 'Pengurusan ISBN', 'Cetak', 'Terbit']
+                                            .map(opt => `<option value="${opt}" ${n.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                                        </select>
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex flex-col gap-2">
+                                            <button onclick="promptNaskahNote(${n.id})" class="text-xs bg-primaryLight text-primaryDark px-3 py-1.5 rounded-lg hover:bg-primary/20 transition font-bold flex items-center justify-center"><i class="ph ph-pencil-simple mr-0.5"></i> Beri Catatan</button>
+                                            <button onclick="deleteNaskah(${n.id})" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-200 transition font-bold flex items-center justify-center"><i class="ph ph-trash mr-0.5"></i> Hapus</button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${db.naskah.map(n => {
-                                    const user = db.users.find(u => u.id === n.userId);
-                                    return `
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="p-4">
-                                            <div class="text-xs text-gray-400 font-mono">${n.date}</div>
-                                            <div class="font-bold text-gray-800">${user?.nama || 'Unknown'}</div>
-                                            <a href="https://wa.me/${user?.phone}" target="_blank" class="text-xs text-green-600 hover:underline inline-flex items-center mt-1"><i class="ph ph-whatsapp-logo mr-0.5 text-base"></i> Hubungi</a>
-                                        </td>
-                                        <td class="p-4"><span class="font-bold text-gray-800 text-base">${n.judul}</span><br><span class="text-gray-500 font-medium">${n.genre}</span></td>
-                                        <td class="p-4">
-                                            <select onchange="updateNaskahStatus(${n.id}, this.value)" class="border rounded-lg p-1.5 bg-white focus:ring-2 focus:ring-primary outline-none">
-                                                ${['Menunggu Review', 'Sedang Direview', 'Revisi', 'Diterima', 'Editing', 'Layout', 'Desain Cover', 'Pengurusan ISBN', 'Cetak', 'Terbit']
-                                                .map(opt => `<option value="${opt}" ${n.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                                            </select>
-                                        </td>
-                                        <td class="p-4">
-                                            <div class="flex flex-col gap-2">
-                                                <button onclick="promptNaskahNote(${n.id})" class="text-xs bg-primaryLight text-primaryDark px-3 py-1.5 rounded-lg hover:bg-primary/20 transition font-bold flex items-center justify-center"><i class="ph ph-pencil-simple mr-0.5"></i> Beri Catatan</button>
-                                                <button onclick="deleteNaskah(${n.id})" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-200 transition font-bold flex items-center justify-center"><i class="ph ph-trash mr-0.5"></i> Hapus</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `}).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                                `
+                            }).join('')}
+                        </tbody>
+                    </table>
                 </div>
+            </div>
             `,
             pesanan: () => `
-                <div class="p-6 md:p-8">
-                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Kelola Pesanan & Invoice</h1>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-4 font-semibold text-gray-600">Invoice / Tgl</th>
-                                    <th class="p-4 font-semibold text-gray-600">Pembeli & Buku</th>
-                                    <th class="p-4 font-semibold text-gray-600">Keuangan (Rp)</th>
-                                    <th class="p-4 font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 font-semibold text-gray-600">Aksi</th>
+            <div class="p-6 md:p-8">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Kelola Pesanan & Invoice</h1>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="p-4 font-semibold text-gray-600">Invoice / Tgl</th>
+                                <th class="p-4 font-semibold text-gray-600">Pembeli & Buku</th>
+                                <th class="p-4 font-semibold text-gray-600">Keuangan (Rp)</th>
+                                <th class="p-4 font-semibold text-gray-600">Status</th>
+                                <th class="p-4 font-semibold text-gray-600">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${db.orders.map(o => {
+                                const book = db.books.find(b => String(b.id) === String(o.bookId));
+                                return `
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4">
+                                        <span class="font-mono text-xs bg-gray-200 px-1.5 py-0.5 rounded">${o.id}</span><br>
+                                        <span class="text-gray-400 text-xs">${o.date}</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <span class="font-bold text-gray-800">${o.nama}</span><br>
+                                        <span class="text-gray-500 text-xs">Buku: ${book?.title}</span>
+                                        ${o.packageName ? `<br><span class="text-[10px] text-primaryDark font-semibold bg-primaryLight px-1.5 py-0.5 rounded-full">Paket: ${o.packageName}</span>` : ''}<br>
+                                        <a href="https://wa.me/${o.phone}" target="_blank" class="text-xs text-green-600 hover:underline"><i class="ph ph-whatsapp-logo mr-0.5"></i> ${o.phone}</a>
+                                    </td>
+                                    <td class="p-4">
+                                        Buku/Paket: ${formatRp(o.total)}<br>
+                                        Ongkir: <button onclick="setOngkir('${o.id}')" class="text-primary hover:underline font-bold" title="Klik untuk set ongkir">${o.shippingCost ? formatRp(o.shippingCost) : 'Set Ongkir'}</button><br>
+                                        <span class="font-bold text-gray-800 border-t pt-1 mt-1 block">Total: ${formatRp(Number(o.total) + Number(o.shippingCost))}</span>
+                                    </td>
+                                    <td class="p-4">
+                                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded-lg p-1.5 bg-white outline-none w-36 text-xs">
+                                            ${['Menunggu Ongkir', 'Menunggu Pembayaran', 'Diproses', 'Dikirim', 'Selesai']
+                                            .map(opt => `<option value="${opt}" ${o.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                                        </select>
+                                        ${o.status === 'Dikirim' ? `<button onclick="setResi('${o.id}')" class="block mt-1 text-xs text-blue-600 hover:underline font-bold">${o.resi ? 'Edit Resi' : '+ Input Resi'}</button>` : ''}
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex flex-col gap-2">
+                                            <button onclick="printInvoice('${o.id}')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-black transition flex items-center justify-center font-semibold"><i class="ph ph-printer mr-1"></i> Cetak PDF</button>
+                                            <button onclick="deleteOrder('${o.id}')" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-200 transition font-bold flex items-center justify-center"><i class="ph ph-trash mr-1"></i> Hapus</button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${db.orders.map(o => {
-                                    const book = db.books.find(b => b.id == o.bookId);
-                                    return `
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="p-4"><span class="font-mono text-xs bg-gray-200 px-1.5 py-0.5 rounded">${o.id}</span><br><span class="text-gray-400 text-xs">${o.date}</span></td>
-                                        <td class="p-4">
-                                            <span class="font-bold text-gray-800">${o.nama}</span><br>
-                                            <span class="text-gray-500 text-xs">Buku: ${book?.title}</span><br>
-                                            <a href="https://wa.me/${o.phone}" target="_blank" class="text-xs text-green-600 hover:underline"><i class="ph ph-whatsapp-logo mr-0.5"></i> ${o.phone}</a>
-                                        </td>
-                                        <td class="p-4">
-                                            Buku: ${formatRp(o.total)}<br>
-                                            Ongkir: <button onclick="setOngkir('${o.id}')" class="text-primary hover:underline font-bold" title="Klik untuk set ongkir">${o.shippingCost ? formatRp(o.shippingCost) : 'Set Ongkir'}</button><br>
-                                            <span class="font-bold text-gray-800 border-t pt-1 mt-1 block">Total: ${formatRp(o.total + o.shippingCost)}</span>
-                                        </td>
-                                        <td class="p-4">
-                                            <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded-lg p-1.5 bg-white outline-none w-36">
-                                                ${['Menunggu Ongkir', 'Menunggu Pembayaran', 'Diproses', 'Dikirim', 'Selesai']
-                                                .map(opt => `<option value="${opt}" ${o.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                                            </select>
-                                            ${o.status === 'Dikirim' ? `<button onclick="setResi('${o.id}')" class="block mt-1 text-xs text-blue-600 hover:underline font-bold">${o.resi ? 'Edit Resi' : '+ Input Resi'}</button>` : ''}
-                                        </td>
-                                        <td class="p-4">
-                                            <div class="flex flex-col gap-2">
-                                                <button onclick="printInvoice('${o.id}')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-black transition flex items-center justify-center font-semibold"><i class="ph ph-printer mr-1"></i> Cetak PDF</button>
-                                                <button onclick="deleteOrder('${o.id}')" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-200 transition font-bold flex items-center justify-center"><i class="ph ph-trash mr-1"></i> Hapus</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `}).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                                `
+                            }).join('')}
+                        </tbody>
+                    </table>
                 </div>
-            `,
-            pesanan: () => `
-                <div class="p-6 md:p-8">
-                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Kelola Pesanan & Invoice</h1>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-4 font-semibold text-gray-600">Invoice / Tgl</th>
-                                    <th class="p-4 font-semibold text-gray-600">Pembeli & Buku</th>
-                                    <th class="p-4 font-semibold text-gray-600">Keuangan (Rp)</th>
-                                    <th class="p-4 font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 font-semibold text-gray-600">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${db.orders.map(o => {
-                                    const book = db.books.find(b => b.id == o.bookId);
-                                    return `
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="p-4"><span class="font-mono text-xs bg-gray-200 px-1.5 py-0.5 rounded">${o.id}</span><br><span class="text-gray-400 text-xs">${o.date}</span></td>
-                                        <td class="p-4">
-                                            <span class="font-bold text-gray-800">${o.nama}</span><br>
-                                            <span class="text-gray-500 text-xs">Buku: ${book?.title}</span><br>
-                                            <a href="https://wa.me/${o.phone}" target="_blank" class="text-xs text-green-600 hover:underline"><i class="ph ph-whatsapp-logo mr-0.5"></i> ${o.phone}</a>
-                                        </td>
-                                        <td class="p-4">
-                                            Buku: ${formatRp(o.total)}<br>
-                                            Ongkir: <button onclick="setOngkir('${o.id}')" class="text-primary hover:underline font-bold" title="Klik untuk set ongkir">${o.shippingCost ? formatRp(o.shippingCost) : 'Set Ongkir'}</button><br>
-                                            <span class="font-bold text-gray-800 border-t pt-1 mt-1 block">Total: ${formatRp(o.total + o.shippingCost)}</span>
-                                        </td>
-                                        <td class="p-4">
-                                            <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded-lg p-1.5 bg-white outline-none w-36">
-                                                ${['Menunggu Ongkir', 'Menunggu Pembayaran', 'Diproses', 'Dikirim', 'Selesai']
-                                                .map(opt => `<option value="${opt}" ${o.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                                            </select>
-                                            ${o.status === 'Dikirim' ? `<button onclick="setResi('${o.id}')" class="block mt-1 text-xs text-blue-600 hover:underline font-bold">${o.resi ? 'Edit Resi' : '+ Input Resi'}</button>` : ''}
-                                        </td>
-                                        <td class="p-4">
-                                            <button onclick="printInvoice('${o.id}')" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-black transition flex items-center font-semibold"><i class="ph ph-printer mr-1"></i> Cetak PDF</button>
-                                        </td>
-                                    </tr>
-                                `}).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            </div>
             `,
             buku: () => `
-                <div class="p-6 md:p-8 space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h1 class="text-2xl font-bold text-gray-800">Kelola Katalog Buku</h1>
-                        <button onclick="showAddBookModal()" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center"><i class="ph ph-plus mr-1.5"></i> Tambah Buku Baru</button>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-4 font-semibold text-gray-600">Cover</th>
-                                    <th class="p-4 font-semibold text-gray-600">Detail Buku</th>
-                                    <th class="p-4 font-semibold text-gray-600">Keuangan & Stok</th>
-                                    <th class="p-4 font-semibold text-gray-600" style="text-align: right;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${db.books.map(b => `
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="p-4 w-20">
-                                            <div class="w-12 h-16 bg-gray-100 rounded overflow-hidden shadow-sm">
-                                                <img src="${b.cover}" class="w-full h-full object-cover">
-                                            </div>
-                                        </td>
-                                        <td class="p-4">
-                                            <h4 class="font-bold text-gray-800">${b.title}</h4>
-                                            <p class="text-gray-500 text-xs">Penulis: ${b.author} | ISBN: ${b.isbn}</p>
-                                        </td>
-                                        <td class="p-4">
-                                            Harga: <strong class="text-primary">${formatRp(b.price)}</strong><br>
-                                            Stok: <span class="font-semibold ${b.stock < 10 ? 'text-red-500' : 'text-gray-700'}">${b.stock} eks</span>
-                                        </td>
-                                        <td class="p-4" style="text-align: right;">
-                                            <button onclick="showEditBookModal(${b.id})" class="text-xs text-blue-600 hover:underline font-bold mr-3">Edit</button>
-                                            <button onclick="deleteBook(${b.id})" class="text-xs text-red-600 hover:underline font-bold">Hapus</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="p-6 md:p-8 space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">Kelola Katalog Buku</h1>
+                    <button onclick="showAddBookModal()" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center"><i class="ph ph-plus mr-1.5"></i> Tambah Buku Baru</button>
                 </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="p-4 font-semibold text-gray-600">Cover</th>
+                                <th class="p-4 font-semibold text-gray-600">Detail Buku</th>
+                                <th class="p-4 font-semibold text-gray-600">Keuangan & Stok</th>
+                                <th class="p-4 font-semibold text-gray-600" style="text-align: right;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${db.books.map(b => {
+                                let packs = [];
+                                try { packs = b.packages ? JSON.parse(b.packages) : []; } catch(e) {}
+                                return `
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4 w-20">
+                                        <div class="w-12 h-16 bg-gray-100 rounded overflow-hidden shadow-sm">
+                                            <img src="${b.cover}" class="w-full h-full object-cover">
+                                        </div>
+                                    </td>
+                                    <td class="p-4">
+                                        <h4 class="font-bold text-gray-800">${b.title}</h4>
+                                        <p class="text-gray-500 text-xs">Penulis: ${b.author} | ISBN: ${b.isbn}</p>
+                                        ${packs.length > 0 ? `
+                                        <div class="mt-1 flex flex-wrap gap-1">
+                                            ${packs.map(p => `<span class="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">${p.name}: ${formatRp(p.price)}</span>`).join('')}
+                                        </div>` : ''}
+                                    </td>
+                                    <td class="p-4">
+                                        Harga Jual Dasar: <strong class="text-primary">${formatRp(b.price)}</strong><br>
+                                        Stok: <span class="font-semibold ${b.stock < 10 ? 'text-red-500' : 'text-gray-700'}">${b.stock} eks</span>
+                                    </td>
+                                    <td class="p-4" style="text-align: right;">
+                                        <button onclick="showEditBookModal(${b.id})" class="text-xs text-blue-600 hover:underline font-bold mr-3">Edit</button>
+                                        <button onclick="deleteBook(${b.id})" class="text-xs text-red-600 hover:underline font-bold">Hapus</button>
+                                    </td>
+                                </tr>
+                                `
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             `,
             member: () => `
-                <div class="p-6 md:p-8 space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h1 class="text-2xl font-bold text-gray-800">Kelola Member</h1>
-                        <button onclick="showAddMemberModal()" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center"><i class="ph ph-plus mr-1.5"></i> Tambah Member Manual</button>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-4 font-semibold text-gray-600">ID & Nama</th>
-                                    <th class="p-4 font-semibold text-gray-600">Kontak & Email</th>
-                                    <th class="p-4 font-semibold text-gray-600">Peran</th>
-                                    <th class="p-4 font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 font-semibold text-gray-600" style="text-align: right;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${db.users.map(u => `
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="p-4 font-bold text-gray-800">
-                                            <span class="text-xs text-gray-400 block font-mono">ID: ${u.id}</span>
-                                            ${u.nama}
-                                        </td>
-                                        <td class="p-4 text-gray-500">${u.email}<br><span class="text-xs font-semibold text-gray-700">${u.phone}</span></td>
-                                        <td class="p-4"><span class="px-2 py-0.5 text-xs font-bold rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">${u.role.toUpperCase()}</span></td>
-                                        <td class="p-4">
-                                            <span class="px-2 py-0.5 text-xs font-bold rounded-full ${u.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${u.status || 'Aktif'}</span>
-                                        </td>
-                                        <td class="p-4" style="text-align: right;">
-                                            <button onclick="toggleMemberStatus(${u.id})" class="text-xs text-yellow-600 hover:underline font-bold mr-3">${u.status === 'Nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}</button>
-                                            <button onclick="deleteMember(${u.id})" class="text-xs text-red-600 hover:underline font-bold">Hapus</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="p-6 md:p-8 space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">Kelola Member</h1>
+                    <button onclick="showAddMemberModal()" class="bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center"><i class="ph ph-plus mr-1.5"></i> Tambah Member Manual</button>
                 </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="p-4 font-semibold text-gray-600">ID & Nama</th>
+                                <th class="p-4 font-semibold text-gray-600">Kontak & Email</th>
+                                <th class="p-4 font-semibold text-gray-600">Peran</th>
+                                <th class="p-4 font-semibold text-gray-600">Status</th>
+                                <th class="p-4 font-semibold text-gray-600" style="text-align: right;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${db.users.map(u => `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="p-4 font-bold text-gray-800">
+                                    <span class="text-xs text-gray-400 block font-mono">ID: ${u.id}</span>
+                                    ${u.nama}
+                                </td>
+                                <td class="p-4 text-gray-500">${u.email}<br><span class="text-xs font-semibold text-gray-700">${u.phone}</span></td>
+                                <td class="p-4"><span class="px-2 py-0.5 text-xs font-bold rounded-full ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">${u.role.toUpperCase()}</span></td>
+                                <td class="p-4">
+                                    <span class="px-2 py-0.5 text-xs font-bold rounded-full ${u.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${u.status || 'Aktif'}</span>
+                                </td>
+                                <td class="p-4" style="text-align: right;">
+                                    <button onclick="toggleMemberStatus(${u.id})" class="text-xs text-yellow-600 hover:underline font-bold mr-3">${u.status === 'Nonaktif' ? 'Aktifkan' : 'Nonaktifkan'}</button>
+                                    <button onclick="deleteMember(${u.id})" class="text-xs text-red-600 hover:underline font-bold">Hapus</button>
+                                </td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             `,
             admin_tickets: () => `
-                <div class="p-6 md:p-8 space-y-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Kelola Tiket Bantuan</h1>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-4 font-semibold text-gray-600">Tgl & Penulis</th>
-                                    <th class="p-4 font-semibold text-gray-600">Subjek & Pesan</th>
-                                    <th class="p-4 font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 font-semibold text-gray-600" style="text-align: right;">Aksi</th>
+            <div class="p-6 md:p-8 space-y-6">
+                <h1 class="text-2xl font-bold text-gray-800">Kelola Tiket Bantuan</h1>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="p-4 font-semibold text-gray-600">Tgl & Penulis</th>
+                                <th class="p-4 font-semibold text-gray-600">Subjek & Pesan</th>
+                                <th class="p-4 font-semibold text-gray-600">Status</th>
+                                <th class="p-4 font-semibold text-gray-600" style="text-align: right;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${db.tickets.map(t => {
+                                const user = db.users.find(u => String(u.id) === String(t.userId));
+                                return `
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="p-4">
+                                        <span class="text-xs text-gray-400 block font-mono">${t.date}</span>
+                                        <strong>${user?.nama || 'Unknown'}</strong>
+                                    </td>
+                                    <td class="p-4">
+                                        <strong class="text-gray-800">${t.subject}</strong><br>
+                                        <p class="text-gray-500 mt-1">${t.message}</p>
+                                        ${t.reply ? `<p class="text-xs text-primaryDark mt-1"><b>Balasan:</b> ${t.reply}</p>` : ''}
+                                    </td>
+                                    <td class="p-4">
+                                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full ${t.status === 'Terbuka' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">${t.status}</span>
+                                    </td>
+                                    <td class="p-4" style="text-align: right;">
+                                        <div class="flex flex-col gap-2 items-end">
+                                            <button onclick="replyTicket(${t.id})" class="text-xs bg-primaryLight text-primaryDark px-3 py-1.5 rounded-lg font-bold hover:bg-primary/20 transition flex items-center justify-center w-full"><i class="ph ph-chat-teardrop-text mr-1"></i> Balas</button>
+                                            <button onclick="deleteTicket(${t.id})" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition flex items-center justify-center w-full"><i class="ph ph-trash mr-1"></i> Hapus</button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${db.tickets.map(t => {
-                                    const user = db.users.find(u => u.id === t.userId);
-                                    return `
-                                    <tr class="border-b hover:bg-gray-50">
-                                        <td class="p-4">
-                                            <span class="text-xs text-gray-400 block font-mono">${t.date}</span>
-                                            <strong>${user?.nama || 'Unknown'}</strong>
-                                        </td>
-                                        <td class="p-4">
-                                            <strong class="text-gray-800">${t.subject}</strong><br>
-                                            <p class="text-gray-500 mt-1">${t.message}</p>
-                                            ${t.reply ? `<p class="text-xs text-primaryDark mt-1"><b>Balasan:</b> ${t.reply}</p>` : ''}
-                                        </td>
-                                        <td class="p-4">
-                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full ${t.status === 'Terbuka' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">${t.status}</span>
-                                        </td>
-                                        <td class="p-4" style="text-align: right;">
-                                            <div class="flex flex-col gap-2 items-end">
-                                                <button onclick="replyTicket(${t.id})" class="text-xs bg-primaryLight text-primaryDark px-3 py-1.5 rounded-lg font-bold hover:bg-primary/20 transition flex items-center justify-center w-full"><i class="ph ph-chat-teardrop-text mr-1"></i> Balas</button>
-                                                <button onclick="deleteTicket(${t.id})" class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-200 transition flex items-center justify-center w-full"><i class="ph ph-trash mr-1"></i> Hapus</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    `
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                                `
+                            }).join('')}
+                        </tbody>
+                    </table>
                 </div>
+            </div>
             `
         };
 
@@ -1238,53 +1185,58 @@
             const currentIdx = stages.findIndex(st => st.s === currentStatus);
 
             return `
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-4 md:py-8">
-                    ${stages.map((st, idx) => {
-                        const isDone = idx < currentIdx;
-                        const isCurrent = idx === currentIdx;
-                        const circleBg = isDone ? 'bg-primary text-white' : (isCurrent ? 'bg-yellow-500 text-white animate-pulse' : 'bg-gray-100 text-gray-400');
-                        const textStyle = isCurrent ? 'text-yellow-600 font-bold' : (isDone ? 'text-primary font-semibold' : 'text-gray-400');
-                        return `
-                            <div class="flex flex-row md:flex-col items-center flex-1 w-full relative">
-                                <div class="w-10 h-10 ${circleBg} rounded-full flex items-center justify-center text-xl shadow-sm z-10">
-                                    <i class="ph ${isDone ? 'ph-check' : st.icon}"></i>
-                                </div>
-                                <div class="ml-4 md:ml-0 md:mt-3 text-left md:text-center">
-                                    <p class="text-xs ${textStyle} leading-tight">${st.label}</p>
-                                    <p class="text-[10px] text-gray-400">${isDone ? 'Selesai' : (isCurrent ? 'Sedang Diproses' : 'Belum Mulai')}</p>
-                                </div>
-                                ${idx < stages.length - 1 ? `
-                                <div class="hidden md:block absolute top-5 left-1/2 w-full h-0.5 ${idx < currentIdx ? 'bg-primary' : 'bg-gray-200'} -z-0"></div>
-                                ` : ''}
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-4 md:py-8">
+                ${stages.map((st, idx) => {
+                    const isDone = idx < currentIdx;
+                    const isCurrent = idx === currentIdx;
+                    const circleBg = isDone ? 'bg-primary text-white' : (isCurrent ? 'bg-yellow-500 text-white animate-pulse' : 'bg-gray-100 text-gray-400');
+                    const textStyle = isCurrent ? 'text-yellow-600 font-bold' : (isDone ? 'text-primary font-semibold' : 'text-gray-400');
+                    return `
+                    <div class="flex flex-row md:flex-col items-center flex-1 w-full relative">
+                        <div class="w-10 h-10 ${circleBg} rounded-full flex items-center justify-center text-xl shadow-sm z-10">
+                            <i class="ph ${isDone ? 'ph-check' : st.icon}"></i>
+                        </div>
+                        <div class="ml-4 md:ml-0 md:mt-3 text-left md:text-center">
+                            <p class="text-xs ${textStyle} leading-tight">${st.label}</p>
+                            <p class="text-[10px] text-gray-400">${isDone ? 'Selesai' : (isCurrent ? 'Sedang Diproses' : 'Belum Mulai')}</p>
+                        </div>
+                        ${idx < stages.length - 1 ? `
+                        <div class="hidden md:block absolute top-5 left-1/2 w-full h-0.5 ${idx < currentIdx ? 'bg-primary' : 'bg-gray-200'} -z-0"></div>
+                        ` : ''}
+                    </div>
+                    `;
+                }).join('')}
+            </div>
             `;
         }
 
         function renderKatalogItems(booksList) {
-            return booksList.map(b => `
+            return booksList.map(b => {
+                let packs = [];
+                try { packs = b.packages ? JSON.parse(b.packages) : []; } catch(e) {}
+                return `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition group">
                     <div class="h-64 overflow-hidden relative bg-gray-100">
                         <img src="${b.cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     </div>
-                    <div class="p-5 flex flex-col justify-between h-48">
+                    <div class="p-5 flex flex-col justify-between h-56">
                         <div>
                             <span class="text-[10px] bg-primaryLight text-primary font-bold px-2 py-0.5 rounded-full">ISBN: ${b.isbn || 'Proses'}</span>
                             <h3 class="font-bold text-gray-800 text-base mb-1 truncate mt-2" title="${b.title}">${b.title}</h3>
-                            <p class="text-xs text-gray-500 mb-2">Oleh: ${b.author}</p>
+                            <p class="text-xs text-gray-500 mb-1">Oleh: ${b.author}</p>
+                            ${packs.length > 0 ? `<p class="text-[10px] text-green-600 font-semibold"><i class="ph ph-package"></i> Tersedia kustom paket</p>` : ''}
                         </div>
                         <div class="flex justify-between items-center pt-2 border-t border-gray-50">
                             <div>
-                                <span class="text-[10px] text-gray-400 block">Harga</span>
+                                <span class="text-[10px] text-gray-400 block">Harga dasar</span>
                                 <span class="font-bold text-primary text-base">${formatRp(b.price)}</span>
                             </div>
-                            <button onclick="orderBook(${b.id})" class="text-xs bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg transition font-bold flex items-center"><i class="ph ph-shopping-bag mr-1"></i> Beli</button>
+                            <button onclick="orderBook(${b.id})" class="text-xs bg-primary hover:bg-primaryDark text-white px-4 py-2 rounded-lg transition font-bold flex items-center shadow"><i class="ph ph-shopping-bag mr-1"></i> Beli</button>
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function searchKatalog(query) {
@@ -1294,61 +1246,98 @@
         }
 
         // --- POPUPS & MODALS ---
+        
+        // MODAL TAMBAH BUKU (DENGAN FORM PAKET DINAMIS BERANAK)
         function showAddBookModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
-                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
-                        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Buku Baru</h3>
-                        <form onsubmit="handleAddBook(event)" class="space-y-4">
+            <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Buku Baru</h3>
+                    <form onsubmit="handleAddBook(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Judul Buku</label>
+                            <input type="text" id="ab-title" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Judul Buku</label>
-                                <input type="text" id="ab-title" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Penulis</label>
-                                    <input type="text" id="ab-author" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">ISBN</label>
-                                    <input type="text" id="ab-isbn" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Harga (Rp)</label>
-                                    <input type="number" id="ab-price" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Halaman</label>
-                                    <input type="number" id="ab-pages" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Stok</label>
-                                    <input type="number" id="ab-stock" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Penulis</label>
+                                <input type="text" id="ab-author" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Pilih File Cover</label>
-                                <input type="file" id="ab-cover-file" onchange="previewCoverImage(this)" class="w-full px-3 py-2 border rounded-lg outline-none text-sm">
-                                <div id="cover-preview-container" class="mt-2 hidden">
-                                    <img id="cover-preview-img" class="h-32 object-contain rounded-lg border">
-                                </div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">ISBN</label>
+                                <input type="text" id="ab-isbn" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Harga Dasar (Rp)</label>
+                                <input type="number" id="ab-price" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Sinopsis</label>
-                                <textarea id="ab-synopsis" rows="3" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Halaman</label>
+                                <input type="number" id="ab-pages" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
-                            <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Tambahkan Buku</button>
-                        </form>
-                    </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Stok</label>
+                                <input type="number" id="ab-stock" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                        </div>
+
+                        <!-- SEKTOR FORM PAKET BUKU (DINAMIS & DAPAT BERGANDA DENGAN TOMBOL PLUS) -->
+                        <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-700 block"><i class="ph ph-package mr-1 text-primary"></i> Atur Paket Buku (Opsional)</span>
+                                <button type="button" onclick="addNewPackageRow('package-list-container')" class="text-xs bg-primary hover:bg-primaryDark text-white px-2 py-1 rounded flex items-center transition"><i class="ph ph-plus mr-1"></i> Tambah Kolom Paket</button>
+                            </div>
+                            <div id="package-list-container" class="space-y-2">
+                                <!-- Baris paket pertama kustom -->
+                                <div class="flex gap-2 items-center package-row">
+                                    <input type="text" placeholder="Nama Paket (cth: Paket Exclusive TTD)" class="pack-name w-1/2 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                                    <input type="number" placeholder="Harga Paket (Rp)" class="pack-price w-1/3 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                                    <button type="button" onclick="removePackageRow(this)" class="text-red-500 hover:text-red-700 text-sm p-1 transition" title="Hapus"><i class="ph ph-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Pilih File Cover</label>
+                            <input type="file" id="ab-cover-file" onchange="previewCoverImage(this)" class="w-full px-3 py-2 border rounded-lg outline-none text-sm bg-white">
+                            <div id="cover-preview-container" class="mt-2 hidden">
+                                <img id="cover-preview-img" class="h-32 object-contain rounded-lg border">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Sinopsis</label>
+                            <textarea id="ab-synopsis" rows="3" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Tambahkan Buku</button>
+                    </form>
                 </div>
+            </div>
             `;
         }
 
-        let uploadedCoverBase64 = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=400"; // Fallback
+        // FUNGSI GANDAKAN KOLOM PAKET BUKU (DINAMIS)
+        function addNewPackageRow(containerId, initialName = '', initialPrice = '') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center package-row fadeIn";
+            div.innerHTML = `
+                <input type="text" placeholder="Nama Paket (cth: Paket Premium)" value="${initialName}" class="pack-name w-1/2 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                <input type="number" placeholder="Harga Paket (Rp)" value="${initialPrice}" class="pack-price w-1/3 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                <button type="button" onclick="removePackageRow(this)" class="text-red-500 hover:text-red-700 text-sm p-1 transition" title="Hapus"><i class="ph ph-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removePackageRow(button) {
+            button.closest('.package-row').remove();
+        }
+
+        let uploadedCoverBase64 = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=400"; // Fallback awal
+        
         function previewCoverImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -1356,8 +1345,10 @@
                     uploadedCoverBase64 = e.target.result;
                     const previewContainer = document.getElementById('cover-preview-container');
                     const previewImg = document.getElementById('cover-preview-img');
-                    previewImg.src = uploadedCoverBase64;
-                    previewContainer.classList.remove('hidden');
+                    if (previewImg) {
+                        previewImg.src = uploadedCoverBase64;
+                        previewContainer.classList.remove('hidden');
+                    }
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -1365,6 +1356,18 @@
 
         function handleAddBook(e) {
             e.preventDefault();
+            
+            // Ambil data-data paket dari input dinamis
+            const packageRows = document.querySelectorAll('#package-list-container .package-row');
+            const listPaket = [];
+            packageRows.forEach(row => {
+                const nameVal = row.querySelector('.pack-name').value.trim();
+                const priceVal = row.querySelector('.pack-price').value.trim();
+                if (nameVal && priceVal) {
+                    listPaket.push({ name: nameVal, price: parseInt(priceVal) });
+                }
+            });
+
             db.books.push({
                 id: Date.now(),
                 title: document.getElementById('ab-title').value,
@@ -1375,7 +1378,8 @@
                 year: new Date().getFullYear(),
                 stock: parseInt(document.getElementById('ab-stock').value),
                 cover: uploadedCoverBase64,
-                synopsis: document.getElementById('ab-synopsis').value
+                synopsis: document.getElementById('ab-synopsis').value,
+                packages: JSON.stringify(listPaket) // Serialisasi kustom paket buku
             });
             saveDb();
             closeModal();
@@ -1383,59 +1387,88 @@
             renderAdmin('buku');
         }
 
+        // MODAL UBAH BUKU DENGAN PAKET DINAMIS
         function showEditBookModal(id) {
             const b = db.books.find(x => x.id === id);
             const root = document.getElementById('modal-root');
             uploadedCoverBase64 = b.cover;
+
+            let listPaket = [];
+            try { listPaket = b.packages ? JSON.parse(b.packages) : []; } catch(e) {}
+
             root.innerHTML = `
-                <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
-                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
-                        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">Ubah Buku</h3>
-                        <form onsubmit="handleEditBook(event, ${id})" class="space-y-4">
+            <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Ubah Buku</h3>
+                    <form onsubmit="handleEditBook(event, ${id})" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Judul Buku</label>
+                            <input type="text" id="eb-title" value="${b.title}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Judul Buku</label>
-                                <input type="text" id="eb-title" value="${b.title}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Penulis</label>
-                                    <input type="text" id="eb-author" value="${b.author}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">ISBN</label>
-                                    <input type="text" id="eb-isbn" value="${b.isbn}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Harga (Rp)</label>
-                                    <input type="number" id="eb-price" value="${b.price}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Halaman</label>
-                                    <input type="number" id="eb-pages" value="${b.pages}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Stok</label>
-                                    <input type="number" id="eb-stock" value="${b.stock}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                                </div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Penulis</label>
+                                <input type="text" id="eb-author" value="${b.author}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Ubah Cover (Optional)</label>
-                                <input type="file" onchange="previewCoverImage(this)" class="w-full px-3 py-2 border rounded-lg outline-none text-sm">
-                                <div id="cover-preview-container" class="mt-2">
-                                    <img id="cover-preview-img" src="${b.cover}" class="h-32 object-contain rounded-lg border">
-                                </div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">ISBN</label>
+                                <input type="text" id="eb-isbn" value="${b.isbn}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Harga Dasar (Rp)</label>
+                                <input type="number" id="eb-price" value="${b.price}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Sinopsis</label>
-                                <textarea id="eb-synopsis" rows="3" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">${b.synopsis}</textarea>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Halaman</label>
+                                <input type="number" id="eb-pages" value="${b.pages}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
                             </div>
-                            <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Simpan Perubahan</button>
-                        </form>
-                    </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Stok</label>
+                                <input type="number" id="eb-stock" value="${b.stock}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                            </div>
+                        </div>
+
+                        <!-- ATUR PAKET EDIT DINAMIS -->
+                        <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-700 block"><i class="ph ph-package mr-1 text-primary"></i> Atur Paket Buku</span>
+                                <button type="button" onclick="addNewPackageRow('package-edit-list-container')" class="text-xs bg-primary hover:bg-primaryDark text-white px-2 py-1 rounded flex items-center transition"><i class="ph ph-plus mr-1"></i> Tambah Kolom Paket</button>
+                            </div>
+                            <div id="package-edit-list-container" class="space-y-2">
+                                ${listPaket.map(p => `
+                                <div class="flex gap-2 items-center package-row">
+                                    <input type="text" placeholder="Nama Paket" value="${p.name}" class="pack-name w-1/2 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                                    <input type="number" placeholder="Harga Paket (Rp)" value="${p.price}" class="pack-price w-1/3 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                                    <button type="button" onclick="removePackageRow(this)" class="text-red-500 hover:text-red-700 text-sm p-1 transition"><i class="ph ph-trash"></i></button>
+                                </div>
+                                `).join('')}
+                                ${listPaket.length === 0 ? `
+                                <div class="flex gap-2 items-center package-row">
+                                    <input type="text" placeholder="Nama Paket (cth: Paket Hemat)" class="pack-name w-1/2 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                                    <input type="number" placeholder="Harga Paket (Rp)" class="pack-price w-1/3 px-2 py-1.5 border rounded-lg text-xs outline-none bg-white">
+                                    <button type="button" onclick="removePackageRow(this)" class="text-red-500 hover:text-red-700 text-sm p-1 transition"><i class="ph ph-trash"></i></button>
+                                </div>` : ''}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Ubah Cover (Opsional)</label>
+                            <input type="file" onchange="previewCoverImage(this)" class="w-full px-3 py-2 border rounded-lg outline-none text-sm bg-white">
+                            <div id="cover-preview-container" class="mt-2">
+                                <img id="cover-preview-img" src="${b.cover}" class="h-32 object-contain rounded-lg border">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Sinopsis</label>
+                            <textarea id="eb-synopsis" rows="3" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">${b.synopsis}</textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Simpan Perubahan</button>
+                    </form>
                 </div>
+            </div>
             `;
         }
 
@@ -1443,6 +1476,16 @@
             e.preventDefault();
             const b = db.books.find(x => x.id === id);
             if(b) {
+                const packageRows = document.querySelectorAll('#package-edit-list-container .package-row');
+                const listPaket = [];
+                packageRows.forEach(row => {
+                    const nameVal = row.querySelector('.pack-name').value.trim();
+                    const priceVal = row.querySelector('.pack-price').value.trim();
+                    if (nameVal && priceVal) {
+                        listPaket.push({ name: nameVal, price: parseInt(priceVal) });
+                    }
+                });
+
                 b.title = document.getElementById('eb-title').value;
                 b.author = document.getElementById('eb-author').value;
                 b.isbn = document.getElementById('eb-isbn').value;
@@ -1451,6 +1494,8 @@
                 b.stock = parseInt(document.getElementById('eb-stock').value);
                 b.cover = uploadedCoverBase64;
                 b.synopsis = document.getElementById('eb-synopsis').value;
+                b.packages = JSON.stringify(listPaket); // Simpan Paket Baru
+                
                 saveDb();
                 closeModal();
                 showToast("Buku berhasil diperbarui!");
@@ -1471,38 +1516,38 @@
         function showAddMemberModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
-                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
-                        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Member Baru</h3>
-                        <form onsubmit="handleAddMember(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
-                                <input type="text" id="am-nama" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Email</label>
-                                <input type="email" id="am-email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Nomor WhatsApp</label>
-                                <input type="text" id="am-phone" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Kata Sandi</label>
-                                <input type="text" id="am-pass" value="member123" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Tambah Akun</button>
-                        </form>
-                    </div>
+            <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Member Baru</h3>
+                    <form onsubmit="handleAddMember(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                            <input type="text" id="am-nama" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Email</label>
+                            <input type="email" id="am-email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Nomor WhatsApp</label>
+                            <input type="text" id="am-phone" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Kata Sandi</label>
+                            <input type="text" id="am-pass" value="member123" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Tambah Akun</button>
+                    </form>
                 </div>
+            </div>
             `;
         }
 
         function handleAddMember(e) {
             e.preventDefault();
             const email = document.getElementById('am-email').value;
-            if(db.users.find(u => u.email === email)) return showToast("Email sudah terdaftar!", true);
+            if(db.users.find(u => String(u.email).toLowerCase() === String(email).toLowerCase())) return showToast("Email sudah terdaftar!", true);
 
             db.users.push({
                 id: Date.now(),
@@ -1543,23 +1588,23 @@
         function showCreateTicketModal() {
             const root = document.getElementById('modal-root');
             root.innerHTML = `
-                <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
-                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
-                        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">Buat Tiket Bantuan</h3>
-                        <form onsubmit="handleCreateTicket(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Subjek Pertanyaan</label>
-                                <input type="text" id="ct-subject" placeholder="Contoh: Kendala Cover / Pengiriman" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1">Isi Masalah / Pertanyaan</label>
-                                <textarea id="ct-message" rows="4" placeholder="Tuliskan kendala Anda secara lengkap..." required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
-                            </div>
-                            <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Kirim Tiket</button>
-                        </form>
-                    </div>
+            <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Buat Tiket Bantuan</h3>
+                    <form onsubmit="handleCreateTicket(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Subjek Pertanyaan</label>
+                            <input type="text" id="ct-subject" placeholder="Contoh: Kendala Cover / Pengiriman" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Isi Masalah / Pertanyaan</label>
+                            <textarea id="ct-message" rows="4" placeholder="Tuliskan kendala Anda secara lengkap..." required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition">Kirim Tiket</button>
+                    </form>
                 </div>
+            </div>
             `;
         }
 
@@ -1593,13 +1638,13 @@
             }
         }
 
-        // --- ACTIONS / MUTATIONS ---
+        // --- SUBMIT NASKAH ---
         function submitNaskah(e) {
             e.preventDefault();
             const judul = document.getElementById('n-judul').value;
             const genre = document.getElementById('n-genre').value;
             const sinopsis = document.getElementById('n-sinopsis').value;
-            
+
             db.naskah.push({
                 id: Date.now(),
                 userId: currentUser.id,
@@ -1613,49 +1658,116 @@
             navigate('naskah_saya');
         }
 
+        // --- ORDER BUKU DENGAN PILIHAN PAKET KHUSUS ---
         function orderBook(bookId) {
             if (!currentUser) return showAuthModal('Silakan login untuk memesan buku.');
-            const book = db.books.find(b => b.id === bookId);
+            const book = db.books.find(b => String(b.id) === String(bookId));
             
-            customPrompt(`Masukkan Alamat Pengiriman Lengkap untuk pemesanan "${book.title}":\n\nPastikan sertakan Kecamatan, Kota, Kode Pos.`, "", (addr) => {
-                if(!addr || addr.trim() === '') {
-                    showToast("Alamat pengiriman tidak boleh kosong!", true);
-                    return;
-                }
+            let listPaket = [];
+            try { listPaket = book.packages ? JSON.parse(book.packages) : []; } catch(e) {}
 
-                const dateObj = new Date();
-                const invId = `INV-NP-${dateObj.getFullYear()}${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(Math.floor(Math.random()*1000)).padStart(3,'0')}`;
+            const root = document.getElementById('modal-root');
+            root.innerHTML = `
+            <div class="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500"><i class="ph ph-x text-2xl"></i></button>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="ph ph-shopping-bag text-primary mr-2"></i> Pemesanan Buku</h3>
+                    <div class="flex gap-4 mb-4 items-center">
+                        <img src="${book.cover}" class="w-16 h-20 object-cover rounded shadow-sm border">
+                        <div>
+                            <h4 class="font-bold text-gray-800">${book.title}</h4>
+                            <p class="text-xs text-gray-500">${book.author}</p>
+                            <p class="text-sm font-bold text-primary mt-1">Harga Dasar: ${formatRp(book.price)}</p>
+                        </div>
+                    </div>
+                    <form onsubmit="handleOrderBookWithPackage(event, ${bookId})" class="space-y-4">
+                        ${listPaket.length > 0 ? `
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Pilih Paket Buku:</label>
+                            <select id="order-package" onchange="updatePriceDisplay(this, ${book.price})" class="w-full px-3 py-2 border rounded-lg text-xs outline-none bg-white">
+                                <option value="default" data-price="${book.price}">Buku Saja (Dasar) - ${formatRp(book.price)}</option>
+                                ${listPaket.map(p => `<option value="${p.name}" data-price="${p.price}">${p.name} - ${formatRp(p.price)}</option>`).join('')}
+                            </select>
+                        </div>` : `<input type="hidden" id="order-package" value="default" data-price="${book.price}">`}
 
-                db.orders.push({
-                    id: invId,
-                    userId: currentUser.id,
-                    bookId: book.id,
-                    nama: currentUser.nama,
-                    address: addr,
-                    phone: currentUser.phone,
-                    date: dateObj.toISOString().split('T')[0],
-                    status: 'Menunggu Ongkir',
-                    shippingCost: 0,
-                    total: book.price,
-                    resi: ''
-                });
-                saveDb();
-                showToast("Pesanan dibuat! Menunggu admin menghitung ongkir.");
-                navigate('pesanan_saya');
-            });
+                        <div class="p-3 bg-primaryLight rounded-lg">
+                            <span class="text-xs text-gray-500 block">Total Harga Item</span>
+                            <span id="order-price-preview" class="text-lg font-bold text-primary">${formatRp(book.price)}</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Alamat Pengiriman Lengkap</label>
+                            <textarea id="order-address" rows="3" required placeholder="Tuliskan alamat lengkap pengiriman beserta Kecamatan, Kota, Kode Pos..." class="w-full px-3 py-2 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white py-2.5 rounded-lg font-bold transition shadow-md shadow-primary/30">Lanjutkan Pemesanan</button>
+                    </form>
+                </div>
+            </div>
+            `;
         }
 
-        // Admin Actions
+        window.updatePriceDisplay = function(selectElement, basePrice) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            document.getElementById('order-price-preview').innerText = formatRp(parseInt(price));
+        }
+
+        function handleOrderBookWithPackage(e, bookId) {
+            e.preventDefault();
+            const book = db.books.find(b => String(b.id) === String(bookId));
+            const selectPack = document.getElementById('order-package');
+            const address = document.getElementById('order-address').value;
+
+            let packageName = "Buku Saja (Dasar)";
+            let finalPrice = book.price;
+
+            if (selectPack && selectPack.value !== 'default') {
+                packageName = selectPack.value;
+                if (selectPack.options) {
+                    finalPrice = parseInt(selectPack.options[selectPack.selectedIndex].getAttribute('data-price'));
+                } else {
+                    // Hidden input fallback
+                    finalPrice = parseInt(selectPack.getAttribute('data-price'));
+                }
+            }
+
+            const dateObj = new Date();
+            const invId = `INV-NP-${dateObj.getFullYear()}${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(Math.floor(Math.random()*1000)).padStart(3,'0')}`;
+
+            db.orders.push({
+                id: invId,
+                userId: currentUser.id,
+                bookId: book.id,
+                nama: currentUser.nama,
+                address: address,
+                phone: currentUser.phone,
+                date: dateObj.toISOString().split('T')[0],
+                status: 'Menunggu Ongkir',
+                shippingCost: 0,
+                total: finalPrice,
+                resi: '',
+                packageName: packageName
+            });
+
+            saveDb();
+            closeModal();
+            showToast("Pesanan berhasil dibuat! Menunggu admin menghitung ongkir.");
+            navigate('pesanan_saya');
+        }
+
+        // --- ADMIN ACTIONS ---
         window.updateNaskahStatus = function(id, status) {
             const n = db.naskah.find(x => x.id === id);
             if(n) { n.status = status; saveDb(); showToast("Status naskah diperbarui"); }
         }
+
         window.promptNaskahNote = function(id) {
             const n = db.naskah.find(x => x.id === id);
             customPrompt("Masukkan catatan editor:", n.notes, (note) => {
                 n.notes = note; saveDb(); renderAdmin('naskah');
             });
         }
+
         window.deleteNaskah = function(id) {
             if(confirm("Apakah Anda yakin ingin menghapus naskah ini?")) {
                 db.naskah = db.naskah.filter(n => n.id !== id);
@@ -1664,10 +1776,12 @@
                 renderAdmin('naskah');
             }
         }
+
         window.updateOrderStatus = function(id, status) {
             const o = db.orders.find(x => x.id === id);
             if(o) { o.status = status; saveDb(); showToast("Status pesanan diperbarui"); renderAdmin('pesanan'); }
         }
+
         window.deleteOrder = function(id) {
             if(confirm("Apakah Anda yakin ingin menghapus pesanan ini?")) {
                 db.orders = db.orders.filter(o => o.id !== id);
@@ -1676,6 +1790,7 @@
                 renderAdmin('pesanan');
             }
         }
+
         window.deleteTicket = function(id) {
             if(confirm("Apakah Anda yakin ingin menghapus tiket bantuan ini?")) {
                 db.tickets = db.tickets.filter(t => t.id !== id);
@@ -1684,74 +1799,86 @@
                 renderAdmin('admin_tickets');
             }
         }
+
         window.setOngkir = function(id) {
             const o = db.orders.find(x => x.id === id);
             customPrompt("Masukkan biaya ongkir (angka saja):", o.shippingCost || "", (cost) => {
-                if(cost && !isNaN(cost)) { o.shippingCost = parseInt(cost); o.status = 'Menunggu Pembayaran'; saveDb(); renderAdmin('pesanan'); }
-                else { showToast("Masukkan angka yang valid!", true); }
+                if(cost && !isNaN(cost)) { 
+                    o.shippingCost = parseInt(cost); 
+                    o.status = 'Menunggu Pembayaran'; 
+                    saveDb(); 
+                    renderAdmin('pesanan'); 
+                } else { 
+                    showToast("Masukkan angka yang valid!", true); 
+                }
             });
         }
+
         window.setResi = function(id) {
             const o = db.orders.find(x => x.id === id);
             customPrompt("Masukkan Nomor Resi Pengiriman:", o.resi || "", (resi) => {
                 o.resi = resi; saveDb(); renderAdmin('pesanan');
             });
         }
+
         window.printInvoice = function(id) {
             const o = db.orders.find(x => x.id === id);
-            const b = db.books.find(x => x.id == o.bookId);
-            
-            const printHtml = `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #56B6C6; padding-bottom: 20px; margin-bottom: 20px;">
-                        <div>
-                            <h1 style="color: #56B6C6; margin: 0; font-size: 24px; font-weight: bold;">NARA PUSTAKA</h1>
-                            <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Kabupaten Bogor, Jawa Barat<br>WhatsApp: +62 821-3087-2054<br>Email: narapustaka1@gmail.com</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <h2 style="margin: 0; color: #333;">INVOICE</h2>
-                            <p style="margin: 5px 0 0 0; font-weight: bold;"># ${o.id}</p>
-                            <p style="margin: 2px 0 0 0; color: #666; font-size: 12px;">Tanggal: ${o.date}</p>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 30px;">
-                        <h3 style="font-size: 14px; margin-bottom: 5px; color: #666;">Ditagihkan Kepada:</h3>
-                        <p style="margin: 0; font-weight: bold;">${o.nama}</p>
-                        <p style="margin: 2px 0 0 0; font-size: 14px;">${o.address}</p>
-                        <p style="margin: 2px 0 0 0; font-size: 14px;">WA: ${o.phone}</p>
-                    </div>
+            const b = db.books.find(x => String(x.id) === String(o.bookId));
 
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-                        <thead>
-                            <tr style="background-color: #f8f9fa;">
-                                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Deskripsi Item</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Jumlah</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #ddd;">Buku: ${b ? b.title : 'Judul Buku'} (Penulis: ${b ? b.author : 'Penulis'})</td>
-                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatRp(o.total)}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #ddd;">Biaya Pengiriman (Ongkir)</td>
-                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatRp(o.shippingCost)}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">TOTAL TAGIHAN</td>
-                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #56B6C6; font-size: 18px;">${formatRp(o.total + o.shippingCost)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div style="text-align: center; margin-top: 50px; color: #666; font-size: 12px;">
-                        <p>Terima kasih atas pesanan Anda.</p>
-                        <p>"Turning Manuscripts Into Meaningful Books"</p>
+            const printHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #56B6C6; padding-bottom: 20px; margin-bottom: 20px;">
+                    <div>
+                        <h1 style="color: #56B6C6; margin: 0; font-size: 24px; font-weight: bold;">NARA PUSTAKA</h1>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">Kabupaten Bogor, Jawa Barat<br>WhatsApp: +62 821-3087-2054<br>Email: narapustaka1@gmail.com</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h2 style="margin: 0; color: #333;">INVOICE</h2>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;"># ${o.id}</p>
+                        <p style="margin: 2px 0 0 0; color: #666; font-size: 12px;">Tanggal: ${o.date}</p>
                     </div>
                 </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 14px; margin-bottom: 5px; color: #666;">Ditagihkan Kepada:</h3>
+                    <p style="margin: 0; font-weight: bold;">${o.nama}</p>
+                    <p style="margin: 2px 0 0 0; font-size: 14px;">${o.address}</p>
+                    <p style="margin: 2px 0 0 0; font-size: 14px;">WA: ${o.phone}</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Deskripsi Item</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                Buku: ${b ? b.title : 'Judul Buku'} (Penulis: ${b ? b.author : 'Penulis'})
+                                ${o.packageName ? `<br><small style="color:#56B6C6; font-weight:bold;">Paket: ${o.packageName}</small>` : ''}
+                            </td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatRp(o.total)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Biaya Pengiriman (Ongkir)</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${formatRp(o.shippingCost)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">TOTAL TAGIHAN</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: #56B6C6; font-size: 18px;">${formatRp(Number(o.total) + Number(o.shippingCost))}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="text-align: center; margin-top: 50px; color: #666; font-size: 12px;">
+                    <p>Terima kasih atas pesanan Anda.</p>
+                    <p>"Turning Manuscripts Into Meaningful Books"</p>
+                </div>
+            </div>
             `;
-            
+
             const pa = document.getElementById('print-area');
             pa.innerHTML = printHtml;
             pa.classList.remove('hidden');
@@ -1759,9 +1886,11 @@
             pa.classList.add('hidden');
         }
 
-        // --- INIT ---
-        renderNav();
-        navigate('home');
+        // --- INIT APP ---
+        window.onload = () => {
+            loadDatabaseFromGAS();
+        };
+
     </script>
 </body>
 </html>
