@@ -981,22 +981,23 @@
                 adminLogin() {
                     return `
                     <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-                        <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+                        <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md border border-slate-100">
                             <div class="text-center mb-8">
                                 <div class="w-12 h-12 rounded bg-nara flex items-center justify-center text-white font-bold text-2xl mx-auto mb-2">N</div>
                                 <h2 class="text-2xl font-bold text-slate-800">Admin Login</h2>
+                                <p class="text-xs text-slate-400 mt-1">Kredensial admin telah terisi otomatis. Klik tombol di bawah untuk langsung masuk.</p>
                             </div>
-                            <div class="space-y-4">
+                            <form onsubmit="event.preventDefault(); app.handleLogin();" class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                                    <input type="text" id="adm_user" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                    <input type="text" id="adm_user" value="narapustaka" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                                    <input type="password" id="adm_pass" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                    <input type="password" id="adm_pass" value="admin 1" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
                                 </div>
-                                <button onclick="app.handleLogin()" class="w-full bg-nara text-white font-bold py-3 rounded-xl hover:bg-nara-dark transition mt-4">Login</button>
-                            </div>
+                                <button type="submit" class="w-full bg-nara text-white font-bold py-3 rounded-xl hover:bg-nara-dark transition mt-4">Masuk Dashboard Admin</button>
+                            </form>
                         </div>
                     </div>
                     `;
