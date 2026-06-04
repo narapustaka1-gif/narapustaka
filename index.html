@@ -1,274 +1,986 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>NARA PUSTAKA - SMART INVOICE SYSTEM</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2pdf.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nara Pustaka | Marketplace Buku & Print On Demand</title>
+    
+    <!-- PWA & SEO Meta -->
+    <meta name="description" content="Marketplace Buku dan Layanan Penerbitan dengan sistem Print On Demand.">
+    <meta name="theme-color" content="#56B6C6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    colors: { primary: '#56B6C6', primaryDark: '#459aa8', secondary: '#f3f4f6' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jsPDF for Invoice -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .dark .glass { background: rgba(31, 41, 55, 0.95); }
+        
+        /* Smooth transitions */
+        .page-transition { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Input focus outline override */
+        input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px #56B6C6; }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-200">
 
-  <!-- HEADER -->
-  <header class="bg-indigo-600 text-white p-4 text-center">
-    <h1 class="text-2xl font-bold">NARA PUSTAKA</h1>
-    <p class="text-sm">Smart Invoice & Logistics System</p>
-    <p id="tanggal" class="mt-2"></p>
-    <p id="noInvoice" class="font-mono"></p>
-  </header>
+    <!-- Header / Navbar -->
+    <header class="fixed top-0 w-full z-50 glass shadow-sm border-b border-gray-100 dark:border-gray-800">
+        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="navigate('home')">
+                <div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-xl">N</div>
+                <h1 class="font-bold text-lg hidden sm:block text-primary">Nara Pustaka</h1>
+            </div>
+            
+            <div class="flex-1 relative">
+                <input type="text" placeholder="Cari buku..." class="w-full bg-gray-100 dark:bg-gray-800 rounded-full py-2 pl-10 pr-4 text-sm focus:bg-white dark:focus:bg-gray-700 transition-all">
+                <i class="fas fa-search absolute left-4 top-2.5 text-gray-400"></i>
+            </div>
+            
+            <div class="flex items-center gap-4 text-gray-600 dark:text-gray-300">
+                <button onclick="navigate('cart')" class="relative">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+                <button onclick="navigate('account')">
+                    <i class="fas fa-user text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-  <!-- FORM PEMBELI -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Data Pembeli</h2>
-    <div class="grid gap-2">
-      <input id="namaPembeli" type="text" placeholder="Nama Pembeli" class="p-2 border rounded">
-      <input id="noHP" type="text" placeholder="Nomor HP" class="p-2 border rounded">
-      <textarea id="alamat" placeholder="Alamat Lengkap" class="p-2 border rounded"></textarea>
-    </div>
-  </section>
+    <!-- Main Content Container -->
+    <main id="app-container" class="pt-16 pb-20 max-w-md mx-auto min-h-screen relative">
+        
+        <!-- VIEW: HOME -->
+        <section id="view-home" class="view-section page-transition">
+            <!-- Hero Banner -->
+            <div class="p-4">
+                <div class="w-full h-40 bg-gradient-to-r from-primary to-blue-400 rounded-2xl shadow-lg flex items-center justify-center text-white p-6 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-bold mb-1">Promo Gajian!</h2>
+                        <p class="text-sm opacity-90">Diskon s/d 50% untuk Novel Terpilih</p>
+                    </div>
+                    <i class="fas fa-book-open absolute -right-4 -bottom-4 text-8xl opacity-20"></i>
+                </div>
+            </div>
 
-  <!-- DAFTAR PESANAN -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Daftar Pesanan</h2>
-    <table class="w-full border mb-2" id="tabelPesanan">
-      <thead class="bg-slate-200">
-        <tr>
-          <th>Nama Buku</th><th>Harga</th><th>Qty</th><th>Total</th><th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button onclick="tambahBuku()" class="bg-indigo-600 text-white px-4 py-2 rounded">Tambah Buku</button>
-  </section>
+            <!-- Categories -->
+            <div class="px-4 py-2">
+                <h3 class="font-bold text-gray-800 dark:text-white mb-3 flex justify-between items-center">
+                    Kategori
+                    <span id="active-category-label" class="text-xs font-normal text-primary hidden bg-primary/10 px-2 py-1 rounded-full cursor-pointer" onclick="filterCategory('All')">Hapus Filter <i class="fas fa-times ml-1"></i></span>
+                </h3>
+                <div class="flex gap-4 overflow-x-auto hide-scroll pb-2">
+                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Novel')">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-book"></i></div>
+                        <span class="text-xs font-medium text-center">Novel</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Pendidikan')">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-graduation-cap"></i></div>
+                        <span class="text-xs font-medium text-center">Pendidikan</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Agama')">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-moon"></i></div>
+                        <span class="text-xs font-medium text-center">Agama</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Anak')">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-child"></i></div>
+                        <span class="text-xs font-medium text-center">Anak</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Penerbitan')">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-print"></i></div>
+                        <span class="text-xs font-medium text-center">Penerbitan</span>
+                    </div>
+                </div>
+            </div>
 
-  <!-- ONGKIR -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Ongkir</h2>
-    <select id="ongkir" class="p-2 border rounded" onchange="hitungTotal()">
-      <option value="0">Pilih Ekspedisi</option>
-      <option value="15000">Lion Parcel REGPACK - Zona A (Rp15.000)</option>
-      <option value="20000">Lion Parcel REGPACK - Zona B (Rp20.000)</option>
-      <option value="25000">Lion Parcel REGPACK - Zona C (Rp25.000)</option>
-      <option value="30000">Lion Parcel REGPACK - Zona D (Rp30.000)</option>
-    </select>
-  </section>
+            <!-- Best Sellers -->
+            <div class="px-4 py-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-800 dark:text-white" id="products-section-title">Buku Terlaris</h3>
+                    <a href="#" onclick="filterCategory('All')" class="text-xs text-primary font-medium">Lihat Semua</a>
+                </div>
+                <div class="grid grid-cols-2 gap-3" id="home-products-grid">
+                    <!-- Products injected via JS -->
+                </div>
+                <!-- Empty State untuk Filter -->
+                <div id="home-products-empty" class="hidden text-center py-10">
+                    <i class="fas fa-box-open text-4xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                    <p class="text-sm text-gray-500">Belum ada buku di kategori ini.</p>
+                </div>
+            </div>
+        </section>
 
-  <!-- TOTAL PEMBAYARAN -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Total Pembayaran</h2>
-    <p>Subtotal: <span id="subtotal">Rp0</span></p>
-    <p>Ongkir: <span id="ongkirDisplay">Rp0</span></p>
-    <p class="font-bold">Grand Total: <span id="grandTotal">Rp0</span></p>
-  </section>
+        <!-- VIEW: PRODUCT DETAIL -->
+        <section id="view-product" class="view-section hidden page-transition bg-white dark:bg-gray-900 min-h-screen">
+            <div id="product-detail-content"></div>
+        </section>
 
-  <!-- INFORMASI PEMBAYARAN -->
-  <section class="p-4">
-    <div class="border rounded p-4 bg-white dark:bg-slate-800">
-      <h2 class="text-lg font-semibold mb-2">Informasi Pembayaran</h2>
-      <p>BCA - 111-047-0742</p>
-      <p>a.n. Deby Verona</p>
-    </div>
-  </section>
+        <!-- VIEW: CART -->
+        <section id="view-cart" class="view-section hidden page-transition px-4 py-4">
+            <h2 class="text-xl font-bold mb-4">Keranjang Belanja</h2>
+            <div id="cart-items" class="space-y-3 mb-6">
+                <!-- Cart items injected via JS -->
+            </div>
+            
+            <div id="cart-summary" class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 hidden">
+                <div class="flex justify-between mb-2 text-sm">
+                    <span class="text-gray-500">Subtotal</span>
+                    <span id="cart-subtotal" class="font-medium text-gray-800 dark:text-white">Rp0</span>
+                </div>
+                <div class="border-t border-gray-100 dark:border-gray-700 my-2 pt-2 flex justify-between font-bold">
+                    <span>Total</span>
+                    <span id="cart-total" class="text-primary">Rp0</span>
+                </div>
+                <button onclick="navigate('checkout')" class="w-full bg-primary text-white rounded-xl py-3 font-medium mt-4 hover:bg-primaryDark transition-colors shadow-md shadow-primary/30">
+                    Lanjut Checkout
+                </button>
+            </div>
+            
+            <div id="cart-empty" class="text-center py-10 hidden">
+                <i class="fas fa-shopping-basket text-5xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                <p class="text-gray-500">Keranjang Anda masih kosong</p>
+                <button onclick="navigate('home')" class="mt-4 text-primary font-medium border border-primary rounded-full px-6 py-2">Mulai Belanja</button>
+            </div>
+        </section>
 
-  <!-- ACTION BUTTONS -->
-  <section class="p-4 flex gap-2 flex-wrap">
-    <button onclick="downloadPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded">Download Invoice PDF</button>
-    <button onclick="simpanDatabase()" class="bg-slate-600 text-white px-4 py-2 rounded">Simpan Database</button>
-    <button onclick="exportCSV()" class="bg-green-600 text-white px-4 py-2 rounded">Export CSV</button>
-    <button onclick="toggleDarkMode()" class="bg-yellow-500 text-white px-4 py-2 rounded">Dark Mode</button>
-  </section>
+        <!-- VIEW: CHECKOUT -->
+        <section id="view-checkout" class="view-section hidden page-transition px-4 py-4">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrow-left text-gray-400 cursor-pointer" onclick="navigate('cart')"></i> Checkout</h2>
+            
+            <form id="checkout-form" onsubmit="processCheckout(event)">
+                <!-- Alamat Pengiriman -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4 border border-gray-100 dark:border-gray-700">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fas fa-map-marker-alt text-primary"></i> Alamat Pengiriman</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="co-name" required placeholder="Nama Lengkap" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                        <input type="tel" id="co-wa" required placeholder="Nomor WhatsApp" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                        <input type="email" id="co-email" required placeholder="Email" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                        <textarea id="co-address" required placeholder="Alamat Lengkap (Jalan, RT/RW, No Rumah)" rows="2" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600"></textarea>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="co-prov" required placeholder="Provinsi" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                            <input type="text" id="co-city" required placeholder="Kota/Kabupaten" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="co-kec" required placeholder="Kecamatan" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                            <input type="number" id="co-pos" required placeholder="Kode Pos" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
+                        </div>
+                    </div>
+                </div>
 
-  <!-- DATABASE -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Database Invoice</h2>
-    <table class="w-full border" id="tabelDatabase">
-      <thead class="bg-slate-200">
-        <tr>
-          <th>Tanggal</th><th>No Invoice</th><th>Nama Pembeli</th><th>Ekspedisi</th><th>Total Bayar</th><th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+                <!-- Ekspedisi -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4 border border-gray-100 dark:border-gray-700">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fas fa-truck text-primary"></i> Pengiriman</h3>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-xs space-y-1 mb-3 border border-blue-100 dark:border-blue-800">
+                        <p class="font-semibold mb-1"><i class="fas fa-info-circle"></i> Kebijakan Print On Demand:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Semua buku dicetak terlebih dahulu setelah pembayaran diterima.</li>
+                            <li>Proses produksi memerlukan waktu sekitar 3 hari kerja.</li>
+                            <li>Pengiriman menggunakan <b>Lion Parcel Reguler</b> (1–3 hari kerja).</li>
+                            <li>Estimasi total buku sampai ke alamat tujuan sekitar 4–7 hari kerja di luar hari libur.</li>
+                        </ul>
+                    </div>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" id="co-agree" required class="mt-1 accent-primary">
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Saya telah membaca dan memahami estimasi produksi dan pengiriman di atas.</span>
+                    </label>
+                </div>
 
-  <!-- LOGISTIK -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Logistik Harian</h2>
-    <div id="logistik"></div>
-  </section>
+                <!-- Pembayaran -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-6 border border-gray-100 dark:border-gray-700">
+                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fas fa-wallet text-primary"></i> Metode Pembayaran</h3>
+                    <div class="border border-primary rounded-lg p-3 bg-primary/5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-blue-800 dark:text-blue-400">BCA</span>
+                            <i class="fas fa-university text-gray-400"></i>
+                        </div>
+                        <p class="text-lg font-mono font-bold text-gray-800 dark:text-white tracking-wider">111-047-0742</p>
+                        <p class="text-xs text-gray-500 uppercase">A.n Deby Verona</p>
+                    </div>
+                </div>
 
-  <!-- KONFIGURASI GOOGLE SHEETS -->
-  <section class="p-4">
-    <h2 class="text-lg font-semibold mb-2">Konfigurasi Google Sheets</h2>
-    <input id="scriptURL" type="text" placeholder="Google Apps Script URL" class="p-2 border rounded w-full mb-2">
-    <button onclick="simpanKonfigurasi()" class="bg-indigo-600 text-white px-4 py-2 rounded">Simpan Konfigurasi</button>
-  </section>
+                <!-- Summary -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-20 border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between mb-2 text-sm text-gray-500">
+                        <span>Subtotal Produk</span>
+                        <span id="co-subtotal">Rp0</span>
+                    </div>
+                    <div class="flex justify-between mb-2 text-sm text-gray-500">
+                        <span>Ongkos Kirim (Flat)</span>
+                        <span>Rp20.000</span>
+                    </div>
+                    <div class="border-t border-gray-100 dark:border-gray-700 my-2 pt-2 flex justify-between font-bold">
+                        <span>Total Pembayaran</span>
+                        <span id="co-total" class="text-primary">Rp0</span>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white rounded-xl py-3 font-medium mt-4 hover:bg-primaryDark transition-colors shadow-md shadow-primary/30">
+                        Buat Pesanan
+                    </button>
+                </div>
+            </form>
+        </section>
 
-  <script>
-    // Utility
-    function formatRupiah(num){return 'Rp'+num.toLocaleString('id-ID');}
-    function tanggalHariIni(){return new Date().toLocaleDateString('id-ID');}
-    function generateInvoiceNumber(){
-      let d=new Date();
-      let y=d.getFullYear(),m=('0'+(d.getMonth()+1)).slice(-2),day=('0'+d.getDate()).slice(-2);
-      let counter=localStorage.getItem('invoiceCounter')||0;
-      counter++;
-      localStorage.setItem('invoiceCounter',counter);
-      return `NP-${y}${m}${day}-${String(counter).padStart(4,'0')}`;
-    }
+        <!-- VIEW: SUCCESS (INVOICE) -->
+        <section id="view-success" class="view-section hidden page-transition px-4 py-10 text-center min-h-screen flex flex-col items-center justify-center">
+            <div class="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">Pesanan Berhasil!</h2>
+            <p class="text-gray-500 text-sm mb-6 max-w-xs mx-auto">Silakan lakukan pembayaran ke rekening BCA dan simpan invoice Anda.</p>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 w-full text-left mb-6">
+                <p class="text-xs text-gray-500 mb-1">Nomor Pesanan</p>
+                <p class="font-bold text-primary mb-3" id="success-invoice-id">INV-NP-20260101-0001</p>
+                <p class="text-xs text-gray-500 mb-1">Total Pembayaran</p>
+                <p class="font-bold text-xl mb-4" id="success-total">Rp0</p>
+                
+                <button onclick="downloadPDF()" class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-file-pdf text-red-500"></i> Download Invoice PDF
+                </button>
+            </div>
+            
+            <button onclick="navigate('home')" class="text-primary font-medium">Kembali ke Beranda</button>
+        </section>
 
-    // Init
-    document.getElementById('tanggal').innerText=tanggalHariIni();
-    let noInv=generateInvoiceNumber();
-    document.getElementById('noInvoice').innerText=noInv;
+        <!-- VIEW: ACCOUNT & ADMIN DASHBOARD -->
+        <section id="view-account" class="view-section hidden page-transition px-4 py-4">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-2xl text-gray-400">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg">Pelanggan Nara</h2>
+                    <p class="text-sm text-gray-500">0821-3087-2054</p>
+                </div>
+            </div>
 
-    // Pesanan
-    function tambahBuku(){
-      let tbody=document.querySelector('#tabelPesanan tbody');
-      let row=document.createElement('tr');
-      row.innerHTML=`
-        <td><input type="text" class="p-1 border rounded namaBuku"></td>
-        <td><input type="number" class="p-1 border rounded harga" value="0"></td>
-        <td><input type="number" class="p-1 border rounded qty" value="1"></td>
-        <td class="total">Rp0</td>
-        <td><button onclick="hapusRow(this)" class="bg-red-600 text-white px-2 py-1 rounded">Hapus</button></td>
-      `;
-      tbody.appendChild(row);
-      row.querySelector('.harga').addEventListener('input',hitungTotal);
-      row.querySelector('.qty').addEventListener('input',hitungTotal);
-    }
-    function hapusRow(btn){btn.parentElement.parentElement.remove();hitungTotal();}
-    function hitungTotal(){
-      let subtotal=0;
-      document.querySelectorAll('#tabelPesanan tbody tr').forEach(tr=>{
-        let harga=parseInt(tr.querySelector('.harga').value)||0;
-        let qty=parseInt(tr.querySelector('.qty').value)||0;
-        let total=harga*qty;
-        tr.querySelector('.total').innerText=formatRupiah(total);
-        subtotal+=total;
-      });
-      document.getElementById('subtotal').innerText=formatRupiah(subtotal);
-      let ongkir=parseInt(document.getElementById('ongkir').value)||0;
-      document.getElementById('ongkirDisplay').innerText=formatRupiah(ongkir);
-      document.getElementById('grandTotal').innerText=formatRupiah(subtotal+ongkir);
-    }
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 transition-colors" onclick="navigate('orders', 'Menunggu Pembayaran')">
+                    <i class="fas fa-wallet text-xl text-primary mb-1"></i>
+                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Belum Bayar</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 transition-colors" onclick="navigate('orders', 'Diproses')">
+                    <i class="fas fa-print text-xl text-primary mb-1"></i>
+                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Diproses</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 transition-colors" onclick="navigate('orders', 'Dikirim')">
+                    <i class="fas fa-truck text-xl text-primary mb-1"></i>
+                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Dikirim</p>
+                </div>
+            </div>
 
-    // PDF
-    function downloadPDF(){
-      let element=document.body;
-      html2pdf().set({
-        margin:0,
-        filename:noInv+'.pdf',
-        image:{type:'jpeg',quality:0.98},
-        html2canvas:{scale:3},
-        jsPDF:{unit:'mm',format:'a5',orientation:'portrait'}
-      }).from(element
-                    }).save();
-    }
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-6">
+                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors" onclick="navigate('orders')">
+                    <span class="font-medium text-sm"><i class="fas fa-history text-gray-400 mr-2"></i> Riwayat Pesanan</span>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors" onclick="filterCategory('All'); navigate('home')">
+                    <span class="font-medium text-sm"><i class="fas fa-heart text-gray-400 mr-2"></i> Wishlist (Segera Hadir)</span>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+                <div class="px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors" onclick="navigate('admin')">
+                    <span class="font-medium text-sm text-primary"><i class="fas fa-cog text-primary mr-2"></i> Mode Admin (Demo)</span>
+                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+            </div>
+        </section>
 
-    // Simpan Database
-    function simpanDatabase(){
-      let nama=document.getElementById('namaPembeli').value;
-      let hp=document.getElementById('noHP').value;
-      let alamat=document.getElementById('alamat').value;
-      if(!nama||!hp||!alamat){alert("Semua data pembeli wajib diisi");return;}
-      let ekspedisi=document.getElementById('ongkir').selectedOptions[0].text;
-      let total=document.getElementById('grandTotal').innerText;
-      let data={tanggal:tanggalHariIni(),no:noInv,nama:nama,hp:hp,alamat:alamat,ekspedisi:ekspedisi,total:total,status:"Belum Dicetak"};
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      db.push(data);
-      localStorage.setItem('dbInvoice',JSON.stringify(db));
-      renderDatabase();
-      renderLogistik();
-      // Kirim ke Google Sheets
-      let url=localStorage.getItem('scriptURL');
-      if(url){
-        fetch(url,{method:'POST',body:JSON.stringify(data)});
-      }
-      alert("Data tersimpan");
-    }
+        <!-- VIEW: ORDERS (CUSTOMER) -->
+        <section id="view-orders" class="view-section hidden page-transition px-4 py-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrow-left text-gray-400 cursor-pointer" onclick="navigate('account')"></i> Riwayat Pesanan</h2>
+            
+            <div id="customer-orders-list" class="space-y-4">
+                <!-- Orders injected via JS -->
+            </div>
+            
+            <div id="customer-orders-empty" class="hidden text-center py-10">
+                <i class="fas fa-receipt text-5xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                <p class="text-gray-500">Belum ada pesanan.</p>
+                <button onclick="navigate('home')" class="mt-4 text-primary font-medium border border-primary rounded-full px-6 py-2">Mulai Belanja</button>
+            </div>
+        </section>
 
-    // Render Database
-    function renderDatabase(){
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      let tbody=document.querySelector('#tabelDatabase tbody');
-      tbody.innerHTML='';
-      db.forEach((d,i)=>{
-        let tr=document.createElement('tr');
-        tr.innerHTML=`<td>${d.tanggal}</td><td>${d.no}</td><td>${d.nama}</td><td>${d.ekspedisi}</td><td>${d.total}</td>
-        <td><button onclick="hapusInvoice(${i})" class="bg-red-600 text-white px-2 py-1 rounded">Hapus</button></td>`;
-        tbody.appendChild(tr);
-      });
-    }
-    function hapusInvoice(i){
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      db.splice(i,1);
-      localStorage.setItem('dbInvoice',JSON.stringify(db));
-      renderDatabase();
-      renderLogistik();
-    }
+        <!-- VIEW: ADMIN DASHBOARD -->
+        <section id="view-admin" class="view-section hidden page-transition px-4 py-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrow-left text-gray-400 cursor-pointer" onclick="navigate('account')"></i> Admin Panel</h2>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-primary">
+                    <p class="text-xs text-gray-500 mb-1">Total Pesanan</p>
+                    <p class="text-xl font-bold" id="admin-total-orders">0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <p class="text-xs text-gray-500 mb-1">Pendapatan</p>
+                    <p class="text-lg font-bold text-green-500" id="admin-total-revenue">Rp0</p>
+                </div>
+            </div>
 
-    // Logistik
-    function renderLogistik(){
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      let container=document.getElementById('logistik');
-      container.innerHTML='';
-      db.forEach((d,i)=>{
-        let div=document.createElement('div');
-        div.className="border p-2 mb-2";
-        div.innerHTML=`<p>No Invoice: ${d.no}</p><p>Nama: ${d.nama}</p><p>No HP: ${d.hp}</p><p>Alamat: ${d.alamat}</p>
-        <p>Ekspedisi: ${d.ekspedisi}</p><p>Total: ${d.total}</p>
-        <p>Status: <span>${d.status}</span></p>
-        <button onclick="toggleStatus(${i})" class="bg-indigo-600 text-white px-2 py-1 rounded">Toggle Status</button>
-        <button onclick="salinLabel(${i})" class="bg-green-600 text-white px-2 py-1 rounded">Salin Label</button>`;
-        container.appendChild(div);
-      });
-    }
-    function toggleStatus(i){
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      db[i].status=db[i].status==="Belum Dicetak"?"Sudah Dicetak":"Belum Dicetak";
-      localStorage.setItem('dbInvoice',JSON.stringify(db));
-      renderLogistik();
-    }
-    function salinLabel(i){
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      let d=db[i];
-      let label=`=== LABEL PENGIRIMAN NARA PUSTAKA ===\nNo Invoice: ${d.no}\nNama: ${d.nama}\nNo HP: ${d.hp}\nAlamat: ${d.alamat}\nEkspedisi: ${d.ekspedisi}\nTotal: ${d.total}`;
-      navigator.clipboard.writeText(label);
-      alert("Label disalin");
-    }
+            <h3 class="font-bold text-sm mb-3">Manajemen Pesanan</h3>
+            <div id="admin-orders-list" class="space-y-3">
+                <!-- Admin orders injected via JS -->
+            </div>
+            
+            <div id="admin-orders-empty" class="hidden text-center py-10 bg-white dark:bg-gray-800 rounded-xl">
+                <p class="text-gray-500 text-sm">Belum ada data pesanan masuk.</p>
+            </div>
+            
+            <div class="mt-6 text-xs text-center text-gray-500">
+                <p>Data pesanan disimpan sementara di perangkat ini.</p>
+                <p class="italic">(Simulasi tanpa backend Google Apps Script)</p>
+            </div>
+        </section>
 
-    // Export CSV
-    function exportCSV(){
-      let db=JSON.parse(localStorage.getItem('dbInvoice')||'[]');
-      let csv="Tanggal,No Invoice,Nama,HP,Alamat,Ekspedisi,Total,Status\n";
-      db.forEach(d=>{
-        csv+=`${d.tanggal},${d.no},${d.nama},${d.hp},${d.alamat},${d.ekspedisi},${d.total},${d.status}\n`;
-      });
-      let blob=new Blob([csv],{type:'text/csv'});
-      let a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download="database_invoice.csv";
-      a.click();
-    }
+    </main>
 
-    // Konfigurasi
-    function simpanKonfigurasi(){
-      let url=document.getElementById('scriptURL').value;
-      localStorage.setItem('scriptURL',url);
-      alert("Konfigurasi tersimpan");
-    }
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pb-safe z-40">
+        <div class="max-w-md mx-auto flex justify-around p-3 text-xs">
+            <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-primary">
+                <i class="fas fa-home text-lg"></i>
+                <span>Beranda</span>
+            </button>
+            <button onclick="navigate('home'); window.scrollTo({top: 200, behavior: 'smooth'});" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+                <i class="fas fa-th-large text-lg"></i>
+                <span>Kategori</span>
+            </button>
+            <button onclick="navigate('cart')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors relative">
+                <i class="fas fa-shopping-bag text-lg"></i>
+                <span>Keranjang</span>
+            </button>
+            <button onclick="navigate('account')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
+                <i class="fas fa-user text-lg"></i>
+                <span>Akun</span>
+            </button>
+        </div>
+    </nav>
 
-    // Dark Mode
-    function toggleDarkMode(){
-      document.body.classList.toggle('dark');
-    }
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/6282130872054?text=Halo%20Admin%20Nara%20Pustaka,%20saya%20ingin%20bertanya..." target="_blank" class="fixed bottom-20 right-4 w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl shadow-lg z-50 hover:bg-green-600 transition-colors hover:scale-110 duration-200">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
-    // Load awal
-    renderDatabase();
-    renderLogistik();
-  </script>
+    <!-- Application Logic -->
+    <script>
+        // MOCK DATA (In real app, this is fetched via Google Apps Script API)
+        const MOCK_PRODUCTS = [
+            {
+                id: 'p1',
+                title: 'Buku Fiksi: Senja di Jakarta',
+                author: 'Seno Gumira',
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
+                rating: 4.8, sold: 124,
+                category: 'Novel',
+                packages: [
+                    { id: 'pkg1', name: 'Paket Reguler (Buku Saja)', price: 75000 },
+                    { id: 'pkg2', name: 'Paket Premium (Buku + TTD + Bookmark)', price: 125000 }
+                ],
+                desc: 'Sebuah novel romantis yang menceritakan dinamika kehidupan di ibu kota. Dicetak menggunakan kertas bookpaper premium 72gr. Cover Ivory 260gr dengan laminasi doff.'
+            },
+            {
+                id: 'p2',
+                title: 'Panduan Sukses UTBK 2026',
+                author: 'Tim Edukasi Nusantara',
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400',
+                rating: 4.9, sold: 450,
+                category: 'Pendidikan',
+                packages: [
+                    { id: 'pkg3', name: 'Reguler (Buku)', price: 110000 },
+                ],
+                desc: 'Buku latihan soal terlengkap dengan pembahasan mendalam.'
+            },
+            {
+                id: 'p3',
+                title: 'Kumpulan Doa Harian',
+                author: 'Ustadz Ahmad',
+                image: 'https://images.unsplash.com/photo-1585862705497-bfa829424ee4?auto=format&fit=crop&q=80&w=400',
+                rating: 5.0, sold: 89,
+                category: 'Agama',
+                packages: [
+                    { id: 'pkg4', name: 'Reguler (Softcover)', price: 45000 },
+                    { id: 'pkg5', name: 'Premium (Hardcover)', price: 85000 }
+                ],
+                desc: 'Panduan doa harian lengkap dengan terjemahan.'
+            },
+            {
+                id: 'p4',
+                title: 'Dongeng Anak Nusantara',
+                author: 'Kak Seto',
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400',
+                rating: 4.7, sold: 210,
+                category: 'Anak',
+                packages: [
+                    { id: 'pkg6', name: 'Full Color Edition', price: 95000 },
+                ],
+                desc: 'Kumpulan cerita rakyat bergambar penuh warna untuk anak-anak.'
+            }
+        ];
+
+        // STATE MANAGEMENT
+        let state = {
+            cart: JSON.parse(localStorage.getItem('nara_cart')) || [],
+            orders: JSON.parse(localStorage.getItem('nara_orders')) || [],
+            currentOrder: null,
+            currentCategory: 'All'
+        };
+
+        // UTILS
+        const formatRp = (num) => 'Rp' + num.toLocaleString('id-ID');
+        
+        // GET STATUS COLOR
+        const getStatusColor = (status) => {
+            if(status === 'Menunggu Pembayaran') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            if(status === 'Diproses') return 'bg-blue-100 text-blue-700 border-blue-200';
+            if(status === 'Dikirim') return 'bg-green-100 text-green-700 border-green-200';
+            if(status === 'Selesai') return 'bg-gray-100 text-gray-700 border-gray-200';
+            return 'bg-gray-100 text-gray-700';
+        };
+
+        // ROUTER
+        function navigate(viewId, data = null) {
+            window.scrollTo(0, 0);
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            
+            // Update bottom nav active state
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-primary');
+                btn.classList.add('text-gray-400');
+            });
+            
+            if(viewId === 'home' || viewId === 'cart' || viewId === 'account') {
+                const btns = document.querySelectorAll('nav button');
+                if(viewId === 'home') { btns[0].classList.add('text-primary'); btns[0].classList.remove('text-gray-400'); }
+                if(viewId === 'cart') { btns[2].classList.add('text-primary'); btns[2].classList.remove('text-gray-400'); }
+                if(viewId === 'account') { btns[3].classList.add('text-primary'); btns[3].classList.remove('text-gray-400'); }
+            }
+
+            // View specific logic
+            if (viewId === 'product' && data) renderProductDetail(data);
+            if (viewId === 'cart') renderCart();
+            if (viewId === 'checkout') renderCheckout();
+            if (viewId === 'orders') renderOrders(data);
+            if (viewId === 'admin') renderAdmin();
+        }
+
+        // INIT
+        function initApp() {
+            renderHomeProducts();
+            updateCartBadge();
+        }
+        
+        // FILTER CATEGORY
+        function filterCategory(category) {
+            state.currentCategory = category;
+            const label = document.getElementById('active-category-label');
+            const title = document.getElementById('products-section-title');
+            
+            if (category === 'All') {
+                label.classList.add('hidden');
+                title.textContent = "Buku Terlaris";
+            } else {
+                label.classList.remove('hidden');
+                label.innerHTML = `${category} <i class="fas fa-times ml-1"></i>`;
+                title.textContent = `Kategori: ${category}`;
+            }
+            renderHomeProducts();
+        }
+
+        // RENDER HOME
+        function renderHomeProducts() {
+            const grid = document.getElementById('home-products-grid');
+            const empty = document.getElementById('home-products-empty');
+            
+            let filtered = MOCK_PRODUCTS;
+            if (state.currentCategory !== 'All') {
+                filtered = MOCK_PRODUCTS.filter(p => p.category === state.currentCategory);
+            }
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+            } else {
+                empty.classList.add('hidden');
+                grid.innerHTML = filtered.map(p => `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow" onclick="navigate('product', '${p.id}')">
+                        <img src="${p.image}" class="w-full h-40 object-cover lazy" alt="${p.title}">
+                        <div class="p-3">
+                            <h4 class="text-sm font-medium line-clamp-2 leading-tight mb-1">${p.title}</h4>
+                            <p class="text-primary font-bold text-sm mb-2">${formatRp(p.packages[0].price)}</p>
+                            <div class="flex items-center justify-between text-[10px] text-gray-500">
+                                <span><i class="fas fa-star text-yellow-400"></i> ${p.rating}</span>
+                                <span>Terjual ${p.sold}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // RENDER PRODUCT DETAIL
+        function renderProductDetail(productId) {
+            const p = MOCK_PRODUCTS.find(x => x.id === productId);
+            if(!p) return;
+
+            const content = document.getElementById('product-detail-content');
+            let packageOptions = p.packages.map((pkg, idx) => `
+                <label class="block border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-2 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="package" value="${pkg.id}" ${idx === 0 ? 'checked' : ''} class="accent-primary">
+                            <span class="text-sm font-medium">${pkg.name}</span>
+                        </div>
+                        <span class="text-primary font-bold text-sm">${formatRp(pkg.price)}</span>
+                    </div>
+                </label>
+            `).join('');
+
+            content.innerHTML = `
+                <div class="relative">
+                    <button onclick="navigate('home')" class="absolute top-4 left-4 z-10 w-8 h-8 bg-black/30 backdrop-blur-sm text-white rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                    <img src="${p.image}" class="w-full h-80 object-cover" alt="${p.title}">
+                </div>
+                <div class="p-4 bg-white dark:bg-gray-800 -mt-4 relative z-10 rounded-t-2xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-xl font-bold leading-tight flex-1 pr-4">${p.title}</h2>
+                        <button class="text-gray-400 hover:text-red-500 text-xl"><i class="far fa-heart"></i></button>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">Penulis: <span class="font-medium text-gray-700 dark:text-gray-300">${p.author}</span></p>
+                    
+                    <div class="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                        <span><i class="fas fa-star text-yellow-400 text-sm"></i> ${p.rating}</span>
+                        <span><i class="fas fa-box text-gray-400"></i> ${p.sold} Terjual</span>
+                        <span><i class="fas fa-tag text-gray-400"></i> ${p.category}</span>
+                    </div>
+
+                    <h3 class="font-bold text-sm mb-3">Pilih Paket</h3>
+                    <div class="mb-6" id="package-selector">
+                        ${packageOptions}
+                    </div>
+
+                    <h3 class="font-bold text-sm mb-2">Deskripsi Buku</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-8">${p.desc}</p>
+                </div>
+                
+                <!-- Sticky Bottom Bar -->
+                <div class="fixed bottom-0 w-full max-w-md bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-3 flex gap-2 z-40 pb-safe">
+                    <button onclick="addToCart('${p.id}')" class="flex-1 border border-primary text-primary font-medium rounded-xl py-3 text-sm hover:bg-primary/5">
+                        <i class="fas fa-cart-plus mr-1"></i> Keranjang
+                    </button>
+                    <button onclick="buyNow('${p.id}')" class="flex-1 bg-primary text-white font-medium rounded-xl py-3 text-sm shadow-md shadow-primary/30">
+                        Beli Sekarang
+                    </button>
+                </div>
+            `;
+        }
+
+        // CART LOGIC
+        function addToCart(productId, redirect = false) {
+            const p = MOCK_PRODUCTS.find(x => x.id === productId);
+            const selectedPkgId = document.querySelector('input[name="package"]:checked').value;
+            const pkg = p.packages.find(x => x.id === selectedPkgId);
+
+            const existing = state.cart.find(x => x.productId === productId && x.packageId === selectedPkgId);
+            if(existing) {
+                existing.qty += 1;
+            } else {
+                state.cart.push({
+                    cartId: Date.now().toString(),
+                    productId: p.id,
+                    title: p.title,
+                    image: p.image,
+                    packageId: pkg.id,
+                    packageName: pkg.name,
+                    price: pkg.price,
+                    qty: 1
+                });
+            }
+            
+            saveCart();
+            if(redirect) navigate('cart');
+            else {
+                // Toast notification
+                const badge = document.getElementById('cart-badge');
+                badge.classList.add('scale-150');
+                setTimeout(() => badge.classList.remove('scale-150'), 200);
+            }
+        }
+
+        function buyNow(productId) {
+            addToCart(productId, true);
+        }
+
+        function updateQty(cartId, delta) {
+            const item = state.cart.find(x => x.cartId === cartId);
+            if(!item) return;
+            item.qty += delta;
+            if(item.qty <= 0) state.cart = state.cart.filter(x => x.cartId !== cartId);
+            saveCart();
+            renderCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('nara_cart', JSON.stringify(state.cart));
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            const total = state.cart.reduce((sum, item) => sum + item.qty, 0);
+            if(total > 0) {
+                badge.textContent = total;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const summary = document.getElementById('cart-summary');
+            const empty = document.getElementById('cart-empty');
+            
+            if(state.cart.length === 0) {
+                container.innerHTML = '';
+                summary.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            summary.classList.remove('hidden');
+
+            let subtotal = 0;
+            container.innerHTML = state.cart.map(item => {
+                subtotal += item.price * item.qty;
+                return `
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3">
+                    <img src="${item.image}" class="w-20 h-20 object-cover rounded-lg">
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium leading-tight mb-1 line-clamp-1">${item.title}</h4>
+                            <p class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-700 inline-block px-2 py-0.5 rounded">${item.packageName}</p>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="font-bold text-primary text-sm">${formatRp(item.price)}</span>
+                            <div class="flex items-center gap-3 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1">
+                                <button onclick="updateQty('${item.cartId}', -1)" class="text-gray-500"><i class="fas fa-minus text-xs"></i></button>
+                                <span class="text-sm font-medium w-4 text-center">${item.qty}</span>
+                                <button onclick="updateQty('${item.cartId}', 1)" class="text-primary"><i class="fas fa-plus text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            document.getElementById('cart-subtotal').textContent = formatRp(subtotal);
+            document.getElementById('cart-total').textContent = formatRp(subtotal); // No shipping yet
+        }
+
+        function renderCheckout() {
+            if(state.cart.length === 0) return navigate('cart');
+            const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const ongkir = 20000; // Flat for demo
+            
+            document.getElementById('co-subtotal').textContent = formatRp(subtotal);
+            document.getElementById('co-total').textContent = formatRp(subtotal + ongkir);
+            
+            // Generate Invoice ID
+            const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
+            state.currentOrder = {
+                id: `INV-NP-${dateStr}-${Math.floor(1000 + Math.random() * 9000)}`,
+                items: [...state.cart],
+                subtotal: subtotal,
+                ongkir: ongkir,
+                total: subtotal + ongkir,
+                date: new Date().toLocaleDateString('id-ID')
+            };
+        }
+
+        function processCheckout(e) {
+            e.preventDefault();
+            const agree = document.getElementById('co-agree').checked;
+            if(!agree) {
+                // Diganti dari alert ke pesan UI manual (guard pattern)
+                const label = document.getElementById('co-agree').nextElementSibling;
+                label.classList.add('text-red-500');
+                setTimeout(() => label.classList.remove('text-red-500'), 2000);
+                return;
+            }
+
+            // Save user info to current order
+            state.currentOrder.customer = {
+                name: document.getElementById('co-name').value,
+                phone: document.getElementById('co-wa').value,
+                address: `${document.getElementById('co-address').value}, ${document.getElementById('co-kec').value}, ${document.getElementById('co-city').value}, ${document.getElementById('co-prov').value} ${document.getElementById('co-pos').value}`
+            };
+            state.currentOrder.status = "Menunggu Pembayaran"; // Default status
+
+            // Simpan pesanan ke riwayat pesanan
+            state.orders.unshift(state.currentOrder);
+            localStorage.setItem('nara_orders', JSON.stringify(state.orders));
+
+            // Kosongkan keranjang
+            state.cart = []; 
+            saveCart();
+            
+            document.getElementById('success-invoice-id').textContent = state.currentOrder.id;
+            document.getElementById('success-total').textContent = formatRp(state.currentOrder.total);
+            
+            navigate('success');
+        }
+        
+        // RENDER CUSTOMER ORDERS
+        function renderOrders(filterStatus = null) {
+            const list = document.getElementById('customer-orders-list');
+            const empty = document.getElementById('customer-orders-empty');
+            
+            let displayOrders = state.orders;
+            if(filterStatus) {
+                displayOrders = state.orders.filter(o => o.status === filterStatus);
+            }
+            
+            if(displayOrders.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            
+            empty.classList.add('hidden');
+            list.innerHTML = displayOrders.map(order => `
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-0.5">${order.date}</p>
+                            <p class="font-bold text-sm text-gray-800 dark:text-white">${order.id}</p>
+                        </div>
+                        <span class="${getStatusColor(order.status)} px-2 py-1 rounded-lg text-[10px] font-bold border">${order.status}</span>
+                    </div>
+                    
+                    <div class="space-y-2 mb-3">
+                        ${order.items.map(item => `
+                            <div class="flex gap-3">
+                                <img src="${item.image}" class="w-12 h-12 object-cover rounded-md">
+                                <div>
+                                    <p class="text-sm font-medium line-clamp-1">${item.title}</p>
+                                    <p class="text-xs text-gray-500">${item.qty}x ${formatRp(item.price)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <span class="text-xs text-gray-500">Total Belanja</span>
+                        <span class="font-bold text-primary">${formatRp(order.total)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // RENDER ADMIN DASHBOARD
+        function renderAdmin() {
+            const list = document.getElementById('admin-orders-list');
+            const empty = document.getElementById('admin-orders-empty');
+            
+            // Update Stats
+            document.getElementById('admin-total-orders').textContent = state.orders.length;
+            const revenue = state.orders.reduce((sum, order) => sum + order.total, 0);
+            document.getElementById('admin-total-revenue').textContent = formatRp(revenue);
+            
+            if(state.orders.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            
+            empty.classList.add('hidden');
+            list.innerHTML = state.orders.map(order => `
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-sm">
+                    <div class="flex justify-between items-start mb-2 border-b border-gray-100 dark:border-gray-700 pb-2">
+                        <div>
+                            <span class="font-bold text-primary block">${order.id}</span>
+                            <span class="text-[10px] text-gray-400">${order.date}</span>
+                        </div>
+                        <span class="${getStatusColor(order.status)} px-2 py-0.5 rounded text-[10px] font-bold border">${order.status}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="font-bold text-gray-800 dark:text-gray-200">${order.customer.name}</p>
+                        <p class="text-xs text-gray-500 break-words mb-1"><i class="fab fa-whatsapp text-green-500"></i> ${order.customer.phone}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 bg-gray-50 dark:bg-gray-700 p-2 rounded-lg mt-1">${order.customer.address}</p>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 mb-3">
+                        <p class="font-medium text-gray-700 dark:text-gray-300 mb-1">Items:</p>
+                        <ul class="list-disc pl-4 space-y-0.5">
+                            ${order.items.map(item => `<li>${item.qty}x ${item.title} (${item.packageName})</li>`).join('')}
+                        </ul>
+                        <p class="mt-2 font-bold text-gray-800 dark:text-gray-200">Total Pembayaran: ${formatRp(order.total)}</p>
+                    </div>
+                    
+                    ${order.status === 'Menunggu Pembayaran' ? `
+                        <div class="flex gap-2">
+                            <button onclick="updateOrderStatus('${order.id}', 'Diproses')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-xs font-bold transition-colors">Telah Dibayar (Proses)</button>
+                        </div>
+                    ` : order.status === 'Diproses' ? `
+                        <div class="flex gap-2">
+                            <button onclick="updateOrderStatus('${order.id}', 'Dikirim')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-xs font-bold transition-colors">Kirim Pesanan</button>
+                        </div>
+                    ` : order.status === 'Dikirim' ? `
+                        <div class="flex gap-2">
+                            <button onclick="updateOrderStatus('${order.id}', 'Selesai')" class="flex-1 bg-gray-800 dark:bg-white dark:text-gray-900 text-white py-2 rounded-lg text-xs font-bold transition-colors">Tandai Selesai</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        // UPDATE ORDER STATUS (ADMIN ACTION)
+        function updateOrderStatus(orderId, newStatus) {
+            const index = state.orders.findIndex(o => o.id === orderId);
+            if(index !== -1) {
+                state.orders[index].status = newStatus;
+                localStorage.setItem('nara_orders', JSON.stringify(state.orders));
+                renderAdmin(); // Re-render list
+            }
+        }
+
+        // GENERATE PDF (jsPDF)
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const order = state.currentOrder;
+
+            // Brand Header
+            doc.setFillColor(86, 182, 198); // #56B6C6
+            doc.rect(0, 0, 210, 40, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.setFont("helvetica", "bold");
+            doc.text("INVOICE NARA PUSTAKA", 15, 25);
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Marketplace Buku & Layanan Print On Demand", 15, 32);
+
+            // Invoice Info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Tagihan Kepada:", 15, 55);
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`Nama: ${order.customer.name}`, 15, 62);
+            doc.text(`WhatsApp: ${order.customer.phone}`, 15, 68);
+            const splitAddress = doc.splitTextToSize(`Alamat: ${order.customer.address}`, 100);
+            doc.text(splitAddress, 15, 74);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Detail Invoice:", 130, 55);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Nomor: ${order.id}`, 130, 62);
+            doc.text(`Tanggal: ${order.date}`, 130, 68);
+            doc.text(`Status: Menunggu Pembayaran`, 130, 74);
+
+            // Table Header
+            doc.setFillColor(240, 240, 240);
+            doc.rect(15, 90, 180, 10, 'F');
+            doc.setFont("helvetica", "bold");
+            doc.text("Produk", 20, 97);
+            doc.text("Qty", 120, 97);
+            doc.text("Harga", 140, 97);
+            doc.text("Subtotal", 170, 97);
+
+            // Table Items
+            doc.setFont("helvetica", "normal");
+            let y = 107;
+            order.items.forEach(item => {
+                const title = doc.splitTextToSize(`${item.title} (${item.packageName})`, 90);
+                doc.text(title, 20, y);
+                doc.text(item.qty.toString(), 122, y);
+                doc.text(formatRp(item.price), 140, y);
+                doc.text(formatRp(item.price * item.qty), 170, y);
+                y += (title.length * 5) + 5;
+            });
+
+            doc.line(15, y, 195, y);
+            y += 7;
+
+            // Totals
+            doc.text("Subtotal Produk:", 130, y);
+            doc.text(formatRp(order.subtotal), 170, y);
+            y += 7;
+            doc.text("Ongkos Kirim (Lion Parcel):", 130, y);
+            doc.text(formatRp(order.ongkir), 170, y);
+            y += 7;
+            doc.setFont("helvetica", "bold");
+            doc.text("TOTAL PEMBAYARAN:", 130, y);
+            doc.setTextColor(86, 182, 198);
+            doc.text(formatRp(order.total), 170, y);
+
+            // Payment Info & Notes
+            doc.setTextColor(0, 0, 0);
+            y += 20;
+            doc.setFontSize(12);
+            doc.text("Informasi Pembayaran:", 15, y);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            y += 7;
+            doc.text("Bank BCA", 15, y);
+            y += 6;
+            doc.setFont("helvetica", "bold");
+            doc.text("No. Rekening: 111-047-0742", 15, y);
+            y += 6;
+            doc.setFont("helvetica", "normal");
+            doc.text("Atas Nama: Deby Verona", 15, y);
+
+            // T&C Box
+            y += 15;
+            doc.setFillColor(245, 245, 245);
+            doc.rect(15, y, 180, 30, 'F');
+            doc.setFont("helvetica", "bold");
+            doc.text("Catatan Penting Print On Demand:", 20, y + 7);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("1. Buku akan dicetak terlebih dahulu setelah pembayaran diterima.", 20, y + 13);
+            doc.text("2. Produksi membutuhkan waktu ± 3 hari kerja.", 20, y + 18);
+            doc.text("3. Pengiriman via Lion Parcel Reguler ± 1–3 hari kerja. Estimasi diterima ± 4–7 hari kerja.", 20, y + 23);
+
+            // Save PDF
+            doc.save(`${order.id}.pdf`);
+        }
+
+        // Run Init
+        window.onload = initApp;
+
+    </script>
 </body>
 </html>
