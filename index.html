@@ -2,985 +2,1388 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nara Pustaka | Marketplace Buku & Print On Demand</title>
-    
-    <!-- PWA & SEO Meta -->
-    <meta name="description" content="Marketplace Buku dan Layanan Penerbitan dengan sistem Print On Demand.">
-    <meta name="theme-color" content="#56B6C6">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nara Pustaka - Marketplace Buku POD</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'media',
             theme: {
                 extend: {
-                    colors: { primary: '#56B6C6', primaryDark: '#459aa8', secondary: '#f3f4f6' },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    colors: {
+                        nara: {
+                            DEFAULT: '#56B6C6',
+                            light: '#7ac7d4',
+                            dark: '#45929e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
                 }
             }
         }
     </script>
-    
-    <!-- Fonts & Icons -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- jsPDF for Invoice -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .dark .glass { background: rgba(31, 41, 55, 0.95); }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
         
-        /* Smooth transitions */
-        .page-transition { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #56B6C6; }
+
+        /* Hide Number Input Arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 80px; /* Above mobile nav */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        @media (min-width: 768px) {
+            #toast-container { bottom: 20px; right: 20px; left: auto; transform: none; }
+        }
+        .toast {
+            background: #334155; color: white; padding: 12px 24px; border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); font-size: 14px;
+            animation: slideUpFade 0.3s ease forwards;
+        }
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print Styles for Invoice */
+        @media print {
+            body * { visibility: hidden; }
+            #invoice-print-area, #invoice-print-area * { visibility: visible; }
+            #invoice-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
         
-        /* Input focus outline override */
-        input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px #56B6C6; }
+        /* Floating WA */
+        .float-wa {
+            position: fixed; bottom: 80px; right: 20px; z-index: 50;
+            background-color: #25D366; color: white; width: 50px; height: 50px;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 24px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+            transition: transform 0.2s;
+        }
+        .float-wa:hover { transform: scale(1.1); }
+        @media (min-width: 768px) { .float-wa { bottom: 20px; } }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-200">
+<body class="antialiased pb-16 md:pb-0">
 
-    <!-- Header / Navbar -->
-    <header class="fixed top-0 w-full z-50 glass shadow-sm border-b border-gray-100 dark:border-gray-800">
-        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="navigate('home')">
-                <div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-xl">N</div>
-                <h1 class="font-bold text-lg hidden sm:block text-primary">Nara Pustaka</h1>
+    <!-- Info Banner -->
+    <div class="bg-nara text-white text-xs py-2 px-4 marquee-container">
+        <div class="marquee-content font-medium">
+            <i class="fas fa-info-circle mr-1"></i> Sistem Print On Demand: Buku dicetak & dikirim dari Sleman, Yogyakarta setelah pembayaran diterima. Proses produksi sekitar 3 hari kerja. Pengiriman menggunakan Lion Parcel. Estimasi diterima 3–6 hari kerja.
+        </div>
+    </div>
+
+    <!-- Header (Desktop & Mobile Top) -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 cursor-pointer" onclick="app.navigate('home')">
+                <div class="w-8 h-8 rounded bg-nara flex items-center justify-center text-white font-bold text-xl">
+                    N
+                </div>
+                <span class="font-bold text-xl text-slate-800 tracking-tight">Nara Pustaka</span>
             </div>
-            
-            <div class="flex-1 relative">
-                <input type="text" placeholder="Cari buku..." class="w-full bg-gray-100 dark:bg-gray-800 rounded-full py-2 pl-10 pr-4 text-sm focus:bg-white dark:focus:bg-gray-700 transition-all">
-                <i class="fas fa-search absolute left-4 top-2.5 text-gray-400"></i>
-            </div>
-            
-            <div class="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-                <button onclick="navigate('cart')" class="relative">
-                    <i class="fas fa-shopping-cart text-xl"></i>
-                    <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center hidden">0</span>
+
+            <!-- Search (Desktop) -->
+            <div class="hidden md:flex flex-1 max-w-xl mx-8 relative">
+                <input type="text" id="searchInput" placeholder="Cari judul buku, penulis..." 
+                    class="w-full bg-slate-100 rounded-full py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-nara text-sm">
+                <button onclick="app.handleSearch()" class="absolute right-3 top-2 text-slate-400 hover:text-nara">
+                    <i class="fas fa-search"></i>
                 </button>
-                <button onclick="navigate('account')">
-                    <i class="fas fa-user text-xl"></i>
+            </div>
+
+            <!-- Desktop Actions -->
+            <div class="hidden md:flex items-center gap-6">
+                <button onclick="app.navigate('catalog')" class="text-slate-600 hover:text-nara font-medium text-sm">Katalog</button>
+                <button onclick="app.navigate('cart')" class="text-slate-600 hover:text-nara relative">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cartBadgeDesk" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+            </div>
+            
+            <!-- Mobile Actions Top -->
+            <div class="md:hidden flex items-center gap-4">
+                <button onclick="app.toggleMobileSearch()" class="text-slate-600"><i class="fas fa-search text-xl"></i></button>
+            </div>
+        </div>
+        <!-- Mobile Search Bar (Hidden by default) -->
+        <div id="mobileSearchBar" class="hidden px-4 pb-3 md:hidden">
+            <div class="relative">
+                <input type="text" id="searchInputMobile" placeholder="Cari buku..." 
+                    class="w-full bg-slate-100 rounded-full py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-nara text-sm">
+                <button onclick="app.handleSearch('mobile')" class="absolute right-3 top-2 text-slate-400">
+                    <i class="fas fa-search"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main id="app-container" class="pt-16 pb-20 max-w-md mx-auto min-h-screen relative">
-        
-        <!-- VIEW: HOME -->
-        <section id="view-home" class="view-section page-transition">
-            <!-- Hero Banner -->
-            <div class="p-4">
-                <div class="w-full h-40 bg-gradient-to-r from-primary to-blue-400 rounded-2xl shadow-lg flex items-center justify-center text-white p-6 relative overflow-hidden">
-                    <div class="relative z-10">
-                        <h2 class="text-2xl font-bold mb-1">Promo Gajian!</h2>
-                        <p class="text-sm opacity-90">Diskon s/d 50% untuk Novel Terpilih</p>
-                    </div>
-                    <i class="fas fa-book-open absolute -right-4 -bottom-4 text-8xl opacity-20"></i>
-                </div>
-            </div>
-
-            <!-- Categories -->
-            <div class="px-4 py-2">
-                <h3 class="font-bold text-gray-800 dark:text-white mb-3 flex justify-between items-center">
-                    Kategori
-                    <span id="active-category-label" class="text-xs font-normal text-primary hidden bg-primary/10 px-2 py-1 rounded-full cursor-pointer" onclick="filterCategory('All')">Hapus Filter <i class="fas fa-times ml-1"></i></span>
-                </h3>
-                <div class="flex gap-4 overflow-x-auto hide-scroll pb-2">
-                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Novel')">
-                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-book"></i></div>
-                        <span class="text-xs font-medium text-center">Novel</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Pendidikan')">
-                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-graduation-cap"></i></div>
-                        <span class="text-xs font-medium text-center">Pendidikan</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Agama')">
-                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-moon"></i></div>
-                        <span class="text-xs font-medium text-center">Agama</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Anak')">
-                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-child"></i></div>
-                        <span class="text-xs font-medium text-center">Anak</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1 min-w-[60px] cursor-pointer hover:scale-105 transition-transform" onclick="filterCategory('Penerbitan')">
-                        <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl"><i class="fas fa-print"></i></div>
-                        <span class="text-xs font-medium text-center">Penerbitan</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Best Sellers -->
-            <div class="px-4 py-4">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-gray-800 dark:text-white" id="products-section-title">Buku Terlaris</h3>
-                    <a href="#" onclick="filterCategory('All')" class="text-xs text-primary font-medium">Lihat Semua</a>
-                </div>
-                <div class="grid grid-cols-2 gap-3" id="home-products-grid">
-                    <!-- Products injected via JS -->
-                </div>
-                <!-- Empty State untuk Filter -->
-                <div id="home-products-empty" class="hidden text-center py-10">
-                    <i class="fas fa-box-open text-4xl text-gray-300 dark:text-gray-600 mb-3"></i>
-                    <p class="text-sm text-gray-500">Belum ada buku di kategori ini.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- VIEW: PRODUCT DETAIL -->
-        <section id="view-product" class="view-section hidden page-transition bg-white dark:bg-gray-900 min-h-screen">
-            <div id="product-detail-content"></div>
-        </section>
-
-        <!-- VIEW: CART -->
-        <section id="view-cart" class="view-section hidden page-transition px-4 py-4">
-            <h2 class="text-xl font-bold mb-4">Keranjang Belanja</h2>
-            <div id="cart-items" class="space-y-3 mb-6">
-                <!-- Cart items injected via JS -->
-            </div>
-            
-            <div id="cart-summary" class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 hidden">
-                <div class="flex justify-between mb-2 text-sm">
-                    <span class="text-gray-500">Subtotal</span>
-                    <span id="cart-subtotal" class="font-medium text-gray-800 dark:text-white">Rp0</span>
-                </div>
-                <div class="border-t border-gray-100 dark:border-gray-700 my-2 pt-2 flex justify-between font-bold">
-                    <span>Total</span>
-                    <span id="cart-total" class="text-primary">Rp0</span>
-                </div>
-                <button onclick="navigate('checkout')" class="w-full bg-primary text-white rounded-xl py-3 font-medium mt-4 hover:bg-primaryDark transition-colors shadow-md shadow-primary/30">
-                    Lanjut Checkout
-                </button>
-            </div>
-            
-            <div id="cart-empty" class="text-center py-10 hidden">
-                <i class="fas fa-shopping-basket text-5xl text-gray-300 dark:text-gray-600 mb-3"></i>
-                <p class="text-gray-500">Keranjang Anda masih kosong</p>
-                <button onclick="navigate('home')" class="mt-4 text-primary font-medium border border-primary rounded-full px-6 py-2">Mulai Belanja</button>
-            </div>
-        </section>
-
-        <!-- VIEW: CHECKOUT -->
-        <section id="view-checkout" class="view-section hidden page-transition px-4 py-4">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrow-left text-gray-400 cursor-pointer" onclick="navigate('cart')"></i> Checkout</h2>
-            
-            <form id="checkout-form" onsubmit="processCheckout(event)">
-                <!-- Alamat Pengiriman -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fas fa-map-marker-alt text-primary"></i> Alamat Pengiriman</h3>
-                    <div class="space-y-3">
-                        <input type="text" id="co-name" required placeholder="Nama Lengkap" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                        <input type="tel" id="co-wa" required placeholder="Nomor WhatsApp" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                        <input type="email" id="co-email" required placeholder="Email" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                        <textarea id="co-address" required placeholder="Alamat Lengkap (Jalan, RT/RW, No Rumah)" rows="2" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600"></textarea>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="co-prov" required placeholder="Provinsi" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                            <input type="text" id="co-city" required placeholder="Kota/Kabupaten" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="co-kec" required placeholder="Kecamatan" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                            <input type="number" id="co-pos" required placeholder="Kode Pos" class="w-full bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm border border-gray-200 dark:border-gray-600">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ekspedisi -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-4 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fas fa-truck text-primary"></i> Pengiriman</h3>
-                    <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-xs space-y-1 mb-3 border border-blue-100 dark:border-blue-800">
-                        <p class="font-semibold mb-1"><i class="fas fa-info-circle"></i> Kebijakan Print On Demand:</p>
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li>Semua buku dicetak terlebih dahulu setelah pembayaran diterima.</li>
-                            <li>Proses produksi memerlukan waktu sekitar 3 hari kerja.</li>
-                            <li>Pengiriman menggunakan <b>Lion Parcel Reguler</b> (1–3 hari kerja).</li>
-                            <li>Estimasi total buku sampai ke alamat tujuan sekitar 4–7 hari kerja di luar hari libur.</li>
-                        </ul>
-                    </div>
-                    <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="checkbox" id="co-agree" required class="mt-1 accent-primary">
-                        <span class="text-xs text-gray-600 dark:text-gray-400">Saya telah membaca dan memahami estimasi produksi dan pengiriman di atas.</span>
-                    </label>
-                </div>
-
-                <!-- Pembayaran -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-6 border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fas fa-wallet text-primary"></i> Metode Pembayaran</h3>
-                    <div class="border border-primary rounded-lg p-3 bg-primary/5">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-blue-800 dark:text-blue-400">BCA</span>
-                            <i class="fas fa-university text-gray-400"></i>
-                        </div>
-                        <p class="text-lg font-mono font-bold text-gray-800 dark:text-white tracking-wider">111-047-0742</p>
-                        <p class="text-xs text-gray-500 uppercase">A.n Deby Verona</p>
-                    </div>
-                </div>
-
-                <!-- Summary -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm mb-20 border border-gray-100 dark:border-gray-700">
-                    <div class="flex justify-between mb-2 text-sm text-gray-500">
-                        <span>Subtotal Produk</span>
-                        <span id="co-subtotal">Rp0</span>
-                    </div>
-                    <div class="flex justify-between mb-2 text-sm text-gray-500">
-                        <span>Ongkos Kirim (Flat)</span>
-                        <span>Rp20.000</span>
-                    </div>
-                    <div class="border-t border-gray-100 dark:border-gray-700 my-2 pt-2 flex justify-between font-bold">
-                        <span>Total Pembayaran</span>
-                        <span id="co-total" class="text-primary">Rp0</span>
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white rounded-xl py-3 font-medium mt-4 hover:bg-primaryDark transition-colors shadow-md shadow-primary/30">
-                        Buat Pesanan
-                    </button>
-                </div>
-            </form>
-        </section>
-
-        <!-- VIEW: SUCCESS (INVOICE) -->
-        <section id="view-success" class="view-section hidden page-transition px-4 py-10 text-center min-h-screen flex flex-col items-center justify-center">
-            <div class="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
-                <i class="fas fa-check"></i>
-            </div>
-            <h2 class="text-2xl font-bold mb-2">Pesanan Berhasil!</h2>
-            <p class="text-gray-500 text-sm mb-6 max-w-xs mx-auto">Silakan lakukan pembayaran ke rekening BCA dan simpan invoice Anda.</p>
-            
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 w-full text-left mb-6">
-                <p class="text-xs text-gray-500 mb-1">Nomor Pesanan</p>
-                <p class="font-bold text-primary mb-3" id="success-invoice-id">INV-NP-20260101-0001</p>
-                <p class="text-xs text-gray-500 mb-1">Total Pembayaran</p>
-                <p class="font-bold text-xl mb-4" id="success-total">Rp0</p>
-                
-                <button onclick="downloadPDF()" class="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                    <i class="fas fa-file-pdf text-red-500"></i> Download Invoice PDF
-                </button>
-            </div>
-            
-            <button onclick="navigate('home')" class="text-primary font-medium">Kembali ke Beranda</button>
-        </section>
-
-        <!-- VIEW: ACCOUNT & ADMIN DASHBOARD -->
-        <section id="view-account" class="view-section hidden page-transition px-4 py-4">
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-2xl text-gray-400">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div>
-                    <h2 class="font-bold text-lg">Pelanggan Nara</h2>
-                    <p class="text-sm text-gray-500">0821-3087-2054</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-3 mb-6">
-                <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 transition-colors" onclick="navigate('orders', 'Menunggu Pembayaran')">
-                    <i class="fas fa-wallet text-xl text-primary mb-1"></i>
-                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Belum Bayar</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 transition-colors" onclick="navigate('orders', 'Diproses')">
-                    <i class="fas fa-print text-xl text-primary mb-1"></i>
-                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Diproses</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm text-center border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 transition-colors" onclick="navigate('orders', 'Dikirim')">
-                    <i class="fas fa-truck text-xl text-primary mb-1"></i>
-                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Dikirim</p>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-6">
-                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors" onclick="navigate('orders')">
-                    <span class="font-medium text-sm"><i class="fas fa-history text-gray-400 mr-2"></i> Riwayat Pesanan</span>
-                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                </div>
-                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors" onclick="filterCategory('All'); navigate('home')">
-                    <span class="font-medium text-sm"><i class="fas fa-heart text-gray-400 mr-2"></i> Wishlist (Segera Hadir)</span>
-                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                </div>
-                <div class="px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors" onclick="navigate('admin')">
-                    <span class="font-medium text-sm text-primary"><i class="fas fa-cog text-primary mr-2"></i> Mode Admin (Demo)</span>
-                    <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
-                </div>
-            </div>
-        </section>
-
-        <!-- VIEW: ORDERS (CUSTOMER) -->
-        <section id="view-orders" class="view-section hidden page-transition px-4 py-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrow-left text-gray-400 cursor-pointer" onclick="navigate('account')"></i> Riwayat Pesanan</h2>
-            
-            <div id="customer-orders-list" class="space-y-4">
-                <!-- Orders injected via JS -->
-            </div>
-            
-            <div id="customer-orders-empty" class="hidden text-center py-10">
-                <i class="fas fa-receipt text-5xl text-gray-300 dark:text-gray-600 mb-3"></i>
-                <p class="text-gray-500">Belum ada pesanan.</p>
-                <button onclick="navigate('home')" class="mt-4 text-primary font-medium border border-primary rounded-full px-6 py-2">Mulai Belanja</button>
-            </div>
-        </section>
-
-        <!-- VIEW: ADMIN DASHBOARD -->
-        <section id="view-admin" class="view-section hidden page-transition px-4 py-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-arrow-left text-gray-400 cursor-pointer" onclick="navigate('account')"></i> Admin Panel</h2>
-            
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-primary">
-                    <p class="text-xs text-gray-500 mb-1">Total Pesanan</p>
-                    <p class="text-xl font-bold" id="admin-total-orders">0</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-green-500">
-                    <p class="text-xs text-gray-500 mb-1">Pendapatan</p>
-                    <p class="text-lg font-bold text-green-500" id="admin-total-revenue">Rp0</p>
-                </div>
-            </div>
-
-            <h3 class="font-bold text-sm mb-3">Manajemen Pesanan</h3>
-            <div id="admin-orders-list" class="space-y-3">
-                <!-- Admin orders injected via JS -->
-            </div>
-            
-            <div id="admin-orders-empty" class="hidden text-center py-10 bg-white dark:bg-gray-800 rounded-xl">
-                <p class="text-gray-500 text-sm">Belum ada data pesanan masuk.</p>
-            </div>
-            
-            <div class="mt-6 text-xs text-center text-gray-500">
-                <p>Data pesanan disimpan sementara di perangkat ini.</p>
-                <p class="italic">(Simulasi tanpa backend Google Apps Script)</p>
-            </div>
-        </section>
-
+    <!-- Main Content Area -->
+    <main id="app-content" class="min-h-screen">
+        <!-- Content will be injected here by JS -->
     </main>
 
-    <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pb-safe z-40">
-        <div class="max-w-md mx-auto flex justify-around p-3 text-xs">
-            <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-primary">
-                <i class="fas fa-home text-lg"></i>
-                <span>Beranda</span>
-            </button>
-            <button onclick="navigate('home'); window.scrollTo({top: 200, behavior: 'smooth'});" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
-                <i class="fas fa-th-large text-lg"></i>
-                <span>Kategori</span>
-            </button>
-            <button onclick="navigate('cart')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors relative">
-                <i class="fas fa-shopping-bag text-lg"></i>
-                <span>Keranjang</span>
-            </button>
-            <button onclick="navigate('account')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors">
-                <i class="fas fa-user text-lg"></i>
-                <span>Akun</span>
-            </button>
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-10 mt-12 hidden md:block" id="main-footer">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 rounded bg-nara flex items-center justify-center text-white font-bold text-xl">N</div>
+                    <span class="font-bold text-xl text-white">Nara Pustaka</span>
+                </div>
+                <p class="text-sm text-slate-400 mb-4">Marketplace Buku Print On Demand. Karya terbaik dicetak khusus untuk Anda dengan kualitas terjamin.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-nara transition"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-nara transition"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Informasi Kontak</h4>
+                <ul class="space-y-2 text-sm text-slate-400">
+                    <li><i class="fas fa-map-marker-alt w-5"></i> Sleman, DI Yogyakarta</li>
+                    <li><i class="fas fa-envelope w-5"></i> narapustaka1@gmail.com</li>
+                    <li><i class="fas fa-phone w-5"></i> +62 821-3087-2054</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Pembayaran & Pengiriman</h4>
+                <div class="text-sm text-slate-400 mb-2">Transfer Bank BCA</div>
+                <div class="font-mono text-white bg-slate-800 p-2 rounded inline-block mb-4">111-047-0742 (Deby Verona)</div>
+                <div class="text-sm text-slate-400">Pengiriman via Lion Parcel</div>
+            </div>
         </div>
+        <div class="container mx-auto px-4 mt-8 pt-4 border-t border-slate-800 text-sm text-slate-500 flex justify-between items-center">
+            <p>&copy; 2026 Nara Pustaka. All rights reserved.</p>
+            <button onclick="app.navigate('admin_login')" class="opacity-50 hover:opacity-100 transition" title="Admin Login"><i class="fas fa-lock"></i></button>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 flex justify-around items-center py-2 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <button onclick="app.navigate('home')" class="flex flex-col items-center p-2 text-slate-400 w-1/4" id="nav-home">
+            <i class="fas fa-home text-xl mb-1"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </button>
+        <button onclick="app.navigate('catalog')" class="flex flex-col items-center p-2 text-slate-400 w-1/4" id="nav-catalog">
+            <i class="fas fa-book text-xl mb-1"></i>
+            <span class="text-[10px] font-medium">Katalog</span>
+        </button>
+        <button onclick="app.navigate('cart')" class="flex flex-col items-center p-2 text-slate-400 w-1/4 relative" id="nav-cart">
+            <i class="fas fa-shopping-cart text-xl mb-1"></i>
+            <span class="text-[10px] font-medium">Keranjang</span>
+            <span id="cartBadgeMob" class="absolute top-1 right-3 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+        </button>
+        <button onclick="app.navigate('admin_login')" class="flex flex-col items-center p-2 text-slate-400 w-1/4" id="nav-admin">
+            <i class="fas fa-user-cog text-xl mb-1"></i>
+            <span class="text-[10px] font-medium">Admin</span>
+        </button>
     </nav>
 
     <!-- Floating WhatsApp -->
-    <a href="https://wa.me/6282130872054?text=Halo%20Admin%20Nara%20Pustaka,%20saya%20ingin%20bertanya..." target="_blank" class="fixed bottom-20 right-4 w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl shadow-lg z-50 hover:bg-green-600 transition-colors hover:scale-110 duration-200">
+    <a href="https://wa.me/6282130872054" target="_blank" class="float-wa">
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- Application Logic -->
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
     <script>
-        // MOCK DATA (In real app, this is fetched via Google Apps Script API)
-        const MOCK_PRODUCTS = [
-            {
-                id: 'p1',
-                title: 'Buku Fiksi: Senja di Jakarta',
-                author: 'Seno Gumira',
-                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
-                rating: 4.8, sold: 124,
-                category: 'Novel',
-                packages: [
-                    { id: 'pkg1', name: 'Paket Reguler (Buku Saja)', price: 75000 },
-                    { id: 'pkg2', name: 'Paket Premium (Buku + TTD + Bookmark)', price: 125000 }
-                ],
-                desc: 'Sebuah novel romantis yang menceritakan dinamika kehidupan di ibu kota. Dicetak menggunakan kertas bookpaper premium 72gr. Cover Ivory 260gr dengan laminasi doff.'
-            },
-            {
-                id: 'p2',
-                title: 'Panduan Sukses UTBK 2026',
-                author: 'Tim Edukasi Nusantara',
-                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400',
-                rating: 4.9, sold: 450,
-                category: 'Pendidikan',
-                packages: [
-                    { id: 'pkg3', name: 'Reguler (Buku)', price: 110000 },
-                ],
-                desc: 'Buku latihan soal terlengkap dengan pembahasan mendalam.'
-            },
-            {
-                id: 'p3',
-                title: 'Kumpulan Doa Harian',
-                author: 'Ustadz Ahmad',
-                image: 'https://images.unsplash.com/photo-1585862705497-bfa829424ee4?auto=format&fit=crop&q=80&w=400',
-                rating: 5.0, sold: 89,
-                category: 'Agama',
-                packages: [
-                    { id: 'pkg4', name: 'Reguler (Softcover)', price: 45000 },
-                    { id: 'pkg5', name: 'Premium (Hardcover)', price: 85000 }
-                ],
-                desc: 'Panduan doa harian lengkap dengan terjemahan.'
-            },
-            {
-                id: 'p4',
-                title: 'Dongeng Anak Nusantara',
-                author: 'Kak Seto',
-                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400',
-                rating: 4.7, sold: 210,
-                category: 'Anak',
-                packages: [
-                    { id: 'pkg6', name: 'Full Color Edition', price: 95000 },
-                ],
-                desc: 'Kumpulan cerita rakyat bergambar penuh warna untuk anak-anak.'
-            }
+        /**
+         * ------------------------------------------------------------------------
+         * PENTING: PANDUAN INTEGRASI GOOGLE APPS SCRIPT (GAS)
+         * ------------------------------------------------------------------------
+         * Saat ini aplikasi menggunakan `localStorage` agar bisa di-preview.
+         * Untuk menghubungkan ke Google Sheets via GAS, ubah object `api` di bawah ini.
+         * Contoh fungsi fetch untuk GAS:
+         * 
+         * const GAS_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
+         * 
+         * async function fetchFromGAS(action, data = null) {
+         *    const res = await fetch(`${GAS_URL}?action=${action}`, {
+         *       method: 'POST',
+         *       body: JSON.stringify(data)
+         *    });
+         *    return res.json();
+         * }
+         * ------------------------------------------------------------------------
+         */
+
+        // Initial Data for Mock DB
+        const INITIAL_PRODUCTS = [
+            { id: 'p1', name: 'Senja di Jakarta', price: 95000, discountPrice: 75000, stock: 99, desc: 'Novel inspiratif tentang perjuangan hidup di ibukota.', cover: 'https://placehold.co/400x600/56B6C6/FFF?text=Senja+di+Jakarta', gallery: [], packages: [{name: 'Reguler', price: 75000}, {name: 'Premium (Hardcover)', price: 120000}], rating: 4.8, reviews: [{user: 'Budi', comment: 'Bagus banget!'}], category: 'Novel', isPromo: true, isRecommended: true, created_at: Date.now() },
+            { id: 'p2', name: 'Panduan Investasi Pemula', price: 125000, discountPrice: null, stock: 50, desc: 'Langkah demi langkah memulai investasi di pasar modal.', cover: 'https://placehold.co/400x600/1e293b/FFF?text=Investasi+Pemula', gallery: [], packages: [{name: 'Reguler', price: 125000}], rating: 4.5, reviews: [], category: 'Bisnis', isPromo: false, isRecommended: true, created_at: Date.now()-1000 },
+            { id: 'p3', name: 'Kumpulan Puisi Rindu', price: 65000, discountPrice: 50000, stock: 100, desc: 'Antologi puisi yang menyentuh hati.', cover: 'https://placehold.co/400x600/e2e8f0/333?text=Puisi+Rindu', gallery: [], packages: [{name: 'Reguler', price: 50000}], rating: 4.9, reviews: [], category: 'Sastra', isPromo: true, isRecommended: false, created_at: Date.now()-2000 },
+            { id: 'p4', name: 'Mastering JavaScript', price: 150000, discountPrice: null, stock: 20, desc: 'Buku teknikal untuk programmer web.', cover: 'https://placehold.co/400x600/f59e0b/FFF?text=JS+Mastery', gallery: [], packages: [{name: 'Buku Fisik', price: 150000}], rating: 5.0, reviews: [], category: 'Teknologi', isPromo: false, isRecommended: false, created_at: Date.now()-3000 },
         ];
 
-        // STATE MANAGEMENT
-        let state = {
-            cart: JSON.parse(localStorage.getItem('nara_cart')) || [],
-            orders: JSON.parse(localStorage.getItem('nara_orders')) || [],
-            currentOrder: null,
-            currentCategory: 'All'
+        const INITIAL_BANNERS = [
+            { id: 'b1', url: 'https://placehold.co/1200x400/56B6C6/FFFFFF?text=Promo+Spesial+Bulan+Ini+-+Diskon+up+to+30%25', title: 'Promo Utama' }
+        ];
+
+        // MOCK API LAYER
+        const api = {
+            async getProducts() {
+                let p = JSON.parse(localStorage.getItem('nara_products'));
+                if(!p) { p = INITIAL_PRODUCTS; localStorage.setItem('nara_products', JSON.stringify(p)); }
+                return p.sort((a,b) => b.created_at - a.created_at);
+            },
+            async saveProduct(prod) {
+                let p = await this.getProducts();
+                if(prod.id) {
+                    const idx = p.findIndex(x => x.id === prod.id);
+                    if(idx > -1) p[idx] = prod;
+                } else {
+                    prod.id = 'p_' + Date.now();
+                    prod.created_at = Date.now();
+                    p.unshift(prod);
+                }
+                localStorage.setItem('nara_products', JSON.stringify(p));
+                return true;
+            },
+            async deleteProduct(id) {
+                let p = await this.getProducts();
+                p = p.filter(x => x.id !== id);
+                localStorage.setItem('nara_products', JSON.stringify(p));
+                return true;
+            },
+            async getBanners() {
+                let b = JSON.parse(localStorage.getItem('nara_banners'));
+                if(!b) { b = INITIAL_BANNERS; localStorage.setItem('nara_banners', JSON.stringify(b)); }
+                return b;
+            },
+            async getOrders() {
+                return JSON.parse(localStorage.getItem('nara_orders')) || [];
+            },
+            async saveOrder(order) {
+                let o = await this.getOrders();
+                order.created_at = Date.now();
+                order.status = 'Menunggu Pembayaran';
+                o.unshift(order);
+                localStorage.setItem('nara_orders', JSON.stringify(o));
+                return order;
+            },
+            async updateOrderStatus(orderId, status) {
+                let o = await this.getOrders();
+                const idx = o.findIndex(x => x.id === orderId);
+                if(idx > -1) {
+                    o[idx].status = status;
+                    localStorage.setItem('nara_orders', JSON.stringify(o));
+                }
+                return true;
+            }
         };
 
-        // UTILS
-        const formatRp = (num) => 'Rp' + num.toLocaleString('id-ID');
-        
-        // GET STATUS COLOR
-        const getStatusColor = (status) => {
-            if(status === 'Menunggu Pembayaran') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-            if(status === 'Diproses') return 'bg-blue-100 text-blue-700 border-blue-200';
-            if(status === 'Dikirim') return 'bg-green-100 text-green-700 border-green-200';
-            if(status === 'Selesai') return 'bg-gray-100 text-gray-700 border-gray-200';
-            return 'bg-gray-100 text-gray-700';
+        const formatRp = (num) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         };
 
-        // ROUTER
-        function navigate(viewId, data = null) {
-            window.scrollTo(0, 0);
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+        const showToast = (msg) => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        };
+
+        const app = {
+            state: {
+                view: 'home', // home, catalog, detail, cart, checkout, admin_login, admin_dash, invoice
+                cart: JSON.parse(localStorage.getItem('nara_cart')) || [],
+                products: [],
+                banners: [],
+                currentProduct: null,
+                currentOrder: null,
+                isAdmin: sessionStorage.getItem('nara_admin') === 'true',
+                searchQuery: ''
+            },
             
-            // Update bottom nav active state
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('text-primary');
-                btn.classList.add('text-gray-400');
-            });
-            
-            if(viewId === 'home' || viewId === 'cart' || viewId === 'account') {
-                const btns = document.querySelectorAll('nav button');
-                if(viewId === 'home') { btns[0].classList.add('text-primary'); btns[0].classList.remove('text-gray-400'); }
-                if(viewId === 'cart') { btns[2].classList.add('text-primary'); btns[2].classList.remove('text-gray-400'); }
-                if(viewId === 'account') { btns[3].classList.add('text-primary'); btns[3].classList.remove('text-gray-400'); }
-            }
-
-            // View specific logic
-            if (viewId === 'product' && data) renderProductDetail(data);
-            if (viewId === 'cart') renderCart();
-            if (viewId === 'checkout') renderCheckout();
-            if (viewId === 'orders') renderOrders(data);
-            if (viewId === 'admin') renderAdmin();
-        }
-
-        // INIT
-        function initApp() {
-            renderHomeProducts();
-            updateCartBadge();
-        }
-        
-        // FILTER CATEGORY
-        function filterCategory(category) {
-            state.currentCategory = category;
-            const label = document.getElementById('active-category-label');
-            const title = document.getElementById('products-section-title');
-            
-            if (category === 'All') {
-                label.classList.add('hidden');
-                title.textContent = "Buku Terlaris";
-            } else {
-                label.classList.remove('hidden');
-                label.innerHTML = `${category} <i class="fas fa-times ml-1"></i>`;
-                title.textContent = `Kategori: ${category}`;
-            }
-            renderHomeProducts();
-        }
-
-        // RENDER HOME
-        function renderHomeProducts() {
-            const grid = document.getElementById('home-products-grid');
-            const empty = document.getElementById('home-products-empty');
-            
-            let filtered = MOCK_PRODUCTS;
-            if (state.currentCategory !== 'All') {
-                filtered = MOCK_PRODUCTS.filter(p => p.category === state.currentCategory);
-            }
-            
-            if (filtered.length === 0) {
-                grid.innerHTML = '';
-                empty.classList.remove('hidden');
-            } else {
-                empty.classList.add('hidden');
-                grid.innerHTML = filtered.map(p => `
-                    <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow" onclick="navigate('product', '${p.id}')">
-                        <img src="${p.image}" class="w-full h-40 object-cover lazy" alt="${p.title}">
-                        <div class="p-3">
-                            <h4 class="text-sm font-medium line-clamp-2 leading-tight mb-1">${p.title}</h4>
-                            <p class="text-primary font-bold text-sm mb-2">${formatRp(p.packages[0].price)}</p>
-                            <div class="flex items-center justify-between text-[10px] text-gray-500">
-                                <span><i class="fas fa-star text-yellow-400"></i> ${p.rating}</span>
-                                <span>Terjual ${p.sold}</span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // RENDER PRODUCT DETAIL
-        function renderProductDetail(productId) {
-            const p = MOCK_PRODUCTS.find(x => x.id === productId);
-            if(!p) return;
-
-            const content = document.getElementById('product-detail-content');
-            let packageOptions = p.packages.map((pkg, idx) => `
-                <label class="block border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-2 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <input type="radio" name="package" value="${pkg.id}" ${idx === 0 ? 'checked' : ''} class="accent-primary">
-                            <span class="text-sm font-medium">${pkg.name}</span>
-                        </div>
-                        <span class="text-primary font-bold text-sm">${formatRp(pkg.price)}</span>
-                    </div>
-                </label>
-            `).join('');
-
-            content.innerHTML = `
-                <div class="relative">
-                    <button onclick="navigate('home')" class="absolute top-4 left-4 z-10 w-8 h-8 bg-black/30 backdrop-blur-sm text-white rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-                    <img src="${p.image}" class="w-full h-80 object-cover" alt="${p.title}">
-                </div>
-                <div class="p-4 bg-white dark:bg-gray-800 -mt-4 relative z-10 rounded-t-2xl shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-                    <div class="flex justify-between items-start mb-2">
-                        <h2 class="text-xl font-bold leading-tight flex-1 pr-4">${p.title}</h2>
-                        <button class="text-gray-400 hover:text-red-500 text-xl"><i class="far fa-heart"></i></button>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-4">Penulis: <span class="font-medium text-gray-700 dark:text-gray-300">${p.author}</span></p>
-                    
-                    <div class="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-                        <span><i class="fas fa-star text-yellow-400 text-sm"></i> ${p.rating}</span>
-                        <span><i class="fas fa-box text-gray-400"></i> ${p.sold} Terjual</span>
-                        <span><i class="fas fa-tag text-gray-400"></i> ${p.category}</span>
-                    </div>
-
-                    <h3 class="font-bold text-sm mb-3">Pilih Paket</h3>
-                    <div class="mb-6" id="package-selector">
-                        ${packageOptions}
-                    </div>
-
-                    <h3 class="font-bold text-sm mb-2">Deskripsi Buku</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-8">${p.desc}</p>
-                </div>
+            calculateOngkir(province) {
+                if (!province) return 18000; // Standar awal jika kosong
+                const prov = province.toLowerCase().trim();
                 
-                <!-- Sticky Bottom Bar -->
-                <div class="fixed bottom-0 w-full max-w-md bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-3 flex gap-2 z-40 pb-safe">
-                    <button onclick="addToCart('${p.id}')" class="flex-1 border border-primary text-primary font-medium rounded-xl py-3 text-sm hover:bg-primary/5">
-                        <i class="fas fa-cart-plus mr-1"></i> Keranjang
-                    </button>
-                    <button onclick="buyNow('${p.id}')" class="flex-1 bg-primary text-white font-medium rounded-xl py-3 text-sm shadow-md shadow-primary/30">
-                        Beli Sekarang
-                    </button>
-                </div>
-            `;
-        }
+                // DI Yogyakarta (Sleman, Bantul, Jogja Kota, dll)
+                if (prov.includes('yogyakarta') || prov.includes('diy') || prov.includes('sleman') || prov.includes('bantul') || prov.includes('gunungkidul') || prov.includes('kulon progo') || prov.includes('jogja')) {
+                    return 8000;
+                }
+                // Jawa Tengah (Semarang, Solo, dll)
+                if (prov.includes('jawa tengah') || prov.includes('jateng') || prov.includes('semarang') || prov.includes('solo') || prov.includes('magelang') || prov.includes('klaten')) {
+                    return 14000;
+                }
+                // Jawa Barat, DKI Jakarta, Banten, Jawa Timur
+                if (prov.includes('jawa barat') || prov.includes('jabar') || prov.includes('dki') || prov.includes('jakarta') || prov.includes('banten') || prov.includes('jawa timur') || prov.includes('jatim') || prov.includes('surabaya') || prov.includes('bandung') || prov.includes('bogor')) {
+                    return 20000;
+                }
+                // Bali & Nusa Tenggara Barat, Sumatera Selatan / Utara / Barat
+                if (prov.includes('bali') || prov.includes('denpasar') || prov.includes('ntb') || prov.includes('lombok') || prov.includes('sumatera') || prov.includes('lampung') || prov.includes('palembang') || prov.includes('medan') || prov.includes('riau') || prov.includes('padang')) {
+                    return 32000;
+                }
+                // Kalimantan, Sulawesi, Nusa Tenggara Timur (NTT)
+                if (prov.includes('kalimantan') || prov.includes('pontianak') || prov.includes('samarinda') || prov.includes('sulawesi') || prov.includes('makassar') || prov.includes('manado') || prov.includes('ntt') || prov.includes('kupang')) {
+                    return 45000;
+                }
+                // Maluku, Papua
+                if (prov.includes('maluku') || prov.includes('ambon') || prov.includes('papua') || prov.includes('jayapura') || prov.includes('sorong')) {
+                    return 60000;
+                }
+                return 18000; // Tarif flat default jika tidak terdeteksi
+            },
 
-        // CART LOGIC
-        function addToCart(productId, redirect = false) {
-            const p = MOCK_PRODUCTS.find(x => x.id === productId);
-            const selectedPkgId = document.querySelector('input[name="package"]:checked').value;
-            const pkg = p.packages.find(x => x.id === selectedPkgId);
+            // Recalculates dynamically during input
+            recalculateCheckout() {
+                const provInput = document.getElementById('co_prov');
+                if (!provInput) return;
+                
+                const provValue = provInput.value;
+                const ongkir = this.calculateOngkir(provValue);
+                
+                const cart = this.state.cart;
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                const total = subtotal + ongkir;
+                
+                const shippingEl = document.getElementById('checkout-shipping-fee');
+                const totalEl = document.getElementById('checkout-total-payment');
+                
+                if (shippingEl) shippingEl.textContent = formatRp(ongkir);
+                if (totalEl) totalEl.textContent = formatRp(total);
+            },
 
-            const existing = state.cart.find(x => x.productId === productId && x.packageId === selectedPkgId);
-            if(existing) {
-                existing.qty += 1;
-            } else {
-                state.cart.push({
-                    cartId: Date.now().toString(),
-                    productId: p.id,
-                    title: p.title,
-                    image: p.image,
-                    packageId: pkg.id,
-                    packageName: pkg.name,
-                    price: pkg.price,
-                    qty: 1
+            async init() {
+                this.state.products = await api.getProducts();
+                this.state.banners = await api.getBanners();
+                this.updateCartBadge();
+                this.navigate('home');
+            },
+
+            updateCartBadge() {
+                const total = this.state.cart.reduce((sum, item) => sum + item.qty, 0);
+                const badges = [document.getElementById('cartBadgeDesk'), document.getElementById('cartBadgeMob')];
+                badges.forEach(b => {
+                    if (b) {
+                        b.textContent = total;
+                        if(total > 0) b.classList.remove('hidden');
+                        else b.classList.add('hidden');
+                    }
                 });
-            }
+                localStorage.setItem('nara_cart', JSON.stringify(this.state.cart));
+            },
+
+            navigate(view, param = null) {
+                this.state.view = view;
+                window.scrollTo(0, 0);
+                
+                // Update Nav Active State (Mobile)
+                document.querySelectorAll('nav button').forEach(b => {
+                    b.classList.remove('text-nara');
+                    b.classList.add('text-slate-400');
+                });
+                let navId = view.startsWith('admin') ? 'nav-admin' : `nav-${view}`;
+                if(document.getElementById(navId)) {
+                    document.getElementById(navId).classList.remove('text-slate-400');
+                    document.getElementById(navId).classList.add('text-nara');
+                }
+
+                // Hide/Show elements based on view
+                document.getElementById('main-footer').style.display = (view.startsWith('admin') || view === 'invoice') ? 'none' : 'block';
+                document.querySelector('header').style.display = (view === 'invoice') ? 'none' : 'block';
+                document.querySelector('nav.md\\:hidden').style.display = (view === 'invoice') ? 'none' : 'flex';
+                document.querySelector('.float-wa').style.display = (view.startsWith('admin') || view === 'invoice') ? 'none' : 'flex';
+
+                const content = document.getElementById('app-content');
+                
+                switch(view) {
+                    case 'home': content.innerHTML = this.views.home(); break;
+                    case 'catalog': content.innerHTML = this.views.catalog(); break;
+                    case 'detail': 
+                        this.state.currentProduct = this.state.products.find(p => p.id === param);
+                        if(this.state.currentProduct) content.innerHTML = this.views.detail();
+                        else this.navigate('catalog');
+                        break;
+                    case 'cart': content.innerHTML = this.views.cart(); break;
+                    case 'checkout': content.innerHTML = this.views.checkout(); break;
+                    case 'admin_login': 
+                        if(this.state.isAdmin) this.navigate('admin_dash');
+                        else content.innerHTML = this.views.adminLogin(); 
+                        break;
+                    case 'admin_dash': 
+                        if(!this.state.isAdmin) this.navigate('admin_login');
+                        else {
+                            content.innerHTML = this.views.adminDash();
+                            this.renderAdminSubView(param || 'dashboard');
+                        }
+                        break;
+                    case 'invoice':
+                        content.innerHTML = this.views.invoice(param); // param is order object
+                        break;
+                }
+            },
+
+            toggleMobileSearch() {
+                const bar = document.getElementById('mobileSearchBar');
+                bar.classList.toggle('hidden');
+            },
+
+            handleSearch(source = 'desktop') {
+                const inputId = source === 'mobile' ? 'searchInputMobile' : 'searchInput';
+                this.state.searchQuery = document.getElementById(inputId).value;
+                this.navigate('catalog');
+            },
+
+            // Cart Logic
+            addToCart(productId, packageIdx = 0, redirect = false) {
+                const product = this.state.products.find(p => p.id === productId);
+                if(!product) return;
+                
+                const selectedPkg = product.packages && product.packages[packageIdx] ? product.packages[packageIdx] : { name: 'Default', price: product.discountPrice || product.price };
+                const priceToUse = selectedPkg.price; // Base it on package selected
+
+                const existingItem = this.state.cart.find(i => i.id === productId && i.packageName === selectedPkg.name);
+                
+                if(existingItem) existingItem.qty += 1;
+                else {
+                    this.state.cart.push({
+                        id: product.id,
+                        name: product.name,
+                        cover: product.cover,
+                        packageName: selectedPkg.name,
+                        price: priceToUse,
+                        qty: 1
+                    });
+                }
+                this.updateCartBadge();
+                showToast('Ditambahkan ke keranjang');
+                if(redirect) this.navigate('cart');
+            },
+
+            updateCartQty(index, change) {
+                const item = this.state.cart[index];
+                item.qty += change;
+                if(item.qty <= 0) this.state.cart.splice(index, 1);
+                this.updateCartBadge();
+                this.navigate('cart'); // re-render
+            },
             
-            saveCart();
-            if(redirect) navigate('cart');
-            else {
-                // Toast notification
-                const badge = document.getElementById('cart-badge');
-                badge.classList.add('scale-150');
-                setTimeout(() => badge.classList.remove('scale-150'), 200);
-            }
-        }
+            removeCartItem(index) {
+                this.state.cart.splice(index, 1);
+                this.updateCartBadge();
+                this.navigate('cart');
+            },
 
-        function buyNow(productId) {
-            addToCart(productId, true);
-        }
+            // Calculate Discont %
+            calcDiscPercent(normal, disc) {
+                if(!disc || disc >= normal) return 0;
+                return Math.round(((normal - disc) / normal) * 100);
+            },
 
-        function updateQty(cartId, delta) {
-            const item = state.cart.find(x => x.cartId === cartId);
-            if(!item) return;
-            item.qty += delta;
-            if(item.qty <= 0) state.cart = state.cart.filter(x => x.cartId !== cartId);
-            saveCart();
-            renderCart();
-        }
-
-        function saveCart() {
-            localStorage.setItem('nara_cart', JSON.stringify(state.cart));
-            updateCartBadge();
-        }
-
-        function updateCartBadge() {
-            const badge = document.getElementById('cart-badge');
-            const total = state.cart.reduce((sum, item) => sum + item.qty, 0);
-            if(total > 0) {
-                badge.textContent = total;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function renderCart() {
-            const container = document.getElementById('cart-items');
-            const summary = document.getElementById('cart-summary');
-            const empty = document.getElementById('cart-empty');
-            
-            if(state.cart.length === 0) {
-                container.innerHTML = '';
-                summary.classList.add('hidden');
-                empty.classList.remove('hidden');
-                return;
-            }
-
-            empty.classList.add('hidden');
-            summary.classList.remove('hidden');
-
-            let subtotal = 0;
-            container.innerHTML = state.cart.map(item => {
-                subtotal += item.price * item.qty;
-                return `
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 flex gap-3">
-                    <img src="${item.image}" class="w-20 h-20 object-cover rounded-lg">
-                    <div class="flex-1 flex flex-col justify-between">
-                        <div>
-                            <h4 class="text-sm font-medium leading-tight mb-1 line-clamp-1">${item.title}</h4>
-                            <p class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-700 inline-block px-2 py-0.5 rounded">${item.packageName}</p>
+            components: {
+                productCard(p) {
+                    const price = p.discountPrice || p.price;
+                    const hasDisc = p.discountPrice && p.discountPrice < p.price;
+                    const discPercent = app.calcDiscPercent(p.price, p.discountPrice);
+                    
+                    return `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition cursor-pointer flex flex-col h-full" onclick="app.navigate('detail', '${p.id}')">
+                        <div class="relative pt-[130%] bg-slate-100">
+                            <img src="${p.cover}" alt="${p.name}" class="absolute top-0 left-0 w-full h-full object-cover" onerror="this.src='https://placehold.co/400x600/eee/999?text=No+Image'">
+                            ${hasDisc ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">-${discPercent}%</div>` : ''}
                         </div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="font-bold text-primary text-sm">${formatRp(item.price)}</span>
-                            <div class="flex items-center gap-3 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1">
-                                <button onclick="updateQty('${item.cartId}', -1)" class="text-gray-500"><i class="fas fa-minus text-xs"></i></button>
-                                <span class="text-sm font-medium w-4 text-center">${item.qty}</span>
-                                <button onclick="updateQty('${item.cartId}', 1)" class="text-primary"><i class="fas fa-plus text-xs"></i></button>
+                        <div class="p-3 flex flex-col flex-grow">
+                            <div class="flex items-center gap-1 mb-1 text-[10px] text-yellow-500">
+                                <i class="fas fa-star"></i> <span>${p.rating || '0.0'}</span>
+                            </div>
+                            <h3 class="font-medium text-sm text-slate-800 line-clamp-2 mb-2 flex-grow">${p.name}</h3>
+                            <div>
+                                ${hasDisc ? `<div class="text-xs text-slate-400 line-through mb-0.5">${formatRp(p.price)}</div>` : ''}
+                                <div class="font-bold text-nara text-sm md:text-base">${formatRp(price)}</div>
                             </div>
                         </div>
                     </div>
-                </div>
-                `;
-            }).join('');
+                    `;
+                }
+            },
 
-            document.getElementById('cart-subtotal').textContent = formatRp(subtotal);
-            document.getElementById('cart-total').textContent = formatRp(subtotal); // No shipping yet
-        }
+            views: {
+                home() {
+                    const p = app.state.products;
+                    const promos = p.filter(x => x.isPromo).slice(0,4);
+                    const recom = p.filter(x => x.isRecommended).slice(0,4);
+                    const latest = p.slice(0,4);
+                    const banner = app.state.banners[0] || { url: 'https://placehold.co/1200x400/56B6C6/FFFFFF?text=Welcome+to+Nara+Pustaka' };
 
-        function renderCheckout() {
-            if(state.cart.length === 0) return navigate('cart');
-            const subtotal = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const ongkir = 20000; // Flat for demo
-            
-            document.getElementById('co-subtotal').textContent = formatRp(subtotal);
-            document.getElementById('co-total').textContent = formatRp(subtotal + ongkir);
-            
-            // Generate Invoice ID
-            const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
-            state.currentOrder = {
-                id: `INV-NP-${dateStr}-${Math.floor(1000 + Math.random() * 9000)}`,
-                items: [...state.cart],
-                subtotal: subtotal,
-                ongkir: ongkir,
-                total: subtotal + ongkir,
-                date: new Date().toLocaleDateString('id-ID')
-            };
-        }
-
-        function processCheckout(e) {
-            e.preventDefault();
-            const agree = document.getElementById('co-agree').checked;
-            if(!agree) {
-                // Diganti dari alert ke pesan UI manual (guard pattern)
-                const label = document.getElementById('co-agree').nextElementSibling;
-                label.classList.add('text-red-500');
-                setTimeout(() => label.classList.remove('text-red-500'), 2000);
-                return;
-            }
-
-            // Save user info to current order
-            state.currentOrder.customer = {
-                name: document.getElementById('co-name').value,
-                phone: document.getElementById('co-wa').value,
-                address: `${document.getElementById('co-address').value}, ${document.getElementById('co-kec').value}, ${document.getElementById('co-city').value}, ${document.getElementById('co-prov').value} ${document.getElementById('co-pos').value}`
-            };
-            state.currentOrder.status = "Menunggu Pembayaran"; // Default status
-
-            // Simpan pesanan ke riwayat pesanan
-            state.orders.unshift(state.currentOrder);
-            localStorage.setItem('nara_orders', JSON.stringify(state.orders));
-
-            // Kosongkan keranjang
-            state.cart = []; 
-            saveCart();
-            
-            document.getElementById('success-invoice-id').textContent = state.currentOrder.id;
-            document.getElementById('success-total').textContent = formatRp(state.currentOrder.total);
-            
-            navigate('success');
-        }
-        
-        // RENDER CUSTOMER ORDERS
-        function renderOrders(filterStatus = null) {
-            const list = document.getElementById('customer-orders-list');
-            const empty = document.getElementById('customer-orders-empty');
-            
-            let displayOrders = state.orders;
-            if(filterStatus) {
-                displayOrders = state.orders.filter(o => o.status === filterStatus);
-            }
-            
-            if(displayOrders.length === 0) {
-                list.innerHTML = '';
-                empty.classList.remove('hidden');
-                return;
-            }
-            
-            empty.classList.add('hidden');
-            list.innerHTML = displayOrders.map(order => `
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div class="flex justify-between items-center mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
-                        <div>
-                            <p class="text-xs text-gray-500 mb-0.5">${order.date}</p>
-                            <p class="font-bold text-sm text-gray-800 dark:text-white">${order.id}</p>
+                    return `
+                    <div class="container mx-auto px-4 py-4 space-y-8">
+                        <!-- Hero Banner -->
+                        <div class="rounded-2xl overflow-hidden shadow-sm aspect-[21/9] md:aspect-[3/1] relative bg-slate-100">
+                            <img src="${banner.url}" alt="Promo Banner" class="w-full h-full object-cover">
                         </div>
-                        <span class="${getStatusColor(order.status)} px-2 py-1 rounded-lg text-[10px] font-bold border">${order.status}</span>
+
+                        <!-- Categories Quick Links -->
+                        <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                            ${['Novel', 'Bisnis', 'Sastra', 'Pendidikan', 'Agama'].map(cat => `
+                                <button onclick="app.state.searchQuery='${cat}'; app.navigate('catalog')" class="flex-shrink-0 px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-600 hover:border-nara hover:text-nara whitespace-nowrap transition">
+                                    ${cat}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Promos -->
+                        ${promos.length ? `
+                        <section>
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-bold text-slate-800">Promo Spesial 🔥</h2>
+                                <button onclick="app.navigate('catalog')" class="text-nara text-sm font-medium">Lihat Semua</button>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                ${promos.map(prod => app.components.productCard(prod)).join('')}
+                            </div>
+                        </section>` : ''}
+
+                        <!-- Rekomendasi -->
+                        ${recom.length ? `
+                        <section>
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-bold text-slate-800">Rekomendasi Untukmu 💡</h2>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                ${recom.map(prod => app.components.productCard(prod)).join('')}
+                            </div>
+                        </section>` : ''}
                     </div>
-                    
-                    <div class="space-y-2 mb-3">
-                        ${order.items.map(item => `
-                            <div class="flex gap-3">
-                                <img src="${item.image}" class="w-12 h-12 object-cover rounded-md">
-                                <div>
-                                    <p class="text-sm font-medium line-clamp-1">${item.title}</p>
-                                    <p class="text-xs text-gray-500">${item.qty}x ${formatRp(item.price)}</p>
+                    `;
+                },
+
+                catalog() {
+                    let p = app.state.products;
+                    const q = app.state.searchQuery.toLowerCase();
+                    if(q) {
+                        p = p.filter(x => x.name.toLowerCase().includes(q) || (x.category && x.category.toLowerCase().includes(q)));
+                    }
+
+                    return `
+                    <div class="container mx-auto px-4 py-6">
+                        <h1 class="text-xl font-bold text-slate-800 mb-6">
+                            ${q ? `Hasil pencarian: "${app.state.searchQuery}"` : 'Semua Buku'}
+                        </h1>
+                        ${p.length === 0 ? `
+                            <div class="text-center py-10 text-slate-500">
+                                <i class="fas fa-box-open text-4xl mb-4 text-slate-300"></i>
+                                <p>Tidak ada produk ditemukan.</p>
+                                ${q ? `<button onclick="app.state.searchQuery=''; app.navigate('catalog')" class="mt-4 text-nara font-medium">Reset Pencarian</button>` : ''}
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                                ${p.map(prod => app.components.productCard(prod)).join('')}
+                            </div>
+                        `}
+                    </div>
+                    `;
+                },
+
+                detail() {
+                    const p = app.state.currentProduct;
+                    const price = p.discountPrice || p.price;
+                    const hasDisc = p.discountPrice && p.discountPrice < p.price;
+                    const discPercent = app.calcDiscPercent(p.price, p.discountPrice);
+
+                    // Setup default package if none exists
+                    let pkgs = p.packages && p.packages.length > 0 ? p.packages : [{name: 'Reguler', price: price}];
+
+                    return `
+                    <div class="bg-white min-h-screen">
+                        <div class="container mx-auto md:max-w-4xl px-0 md:px-4 py-0 md:py-6 flex flex-col md:flex-row gap-6">
+                            <!-- Image Gallery -->
+                            <div class="w-full md:w-1/2 md:sticky md:top-24 self-start">
+                                <div class="aspect-[3/4] md:rounded-2xl overflow-hidden bg-slate-100 relative">
+                                    <img src="${p.cover}" alt="${p.name}" class="w-full h-full object-cover">
+                                    ${hasDisc ? `<div class="absolute top-4 left-4 bg-red-500 text-white font-bold px-3 py-1.5 rounded-lg text-sm shadow-md">Diskon ${discPercent}%</div>` : ''}
                                 </div>
                             </div>
-                        `).join('')}
+
+                            <!-- Info -->
+                            <div class="w-full md:w-1/2 px-4 md:px-0 pb-24 md:pb-0">
+                                <div class="flex items-center gap-2 text-sm text-slate-500 mb-2">
+                                    <span class="text-yellow-500"><i class="fas fa-star"></i> ${p.rating || '0.0'}</span>
+                                    <span>•</span>
+                                    <span>${p.category || 'Buku'}</span>
+                                </div>
+                                <h1 class="text-2xl font-bold text-slate-800 mb-2">${p.name}</h1>
+                                
+                                <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                    ${hasDisc ? `<div class="text-sm text-slate-400 line-through mb-1">${formatRp(p.price)}</div>` : ''}
+                                    <div class="text-2xl font-bold text-nara">${formatRp(price)}</div>
+                                </div>
+
+                                <!-- Packages -->
+                                <div class="mb-6">
+                                    <h3 class="font-semibold text-slate-800 mb-3">Pilih Paket:</h3>
+                                    <div class="space-y-2">
+                                        ${pkgs.map((pkg, idx) => `
+                                            <label class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:border-nara hover:bg-slate-50 transition">
+                                                <div class="flex items-center gap-3">
+                                                    <input type="radio" name="packageSelect" value="${idx}" class="w-4 h-4 text-nara focus:ring-nara accent-nara" ${idx === 0 ? 'checked' : ''}>
+                                                    <span class="font-medium text-slate-700">${pkg.name}</span>
+                                                </div>
+                                                <span class="font-bold text-slate-800">${formatRp(pkg.price)}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="mb-8">
+                                    <h3 class="font-semibold text-slate-800 mb-2">Deskripsi Produk</h3>
+                                    <div class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+                                        ${p.desc}
+                                    </div>
+                                </div>
+
+                                <!-- Info Box -->
+                                <div class="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm mb-6 flex items-start gap-3">
+                                    <i class="fas fa-info-circle mt-0.5"></i>
+                                    <div>Buku diproses cetak (POD) setelah pembayaran. Estimasi produksi 3 hari kerja sebelum dikirim via Lion Parcel.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Action Bar (Fixed Mobile) -->
+                        <div class="fixed bottom-0 md:bottom-auto md:relative left-0 w-full bg-white border-t border-slate-200 p-4 pb-safe flex gap-3 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:shadow-none md:border-none md:max-w-4xl md:mx-auto md:px-0">
+                            <button onclick="app.addToCart('${p.id}', document.querySelector('input[name=packageSelect]:checked').value)" class="flex-1 border-2 border-nara text-nara font-bold py-3 rounded-xl hover:bg-nara hover:text-white transition">
+                                Tambah Keranjang
+                            </button>
+                            <button onclick="app.addToCart('${p.id}', document.querySelector('input[name=packageSelect]:checked').value, true)" class="flex-1 bg-nara text-white font-bold py-3 rounded-xl hover:bg-nara-dark transition">
+                                Beli Sekarang
+                            </button>
+                        </div>
                     </div>
+                    `;
+                },
+
+                cart() {
+                    const cart = app.state.cart;
+                    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+                    if (cart.length === 0) {
+                        return `
+                        <div class="container mx-auto px-4 py-20 text-center">
+                            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
+                                <i class="fas fa-shopping-cart text-3xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-slate-800 mb-2">Keranjang Kosong</h2>
+                            <p class="text-slate-500 mb-6">Mulai pilih buku-buku menarik dari katalog kami.</p>
+                            <button onclick="app.navigate('catalog')" class="bg-nara text-white px-6 py-2.5 rounded-full font-medium hover:bg-nara-dark transition">Mulai Belanja</button>
+                        </div>`;
+                    }
+
+                    return `
+                    <div class="container mx-auto max-w-3xl px-4 py-6">
+                        <h1 class="text-2xl font-bold text-slate-800 mb-6">Keranjang Belanja</h1>
+                        <div class="space-y-4 mb-8">
+                            ${cart.map((item, idx) => `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex gap-4">
+                                    <img src="${item.cover}" class="w-20 h-28 object-cover rounded-md bg-slate-100">
+                                    <div class="flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex justify-between items-start">
+                                                <h3 class="font-semibold text-slate-800 line-clamp-2">${item.name}</h3>
+                                                <button onclick="app.removeCartItem(${idx})" class="text-slate-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                            <p class="text-xs text-slate-500 mt-1">Paket: ${item.packageName}</p>
+                                            <div class="font-bold text-nara mt-1">${formatRp(item.price)}</div>
+                                        </div>
+                                        <div class="flex items-center gap-3 mt-2">
+                                            <button onclick="app.updateCartQty(${idx}, -1)" class="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50">-</button>
+                                            <span class="font-medium w-4 text-center">${item.qty}</span>
+                                            <button onclick="app.updateCartQty(${idx}, 1)" class="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
+                            <div class="flex justify-between items-center mb-4 text-lg">
+                                <span class="font-semibold text-slate-700">Subtotal</span>
+                                <span class="font-bold text-slate-800">${formatRp(subtotal)}</span>
+                            </div>
+                            <button onclick="app.navigate('checkout')" class="w-full bg-nara text-white font-bold py-3.5 rounded-xl hover:bg-nara-dark transition text-lg">
+                                Lanjut Checkout
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                },
+
+                checkout() {
+                    const cart = app.state.cart;
+                    if(cart.length === 0) { setTimeout(() => app.navigate('cart'), 100); return ''; }
                     
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
-                        <span class="text-xs text-gray-500">Total Belanja</span>
-                        <span class="font-bold text-primary">${formatRp(order.total)}</span>
+                    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                    const defaultOngkir = 18000; 
+                    const total = subtotal + defaultOngkir;
+
+                    return `
+                    <div class="container mx-auto max-w-4xl px-4 py-6">
+                        <h1 class="text-2xl font-bold text-slate-800 mb-6">Checkout</h1>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Form Data -->
+                            <div>
+                                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
+                                    <h2 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Informasi Pengiriman</h2>
+                                    <form id="checkoutForm" class="space-y-4" onsubmit="event.preventDefault();">
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap *</label>
+                                            <input type="text" id="co_name" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">No. WhatsApp *</label>
+                                                <input type="tel" id="co_wa" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                                                <input type="email" id="co_email" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1">Alamat Lengkap *</label>
+                                            <textarea id="co_address" required rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none"></textarea>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Provinsi *</label>
+                                                <input type="text" id="co_prov" required oninput="app.recalculateCheckout()" placeholder="Contoh: Jawa Timur" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Kota/Kabupaten *</label>
+                                                <input type="text" id="co_city" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Kecamatan *</label>
+                                                <input type="text" id="co_kec" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Kode Pos *</label>
+                                                <input type="number" id="co_pos" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1">Catatan Pesanan</label>
+                                            <input type="text" id="co_note" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none" placeholder="Opsional">
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
+                                    <img src="https://placehold.co/60x30/fff/111?text=Lion+Parcel" alt="Lion" class="rounded">
+                                    <div class="text-sm text-blue-800">
+                                        <div class="font-bold">Pengiriman via Lion Parcel</div>
+                                        <p class="text-xs text-slate-500 mt-1">Gudang Asal: Ngaglik, Sleman, DI Yogyakarta</p>
+                                        <div class="text-xs font-semibold mt-1 text-nara-dark">Tarif dihitung otomatis berdasarkan provinsi tujuan Anda!</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ringkasan & Bayar -->
+                            <div>
+                                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6 sticky top-24">
+                                    <h2 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Ringkasan Pesanan</h2>
+                                    <div class="space-y-3 mb-4 max-h-40 overflow-y-auto pr-2">
+                                        ${cart.map(item => `
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-slate-600 line-clamp-1 flex-1">${item.qty}x ${item.name} (${item.packageName})</span>
+                                                <span class="font-medium text-slate-800 ml-2">${formatRp(item.price * item.qty)}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="border-t pt-3 space-y-2 text-sm">
+                                        <div class="flex justify-between text-slate-600">
+                                            <span>Subtotal</span><span>${formatRp(subtotal)}</span>
+                                        </div>
+                                        <div class="flex justify-between text-slate-600">
+                                            <span>Ongkos Kirim (Lion Parcel)</span><span id="checkout-shipping-fee">${formatRp(defaultOngkir)}</span>
+                                        </div>
+                                        <div class="flex justify-between font-bold text-lg text-slate-800 mt-2 pt-2 border-t">
+                                            <span>Total Bayar</span><span class="text-nara" id="checkout-total-payment">${formatRp(total)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                        <h3 class="font-semibold text-slate-700 text-sm mb-2">Transfer Pembayaran Ke:</h3>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-12 h-8 bg-blue-600 text-white font-bold text-xs flex items-center justify-center rounded">BCA</div>
+                                            <div>
+                                                <div class="font-mono font-bold text-lg text-slate-800">111-047-0742</div>
+                                                <div class="text-sm text-slate-500">A.N. Deby Verona</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Upload Bukti Transfer (Opsional saat ini)</label>
+                                        <input type="file" id="co_proof" accept="image/png, image/jpeg, application/pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-nara file:text-white hover:file:bg-nara-dark cursor-pointer">
+                                    </div>
+
+                                    <button onclick="app.processCheckout()" class="w-full bg-nara text-white font-bold py-3.5 rounded-xl hover:bg-nara-dark transition text-lg mt-6">
+                                        Buat Pesanan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-        }
-        
-        // RENDER ADMIN DASHBOARD
-        function renderAdmin() {
-            const list = document.getElementById('admin-orders-list');
-            const empty = document.getElementById('admin-orders-empty');
+                    `;
+                },
+
+                adminLogin() {
+                    return `
+                    <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+                        <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+                            <div class="text-center mb-8">
+                                <div class="w-12 h-12 rounded bg-nara flex items-center justify-center text-white font-bold text-2xl mx-auto mb-2">N</div>
+                                <h2 class="text-2xl font-bold text-slate-800">Admin Login</h2>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                                    <input type="text" id="adm_user" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                    <input type="password" id="adm_pass" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                </div>
+                                <button onclick="app.handleLogin()" class="w-full bg-nara text-white font-bold py-3 rounded-xl hover:bg-nara-dark transition mt-4">Login</button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                },
+
+                adminDash() {
+                    return `
+                    <div class="flex min-h-screen bg-slate-100">
+                        <!-- Sidebar -->
+                        <div class="w-64 bg-slate-900 text-white hidden md:block">
+                            <div class="p-6">
+                                <h2 class="text-xl font-bold text-white tracking-wider text-center">ADMIN PANEL</h2>
+                            </div>
+                            <nav class="mt-6 space-y-1 px-3">
+                                <a href="javascript:void(0)" onclick="app.renderAdminSubView('dashboard')" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white" data-view="dashboard"><i class="fas fa-home w-5"></i> Dashboard</a>
+                                <a href="javascript:void(0)" onclick="app.renderAdminSubView('products')" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white" data-view="products"><i class="fas fa-box w-5"></i> Produk</a>
+                                <a href="javascript:void(0)" onclick="app.renderAdminSubView('orders')" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white" data-view="orders"><i class="fas fa-shopping-bag w-5"></i> Pesanan</a>
+                                <a href="javascript:void(0)" onclick="app.handleLogout()" class="mt-10 flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition"><i class="fas fa-sign-out-alt w-5"></i> Logout</a>
+                            </nav>
+                        </div>
+
+                        <!-- Mobile Admin Header -->
+                        <div class="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 px-4 py-3 flex justify-between items-center">
+                            <span class="font-bold">ADMIN PANEL</span>
+                            <select onchange="app.renderAdminSubView(this.value)" class="bg-slate-800 text-white border-none rounded p-1 text-sm outline-none">
+                                <option value="dashboard">Dashboard</option>
+                                <option value="products">Produk</option>
+                                <option value="orders">Pesanan</option>
+                            </select>
+                        </div>
+
+                        <!-- Main Content Admin -->
+                        <div class="flex-1 p-4 md:p-8 pt-16 md:pt-8 overflow-y-auto" id="admin-main-area">
+                            <!-- Injected by renderAdminSubView -->
+                        </div>
+                    </div>
+                    `;
+                },
+
+                invoice(order) {
+                    return `
+                    <div class="bg-slate-100 min-h-screen py-8">
+                        <div class="max-w-3xl mx-auto bg-white p-8 md:p-12 shadow-lg" id="invoice-print-area">
+                            <!-- Invoice Header -->
+                            <div class="flex justify-between items-start border-b-2 border-nara pb-6 mb-6">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-10 h-10 rounded bg-nara flex items-center justify-center text-white font-bold text-2xl">N</div>
+                                        <h1 class="text-2xl font-bold text-slate-800">Nara Pustaka</h1>
+                                    </div>
+                                    <p class="text-xs text-slate-600 font-semibold uppercase">Pusat Cetak & POD:</p>
+                                    <p class="text-xs text-slate-500 font-medium">Jl. Rajawali G Gg. Elang 6 No.2, RT.005/RW.033, Drono</p>
+                                    <p class="text-xs text-slate-500">Sardonoharjo, Ngaglik, Sleman, DI Yogyakarta 55581</p>
+                                    <p class="text-xs text-slate-500">WA: +62 821-3087-2054 | Email: narapustaka1@gmail.com</p>
+                                </div>
+                                <div class="text-right">
+                                    <h2 class="text-3xl font-bold text-slate-300 mb-2">INVOICE</h2>
+                                    <p class="text-sm font-semibold text-slate-700">#${order.id}</p>
+                                    <p class="text-sm text-slate-500">Tanggal: ${new Date(order.created_at).toLocaleDateString('id-ID')}</p>
+                                    <div class="mt-2 inline-block px-3 py-1 bg-slate-100 rounded text-xs font-bold text-slate-600">${order.status}</div>
+                                </div>
+                            </div>
+
+                            <!-- Customer Info -->
+                            <div class="mb-8 flex justify-between">
+                                <div class="w-1/2">
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ditagihkan Kepada:</h3>
+                                    <p class="font-bold text-slate-800">${order.customer.name}</p>
+                                    <p class="text-sm text-slate-600">${order.customer.wa}</p>
+                                    <p class="text-sm text-slate-600">${order.customer.email}</p>
+                                </div>
+                                <div class="w-1/2 text-right">
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Dikirim Ke:</h3>
+                                    <p class="text-sm text-slate-600 whitespace-pre-line">${order.customer.address}, Kec. ${order.customer.kecamatan}, ${order.customer.city}, Prov. ${order.customer.provinsi} ${order.customer.kodepos}</p>
+                                </div>
+                            </div>
+
+                            <!-- Items -->
+                            <table class="w-full mb-8 text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-y border-slate-200 text-sm font-bold text-slate-700">
+                                        <th class="py-3 px-4">Deskripsi Item</th>
+                                        <th class="py-3 px-4 text-center">Qty</th>
+                                        <th class="py-3 px-4 text-right">Harga Satuan</th>
+                                        <th class="py-3 px-4 text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${order.items.map(item => `
+                                        <tr class="border-b border-slate-100 text-sm text-slate-600">
+                                            <td class="py-3 px-4">
+                                                <div class="font-medium text-slate-800">${item.name}</div>
+                                                <div class="text-xs text-slate-500">Paket: ${item.packageName}</div>
+                                            </td>
+                                            <td class="py-3 px-4 text-center">${item.qty}</td>
+                                            <td class="py-3 px-4 text-right">${formatRp(item.price)}</td>
+                                            <td class="py-3 px-4 text-right font-medium">${formatRp(item.price * item.qty)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+
+                            <!-- Totals -->
+                            <div class="flex justify-end mb-8">
+                                <div class="w-full md:w-1/2 bg-slate-50 p-4 rounded-xl">
+                                    <div class="flex justify-between text-sm mb-2 text-slate-600">
+                                        <span>Subtotal</span><span>${formatRp(order.subtotal)}</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mb-4 text-slate-600 pb-4 border-b border-slate-200">
+                                        <span>Ongkos Kirim (Lion Parcel)</span><span>${formatRp(order.ongkir)}</span>
+                                    </div>
+                                    <div class="flex justify-between font-bold text-xl text-slate-800">
+                                        <span>Total</span><span class="text-nara">${formatRp(order.total)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Info -->
+                            <div class="border-t-2 border-slate-100 pt-6 flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs text-slate-500 mb-1">Informasi Pembayaran:</p>
+                                    <p class="font-bold text-slate-800 text-sm">BCA 111-047-0742 a.n Deby Verona</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-400 italic">Terima kasih atas pesanan Anda.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions (No Print) -->
+                        <div class="max-w-3xl mx-auto mt-6 flex justify-center gap-4 no-print px-4">
+                            <button onclick="window.print()" class="bg-nara text-white px-6 py-2 rounded-lg font-medium shadow hover:bg-nara-dark transition flex items-center gap-2">
+                                <i class="fas fa-print"></i> Cetak / Simpan PDF
+                            </button>
+                            <button onclick="${app.state.isAdmin ? "app.navigate('admin_dash', 'orders')" : "app.navigate('home')"}" class="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-medium hover:bg-slate-300 transition">
+                                Kembali
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                }
+            },
+
+            handleLogin() {
+                const u = document.getElementById('adm_user').value;
+                const p = document.getElementById('adm_pass').value;
+                if(u === 'narapustaka' && p === 'admin 1') {
+                    this.state.isAdmin = true;
+                    sessionStorage.setItem('nara_admin', 'true');
+                    showToast('Login berhasil');
+                    this.navigate('admin_dash');
+                } else {
+                    showToast('Username atau password salah');
+                }
+            },
+
+            handleLogout() {
+                this.state.isAdmin = false;
+                sessionStorage.removeItem('nara_admin');
+                this.navigate('home');
+            },
+
+            async processCheckout() {
+                const form = document.getElementById('checkoutForm');
+                if(!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                const cart = this.state.cart;
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                
+                const provValue = document.getElementById('co_prov').value;
+                const ongkir = this.calculateOngkir(provValue);
+
+                const orderData = {
+                    id: 'ORD' + Math.floor(Math.random()*1000000),
+                    customer: {
+                        name: document.getElementById('co_name').value,
+                        wa: document.getElementById('co_wa').value,
+                        email: document.getElementById('co_email').value,
+                        address: document.getElementById('co_address').value,
+                        provinsi: provValue,
+                        city: document.getElementById('co_city').value,
+                        kecamatan: document.getElementById('co_kec').value,
+                        kodepos: document.getElementById('co_pos').value,
+                        note: document.getElementById('co_note').value,
+                    },
+                    items: [...cart],
+                    subtotal: subtotal,
+                    ongkir: ongkir,
+                    total: subtotal + ongkir
+                };
+
+                // Simulate saving to API (GAS)
+                await api.saveOrder(orderData);
+                
+                // Clear Cart
+                this.state.cart = [];
+                this.updateCartBadge();
+                
+                showToast('Pesanan berhasil dibuat!');
+                
+                // Show Invoice
+                setTimeout(() => {
+                    this.navigate('invoice', orderData);
+                }, 1000);
+            },
+
+            async renderAdminSubView(viewId) {
+                const area = document.getElementById('admin-main-area');
+                if(!area) return;
+
+                // Update active state on sidebar
+                document.querySelectorAll('.admin-nav-link').forEach(el => {
+                    if(el.dataset.view === viewId) {
+                        el.classList.add('bg-slate-800', 'text-white');
+                        el.classList.remove('text-slate-300');
+                    } else {
+                        el.classList.remove('bg-slate-800', 'text-white');
+                        el.classList.add('text-slate-300');
+                    }
+                });
+
+                let html = '';
+                if(viewId === 'dashboard') {
+                    const orders = await api.getOrders();
+                    const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+                    const pendingOrders = orders.filter(o => o.status === 'Menunggu Pembayaran').length;
+                    
+                    html = `
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6">Dashboard Overview</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-nara">
+                                <p class="text-sm text-slate-500 font-medium mb-1">Total Pendapatan</p>
+                                <h3 class="text-2xl font-bold text-slate-800">${formatRp(totalSales)}</h3>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                                <p class="text-sm text-slate-500 font-medium mb-1">Pesanan Menunggu</p>
+                                <h3 class="text-2xl font-bold text-slate-800">${pendingOrders} Pesanan</h3>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                                <p class="text-sm text-slate-500 font-medium mb-1">Total Produk</p>
+                                <h3 class="text-2xl font-bold text-slate-800">${this.state.products.length} Buku</h3>
+                            </div>
+                        </div>
+                    `;
+                } 
+                else if(viewId === 'products') {
+                    const products = await api.getProducts();
+                    html = `
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-slate-800">Kelola Produk</h2>
+                            <button onclick="app.showProductModal()" class="bg-nara text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-nara-dark transition"><i class="fas fa-plus mr-1"></i> Tambah Produk</button>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-200 text-sm text-slate-600">
+                                            <th class="p-4">Produk</th>
+                                            <th class="p-4">Harga Normal</th>
+                                            <th class="p-4">Harga Diskon</th>
+                                            <th class="p-4">Stok</th>
+                                            <th class="p-4 text-right">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-sm">
+                                        ${products.map(p => `
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                                <td class="p-4 flex items-center gap-3">
+                                                    <img src="${p.cover}" class="w-10 h-14 object-cover rounded bg-slate-200">
+                                                    <div class="font-medium text-slate-800 line-clamp-2">${p.name}</div>
+                                                </td>
+                                                <td class="p-4 text-slate-500">${formatRp(p.price)}</td>
+                                                <td class="p-4 text-nara font-medium">${p.discountPrice ? formatRp(p.discountPrice) : '-'}</td>
+                                                <td class="p-4">${p.stock}</td>
+                                                <td class="p-4 text-right space-x-2">
+                                                    <button onclick="app.editProduct('${p.id}')" class="text-blue-500 hover:text-blue-700 p-1" title="Edit"><i class="fas fa-edit"></i></button>
+                                                    <button onclick="app.deleteProduct('${p.id}')" class="text-red-500 hover:text-red-700 p-1" title="Hapus"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if(viewId === 'orders') {
+                    const orders = await api.getOrders();
+                    const statusColors = {
+                        'Menunggu Pembayaran': 'bg-yellow-100 text-yellow-800',
+                        'Diproses': 'bg-blue-100 text-blue-800',
+                        'Dicetak': 'bg-purple-100 text-purple-800',
+                        'Dikirim': 'bg-nara-light text-white',
+                        'Selesai': 'bg-green-100 text-green-800'
+                    };
+
+                    html = `
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6">Kelola Pesanan</h2>
+                        <div class="space-y-4">
+                            ${orders.length === 0 ? '<div class="text-slate-500">Belum ada pesanan masuk.</div>' : orders.map(o => `
+                                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                                    <div class="flex flex-wrap justify-between items-start gap-4 mb-4 border-b border-slate-100 pb-4">
+                                        <div>
+                                            <div class="font-bold text-slate-800">#${o.id}</div>
+                                            <div class="text-sm text-slate-500">${new Date(o.created_at).toLocaleString('id-ID')}</div>
+                                            <div class="font-medium text-slate-700 mt-1">${o.customer.name} (${o.customer.wa})</div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="font-bold text-lg text-nara mb-1">${formatRp(o.total)}</div>
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${statusColors[o.status] || 'bg-slate-100'}">${o.status}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-4">
+                                        <div class="flex items-center gap-2">
+                                            <select onchange="app.changeOrderStatus('${o.id}', this.value)" class="border border-slate-300 text-sm rounded-lg p-1.5 outline-none focus:border-nara">
+                                                ${Object.keys(statusColors).map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+                                            </select>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button class="px-3 py-1.5 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50"><i class="fas fa-image text-slate-400"></i> Bukti</button>
+                                            <button onclick="app.viewOrderInvoice('${o.id}')" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-700"><i class="fas fa-file-invoice"></i> Invoice</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                area.innerHTML = html;
+            },
+
+            // Admin Actions Data Modifiers
+            async showProductModal(id = null) {
+                // In a real app, this would be a proper modal dialog. 
+                // For simplicity in single file, we will render a form view in the admin area.
+                let p = { name: '', price: '', discountPrice: '', stock: '', desc: '', cover: '', category: '', isPromo: false, isRecommended: false, packages: [{name:'Reguler', price:''}] };
+                if(id) p = this.state.products.find(x => x.id === id);
+
+                const html = `
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">${id ? 'Edit' : 'Tambah'} Produk</h2>
+                        <button onclick="app.renderAdminSubView('products')" class="text-slate-500 hover:text-slate-800"><i class="fas fa-times text-xl"></i></button>
+                    </div>
+                    <form onsubmit="event.preventDefault(); app.saveProductForm('${id || ''}')" class="bg-white p-6 rounded-xl shadow-sm max-w-2xl">
+                        <div class="space-y-4">
+                            <div><label class="block text-sm mb-1 text-slate-600">Nama Produk</label>
+                                <input type="text" id="fm_name" value="${p.name}" required class="w-full border p-2 rounded"></div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-sm mb-1 text-slate-600">Harga Normal</label>
+                                    <input type="number" id="fm_price" value="${p.price}" required class="w-full border p-2 rounded"></div>
+                                <div><label class="block text-sm mb-1 text-slate-600">Harga Diskon (Kosongkan jika tidak ada)</label>
+                                    <input type="number" id="fm_disc" value="${p.discountPrice || ''}" class="w-full border p-2 rounded"></div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-sm mb-1 text-slate-600">Kategori</label>
+                                    <input type="text" id="fm_cat" value="${p.category || ''}" class="w-full border p-2 rounded"></div>
+                                <div><label class="block text-sm mb-1 text-slate-600">Stok</label>
+                                    <input type="number" id="fm_stock" value="${p.stock}" required class="w-full border p-2 rounded"></div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm mb-1 text-slate-600">Cover Image</label>
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-24 h-32 bg-slate-100 rounded border border-slate-200 overflow-hidden flex-shrink-0">
+                                        <img id="fm_cover_preview" src="${p.cover || 'https://placehold.co/400x600/eee/999?text=No+Image'}" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="file" id="fm_cover_file" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-nara file:text-white hover:file:bg-nara-dark cursor-pointer outline-none" onchange="app.handleCoverUpload(event)">
+                                        <input type="hidden" id="fm_cover_base64" value="${p.cover}">
+                                        <p class="text-xs text-slate-400 mt-2">Pilih gambar dari galeri perangkat Anda.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div><label class="block text-sm mb-1 text-slate-600">Deskripsi</label>
+                                <textarea id="fm_desc" rows="4" required class="w-full border p-2 rounded">${p.desc}</textarea></div>
+                            
+                            <div class="border p-4 rounded bg-slate-50">
+                                <div class="flex justify-between items-center mb-3">
+                                    <label class="block text-sm font-bold text-slate-700">Paket Tersedia (Min 1)</label>
+                                    <button type="button" onclick="app.addPackageField()" class="bg-nara text-white px-3 py-1 rounded text-xs font-medium hover:bg-nara-dark transition shadow-sm"><i class="fas fa-plus"></i> Tambah Kolom</button>
+                                </div>
+                                <div id="package-fields-container" class="space-y-2">
+                                    ${p.packages.map((pkg, i) => `
+                                        <div class="flex gap-2 package-row items-center">
+                                            <input type="text" class="pkg-name border border-slate-300 p-2 w-[45%] text-sm rounded outline-none focus:border-nara" value="${pkg.name}" placeholder="Nama Paket" required>
+                                            <input type="number" class="pkg-price border border-slate-300 p-2 w-[45%] text-sm rounded outline-none focus:border-nara" value="${pkg.price}" placeholder="Harga" required>
+                                            ${i > 0 ? `<button type="button" onclick="this.parentElement.remove()" class="w-[10%] text-red-500 hover:bg-red-50 rounded p-2 text-center transition" title="Hapus"><i class="fas fa-trash"></i></button>` : `<div class="w-[10%]"></div>`}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2"><input type="checkbox" id="fm_promo" ${p.isPromo?'checked':''}> Tampil di Promo</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" id="fm_recom" ${p.isRecommended?'checked':''}> Rekomendasi</label>
+                            </div>
+
+                            <button type="submit" class="bg-nara text-white px-6 py-2 rounded mt-4 font-bold">Simpan Produk</button>
+                        </div>
+                    </form>
+                `;
+                document.getElementById('admin-main-area').innerHTML = html;
+            },
+
+            addPackageField() {
+                const container = document.getElementById('package-fields-container');
+                const div = document.createElement('div');
+                div.className = 'flex gap-2 package-row items-center';
+                div.innerHTML = `
+                    <input type="text" class="pkg-name border border-slate-300 p-2 w-[45%] text-sm rounded outline-none focus:border-nara" placeholder="Nama Paket" required>
+                    <input type="number" class="pkg-price border border-slate-300 p-2 w-[45%] text-sm rounded outline-none focus:border-nara" placeholder="Harga" required>
+                    <button type="button" onclick="this.parentElement.remove()" class="w-[10%] text-red-500 hover:bg-red-50 rounded p-2 text-center transition" title="Hapus"><i class="fas fa-trash"></i></button>
+                `;
+                container.appendChild(div);
+            },
+
+            handleCoverUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    document.getElementById('fm_cover_preview').src = base64;
+                    document.getElementById('fm_cover_base64').value = base64;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            async saveProductForm(idStr) {
+                const pkgs = [];
+                document.querySelectorAll('.package-row').forEach(row => {
+                    const name = row.querySelector('.pkg-name').value;
+                    const price = parseInt(row.querySelector('.pkg-price').value);
+                    if(name && price) pkgs.push({name, price});
+                });
+
+                const prod = {
+                    id: idStr ? idStr : null,
+                    name: document.getElementById('fm_name').value,
+                    price: parseInt(document.getElementById('fm_price').value),
+                    discountPrice: document.getElementById('fm_disc').value ? parseInt(document.getElementById('fm_disc').value) : null,
+                    stock: parseInt(document.getElementById('fm_stock').value),
+                    category: document.getElementById('fm_cat').value,
+                    cover: document.getElementById('fm_cover_base64').value,
+                    desc: document.getElementById('fm_desc').value,
+                    packages: pkgs,
+                    isPromo: document.getElementById('fm_promo').checked,
+                    isRecommended: document.getElementById('fm_recom').checked,
+                };
+                
+                await api.saveProduct(prod);
+                this.state.products = await api.getProducts(); // refresh state
+                showToast('Produk disimpan');
+                this.renderAdminSubView('products');
+            },
+
+            editProduct(id) { this.showProductModal(id); },
+            async deleteProduct(id) {
+                if(confirm('Yakin hapus produk ini?')) {
+                    await api.deleteProduct(id);
+                    this.state.products = await api.getProducts();
+                    showToast('Produk dihapus');
+                    this.renderAdminSubView('products');
+                }
+            },
+
+            async changeOrderStatus(orderId, status) {
+                await api.updateOrderStatus(orderId, status);
+                showToast('Status pesanan diubah menjadi: ' + status);
+            },
             
-            // Update Stats
-            document.getElementById('admin-total-orders').textContent = state.orders.length;
-            const revenue = state.orders.reduce((sum, order) => sum + order.total, 0);
-            document.getElementById('admin-total-revenue').textContent = formatRp(revenue);
-            
-            if(state.orders.length === 0) {
-                list.innerHTML = '';
-                empty.classList.remove('hidden');
-                return;
+            async viewOrderInvoice(orderId) {
+                const orders = await api.getOrders();
+                const o = orders.find(x => x.id === orderId);
+                if(o) this.navigate('invoice', o);
             }
-            
-            empty.classList.add('hidden');
-            list.innerHTML = state.orders.map(order => `
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-sm">
-                    <div class="flex justify-between items-start mb-2 border-b border-gray-100 dark:border-gray-700 pb-2">
-                        <div>
-                            <span class="font-bold text-primary block">${order.id}</span>
-                            <span class="text-[10px] text-gray-400">${order.date}</span>
-                        </div>
-                        <span class="${getStatusColor(order.status)} px-2 py-0.5 rounded text-[10px] font-bold border">${order.status}</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="font-bold text-gray-800 dark:text-gray-200">${order.customer.name}</p>
-                        <p class="text-xs text-gray-500 break-words mb-1"><i class="fab fa-whatsapp text-green-500"></i> ${order.customer.phone}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 bg-gray-50 dark:bg-gray-700 p-2 rounded-lg mt-1">${order.customer.address}</p>
-                    </div>
-                    
-                    <div class="text-xs text-gray-500 mb-3">
-                        <p class="font-medium text-gray-700 dark:text-gray-300 mb-1">Items:</p>
-                        <ul class="list-disc pl-4 space-y-0.5">
-                            ${order.items.map(item => `<li>${item.qty}x ${item.title} (${item.packageName})</li>`).join('')}
-                        </ul>
-                        <p class="mt-2 font-bold text-gray-800 dark:text-gray-200">Total Pembayaran: ${formatRp(order.total)}</p>
-                    </div>
-                    
-                    ${order.status === 'Menunggu Pembayaran' ? `
-                        <div class="flex gap-2">
-                            <button onclick="updateOrderStatus('${order.id}', 'Diproses')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-xs font-bold transition-colors">Telah Dibayar (Proses)</button>
-                        </div>
-                    ` : order.status === 'Diproses' ? `
-                        <div class="flex gap-2">
-                            <button onclick="updateOrderStatus('${order.id}', 'Dikirim')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-xs font-bold transition-colors">Kirim Pesanan</button>
-                        </div>
-                    ` : order.status === 'Dikirim' ? `
-                        <div class="flex gap-2">
-                            <button onclick="updateOrderStatus('${order.id}', 'Selesai')" class="flex-1 bg-gray-800 dark:bg-white dark:text-gray-900 text-white py-2 rounded-lg text-xs font-bold transition-colors">Tandai Selesai</button>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-        }
-        
-        // UPDATE ORDER STATUS (ADMIN ACTION)
-        function updateOrderStatus(orderId, newStatus) {
-            const index = state.orders.findIndex(o => o.id === orderId);
-            if(index !== -1) {
-                state.orders[index].status = newStatus;
-                localStorage.setItem('nara_orders', JSON.stringify(state.orders));
-                renderAdmin(); // Re-render list
-            }
-        }
+        };
 
-        // GENERATE PDF (jsPDF)
-        function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const order = state.currentOrder;
-
-            // Brand Header
-            doc.setFillColor(86, 182, 198); // #56B6C6
-            doc.rect(0, 0, 210, 40, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(24);
-            doc.setFont("helvetica", "bold");
-            doc.text("INVOICE NARA PUSTAKA", 15, 25);
-            
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.text("Marketplace Buku & Layanan Print On Demand", 15, 32);
-
-            // Invoice Info
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.text("Tagihan Kepada:", 15, 55);
-            
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text(`Nama: ${order.customer.name}`, 15, 62);
-            doc.text(`WhatsApp: ${order.customer.phone}`, 15, 68);
-            const splitAddress = doc.splitTextToSize(`Alamat: ${order.customer.address}`, 100);
-            doc.text(splitAddress, 15, 74);
-
-            doc.setFont("helvetica", "bold");
-            doc.text("Detail Invoice:", 130, 55);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Nomor: ${order.id}`, 130, 62);
-            doc.text(`Tanggal: ${order.date}`, 130, 68);
-            doc.text(`Status: Menunggu Pembayaran`, 130, 74);
-
-            // Table Header
-            doc.setFillColor(240, 240, 240);
-            doc.rect(15, 90, 180, 10, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text("Produk", 20, 97);
-            doc.text("Qty", 120, 97);
-            doc.text("Harga", 140, 97);
-            doc.text("Subtotal", 170, 97);
-
-            // Table Items
-            doc.setFont("helvetica", "normal");
-            let y = 107;
-            order.items.forEach(item => {
-                const title = doc.splitTextToSize(`${item.title} (${item.packageName})`, 90);
-                doc.text(title, 20, y);
-                doc.text(item.qty.toString(), 122, y);
-                doc.text(formatRp(item.price), 140, y);
-                doc.text(formatRp(item.price * item.qty), 170, y);
-                y += (title.length * 5) + 5;
-            });
-
-            doc.line(15, y, 195, y);
-            y += 7;
-
-            // Totals
-            doc.text("Subtotal Produk:", 130, y);
-            doc.text(formatRp(order.subtotal), 170, y);
-            y += 7;
-            doc.text("Ongkos Kirim (Lion Parcel):", 130, y);
-            doc.text(formatRp(order.ongkir), 170, y);
-            y += 7;
-            doc.setFont("helvetica", "bold");
-            doc.text("TOTAL PEMBAYARAN:", 130, y);
-            doc.setTextColor(86, 182, 198);
-            doc.text(formatRp(order.total), 170, y);
-
-            // Payment Info & Notes
-            doc.setTextColor(0, 0, 0);
-            y += 20;
-            doc.setFontSize(12);
-            doc.text("Informasi Pembayaran:", 15, y);
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            y += 7;
-            doc.text("Bank BCA", 15, y);
-            y += 6;
-            doc.setFont("helvetica", "bold");
-            doc.text("No. Rekening: 111-047-0742", 15, y);
-            y += 6;
-            doc.setFont("helvetica", "normal");
-            doc.text("Atas Nama: Deby Verona", 15, y);
-
-            // T&C Box
-            y += 15;
-            doc.setFillColor(245, 245, 245);
-            doc.rect(15, y, 180, 30, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text("Catatan Penting Print On Demand:", 20, y + 7);
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.text("1. Buku akan dicetak terlebih dahulu setelah pembayaran diterima.", 20, y + 13);
-            doc.text("2. Produksi membutuhkan waktu ± 3 hari kerja.", 20, y + 18);
-            doc.text("3. Pengiriman via Lion Parcel Reguler ± 1–3 hari kerja. Estimasi diterima ± 4–7 hari kerja.", 20, y + 23);
-
-            // Save PDF
-            doc.save(`${order.id}.pdf`);
-        }
-
-        // Run Init
-        window.onload = initApp;
-
+        // Initialize App on load
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
     </script>
 </body>
 </html>
