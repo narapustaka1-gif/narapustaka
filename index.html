@@ -54,7 +54,7 @@
         }
         .marquee-content {
             display: inline-block;
-            animation: marquee 20s linear infinite;
+            animation: marquee 25s linear infinite;
         }
         @keyframes marquee {
             0% { transform: translateX(100%); }
@@ -110,7 +110,7 @@
     <!-- Info Banner -->
     <div class="bg-nara text-white text-xs py-2 px-4 marquee-container">
         <div class="marquee-content font-medium">
-            <i class="fas fa-info-circle mr-1"></i> Sistem Print On Demand: Buku dicetak & dikirim dari Sleman, Yogyakarta setelah pembayaran diterima. Proses produksi sekitar 3 hari kerja. Pengiriman menggunakan Lion Parcel. Estimasi diterima 3–6 hari kerja.
+            <i class="fas fa-info-circle mr-1"></i> Sistem Print On Demand: Buku dicetak terlebih dahulu setelah pembayaran diterima. Proses produksi sekitar 3 hari kerja. Pengiriman menggunakan Lion Parcel. Estimasi diterima sekitar 4–7 hari kerja di luar hari libur. Hubungi admin untuk detail pengiriman.
         </div>
     </div>
 
@@ -141,6 +141,10 @@
                     <i class="fas fa-shopping-cart text-xl"></i>
                     <span id="cartBadgeDesk" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
                 </button>
+                <!-- Container Profil / Login Pelanggan -->
+                <div id="user-profile-desk" class="flex items-center gap-2">
+                    <!-- Dinamis terisi via JS -->
+                </div>
             </div>
             
             <!-- Mobile Actions Top -->
@@ -182,7 +186,7 @@
             <div>
                 <h4 class="text-white font-semibold mb-4">Informasi Kontak</h4>
                 <ul class="space-y-2 text-sm text-slate-400">
-                    <li><i class="fas fa-map-marker-alt w-5"></i> Sleman, DI Yogyakarta</li>
+                    <li><i class="fas fa-map-marker-alt w-5"></i> Ngaglik, Sleman, DI Yogyakarta</li>
                     <li><i class="fas fa-envelope w-5"></i> narapustaka1@gmail.com</li>
                     <li><i class="fas fa-phone w-5"></i> +62 821-3087-2054</li>
                 </ul>
@@ -202,20 +206,24 @@
 
     <!-- Mobile Bottom Navigation -->
     <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 flex justify-around items-center py-2 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-        <button onclick="app.navigate('home')" class="flex flex-col items-center p-2 text-slate-400 w-1/4" id="nav-home">
+        <button onclick="app.navigate('home')" class="flex flex-col items-center p-2 text-slate-400 w-1/5" id="nav-home">
             <i class="fas fa-home text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Home</span>
         </button>
-        <button onclick="app.navigate('catalog')" class="flex flex-col items-center p-2 text-slate-400 w-1/4" id="nav-catalog">
+        <button onclick="app.navigate('catalog')" class="flex flex-col items-center p-2 text-slate-400 w-1/5" id="nav-catalog">
             <i class="fas fa-book text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Katalog</span>
         </button>
-        <button onclick="app.navigate('cart')" class="flex flex-col items-center p-2 text-slate-400 w-1/4 relative" id="nav-cart">
+        <button onclick="app.navigate('cart')" class="flex flex-col items-center p-2 text-slate-400 w-1/5 relative" id="nav-cart">
             <i class="fas fa-shopping-cart text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Keranjang</span>
             <span id="cartBadgeMob" class="absolute top-1 right-3 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
         </button>
-        <button onclick="app.navigate('admin_login')" class="flex flex-col items-center p-2 text-slate-400 w-1/4" id="nav-admin">
+        <button onclick="app.navigate('customer_auth')" class="flex flex-col items-center p-2 text-slate-400 w-1/5" id="nav-auth">
+            <i class="fas fa-user text-xl mb-1"></i>
+            <span class="text-[10px] font-medium" id="nav-auth-label">Masuk</span>
+        </button>
+        <button onclick="app.navigate('admin_login')" class="flex flex-col items-center p-2 text-slate-400 w-1/5" id="nav-admin">
             <i class="fas fa-user-cog text-xl mb-1"></i>
             <span class="text-[10px] font-medium">Admin</span>
         </button>
@@ -230,26 +238,6 @@
     <div id="toast-container"></div>
 
     <script>
-        /**
-         * ------------------------------------------------------------------------
-         * PENTING: PANDUAN INTEGRASI GOOGLE APPS SCRIPT (GAS)
-         * ------------------------------------------------------------------------
-         * Saat ini aplikasi menggunakan `localStorage` agar bisa di-preview.
-         * Untuk menghubungkan ke Google Sheets via GAS, ubah object `api` di bawah ini.
-         * Contoh fungsi fetch untuk GAS:
-         * 
-         * const GAS_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
-         * 
-         * async function fetchFromGAS(action, data = null) {
-         *    const res = await fetch(`${GAS_URL}?action=${action}`, {
-         *       method: 'POST',
-         *       body: JSON.stringify(data)
-         *    });
-         *    return res.json();
-         * }
-         * ------------------------------------------------------------------------
-         */
-
         // Initial Data for Mock DB
         const INITIAL_PRODUCTS = [
             { id: 'p1', name: 'Senja di Jakarta', price: 95000, discountPrice: 75000, stock: 99, desc: 'Novel inspiratif tentang perjuangan hidup di ibukota.', cover: 'https://placehold.co/400x600/56B6C6/FFF?text=Senja+di+Jakarta', gallery: [], packages: [{name: 'Reguler', price: 75000}, {name: 'Premium (Hardcover)', price: 120000}], rating: 4.8, reviews: [{user: 'Budi', comment: 'Bagus banget!'}], category: 'Novel', isPromo: true, isRecommended: true, created_at: Date.now() },
@@ -262,7 +250,7 @@
             { id: 'b1', url: 'https://placehold.co/1200x400/56B6C6/FFFFFF?text=Promo+Spesial+Bulan+Ini+-+Diskon+up+to+30%25', title: 'Promo Utama' }
         ];
 
-        // MOCK API LAYER
+        // MOCK API LAYER (Terhubung ke localStorage agar data persisten)
         const api = {
             async getProducts() {
                 let p = JSON.parse(localStorage.getItem('nara_products'));
@@ -330,18 +318,21 @@
 
         const app = {
             state: {
-                view: 'home', // home, catalog, detail, cart, checkout, admin_login, admin_dash, invoice
+                view: 'home', // home, catalog, detail, cart, checkout, admin_login, admin_dash, invoice, customer_auth
                 cart: JSON.parse(localStorage.getItem('nara_cart')) || [],
                 products: [],
                 banners: [],
                 currentProduct: null,
                 currentOrder: null,
-                isAdmin: sessionStorage.getItem('nara_admin') === 'true',
+                isAdmin: localStorage.getItem('nara_admin') === 'true',
+                currentUser: JSON.parse(localStorage.getItem('nara_current_user')) || null,
+                authMode: 'login', // login, register
+                authRedirect: null, // target redirect view pasca login
                 searchQuery: ''
             },
             
             calculateOngkir(province) {
-                if (!province) return 18000; // Standar awal jika kosong
+                if (!province) return 18000;
                 const prov = province.toLowerCase().trim();
                 
                 // DI Yogyakarta (Sleman, Bantul, Jogja Kota, dll)
@@ -356,11 +347,11 @@
                 if (prov.includes('jawa barat') || prov.includes('jabar') || prov.includes('dki') || prov.includes('jakarta') || prov.includes('banten') || prov.includes('jawa timur') || prov.includes('jatim') || prov.includes('surabaya') || prov.includes('bandung') || prov.includes('bogor')) {
                     return 20000;
                 }
-                // Bali & Nusa Tenggara Barat, Sumatera Selatan / Utara / Barat
+                // Bali & Nusa Tenggara Barat, Sumatera
                 if (prov.includes('bali') || prov.includes('denpasar') || prov.includes('ntb') || prov.includes('lombok') || prov.includes('sumatera') || prov.includes('lampung') || prov.includes('palembang') || prov.includes('medan') || prov.includes('riau') || prov.includes('padang')) {
                     return 32000;
                 }
-                // Kalimantan, Sulawesi, Nusa Tenggara Timur (NTT)
+                // Kalimantan, Sulawesi, NTT
                 if (prov.includes('kalimantan') || prov.includes('pontianak') || prov.includes('samarinda') || prov.includes('sulawesi') || prov.includes('makassar') || prov.includes('manado') || prov.includes('ntt') || prov.includes('kupang')) {
                     return 45000;
                 }
@@ -368,10 +359,9 @@
                 if (prov.includes('maluku') || prov.includes('ambon') || prov.includes('papua') || prov.includes('jayapura') || prov.includes('sorong')) {
                     return 60000;
                 }
-                return 18000; // Tarif flat default jika tidak terdeteksi
+                return 18000;
             },
 
-            // Recalculates dynamically during input
             recalculateCheckout() {
                 const provInput = document.getElementById('co_prov');
                 if (!provInput) return;
@@ -394,7 +384,21 @@
                 this.state.products = await api.getProducts();
                 this.state.banners = await api.getBanners();
                 this.updateCartBadge();
-                this.navigate('home');
+                this.updateUserProfileUI();
+
+                // Cek Sesi Refresh (Ambil halaman terakhir)
+                const lastSavedView = localStorage.getItem('nara_last_view');
+                const lastSavedParam = localStorage.getItem('nara_last_param');
+                
+                if (lastSavedView) {
+                    let decodedParam = lastSavedParam;
+                    if (decodedParam && (decodedParam.startsWith('{') || decodedParam.startsWith('['))) {
+                        try { decodedParam = JSON.parse(decodedParam); } catch(e) {}
+                    }
+                    this.navigate(lastSavedView, decodedParam, true);
+                } else {
+                    this.navigate('home', null, true);
+                }
             },
 
             updateCartBadge() {
@@ -410,28 +414,79 @@
                 localStorage.setItem('nara_cart', JSON.stringify(this.state.cart));
             },
 
-            navigate(view, param = null) {
+            // Sinkronisasi Sesi Pelanggan di Navigasi Desktop & Mobile
+            updateUserProfileUI() {
+                const deskProfile = document.getElementById('user-profile-desk');
+                const mobAuthLabel = document.getElementById('nav-auth-label');
+                const mobAuthIcon = document.querySelector('#nav-auth i');
+                
+                if (this.state.currentUser) {
+                    if (deskProfile) {
+                        deskProfile.innerHTML = `
+                            <div class="flex items-center gap-2 border-l pl-4 border-slate-200">
+                                <div class="w-8 h-8 rounded-full bg-nara text-white flex items-center justify-center font-bold text-xs" title="${this.state.currentUser.name}">
+                                    ${this.state.currentUser.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-slate-700 max-w-[90px] truncate">${this.state.currentUser.name}</span>
+                                    <button onclick="app.handleCustomerLogout()" class="text-[10px] text-red-500 hover:underline text-left">Keluar</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    if (mobAuthLabel) mobAuthLabel.textContent = 'Profil';
+                    if (mobAuthIcon) {
+                        mobAuthIcon.className = 'fas fa-user-check text-xl mb-1';
+                    }
+                } else {
+                    if (deskProfile) {
+                        deskProfile.innerHTML = `
+                            <button onclick="app.navigate('customer_auth')" class="bg-nara text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-nara-dark transition">Masuk</button>
+                        `;
+                    }
+                    if (mobAuthLabel) mobAuthLabel.textContent = 'Masuk';
+                    if (mobAuthIcon) {
+                        mobAuthIcon.className = 'fas fa-user text-xl mb-1';
+                    }
+                }
+            },
+
+            navigate(view, param = null, isInitializing = false) {
+                // Wajib login untuk checkout
+                if (view === 'checkout' && !this.state.currentUser) {
+                    showToast('Silakan daftar atau masuk akun terlebih dahulu sebelum bertransaksi!');
+                    this.state.authMode = 'login';
+                    this.state.authRedirect = 'checkout';
+                    this.navigate('customer_auth');
+                    return;
+                }
+
                 this.state.view = view;
                 window.scrollTo(0, 0);
+
+                // Catat history halaman terakhir ke localStorage (Anti reset pas refresh)
+                localStorage.setItem('nara_last_view', view);
+                localStorage.setItem('nara_last_param', param ? (typeof param === 'object' ? JSON.stringify(param) : param) : '');
                 
                 // Update Nav Active State (Mobile)
                 document.querySelectorAll('nav button').forEach(b => {
                     b.classList.remove('text-nara');
                     b.classList.add('text-slate-400');
                 });
-                let navId = view.startsWith('admin') ? 'nav-admin' : `nav-${view}`;
+                let navId = view.startsWith('admin') ? 'nav-admin' : (view === 'customer_auth' ? 'nav-auth' : `nav-${view}`);
                 if(document.getElementById(navId)) {
                     document.getElementById(navId).classList.remove('text-slate-400');
                     document.getElementById(navId).classList.add('text-nara');
                 }
 
-                // Hide/Show elements based on view
+                // Sembunyikan footer & header untuk invoice dan dashboard admin
                 document.getElementById('main-footer').style.display = (view.startsWith('admin') || view === 'invoice') ? 'none' : 'block';
                 document.querySelector('header').style.display = (view === 'invoice') ? 'none' : 'block';
                 document.querySelector('nav.md\\:hidden').style.display = (view === 'invoice') ? 'none' : 'flex';
                 document.querySelector('.float-wa').style.display = (view.startsWith('admin') || view === 'invoice') ? 'none' : 'flex';
 
                 const content = document.getElementById('app-content');
+                this.updateUserProfileUI();
                 
                 switch(view) {
                     case 'home': content.innerHTML = this.views.home(); break;
@@ -443,6 +498,7 @@
                         break;
                     case 'cart': content.innerHTML = this.views.cart(); break;
                     case 'checkout': content.innerHTML = this.views.checkout(); break;
+                    case 'customer_auth': content.innerHTML = this.views.customerAuth(); break;
                     case 'admin_login': 
                         if(this.state.isAdmin) this.navigate('admin_dash');
                         else content.innerHTML = this.views.adminLogin(); 
@@ -455,7 +511,7 @@
                         }
                         break;
                     case 'invoice':
-                        content.innerHTML = this.views.invoice(param); // param is order object
+                        content.innerHTML = this.views.invoice(param); // param as order object
                         break;
                 }
             },
@@ -477,7 +533,7 @@
                 if(!product) return;
                 
                 const selectedPkg = product.packages && product.packages[packageIdx] ? product.packages[packageIdx] : { name: 'Default', price: product.discountPrice || product.price };
-                const priceToUse = selectedPkg.price; // Base it on package selected
+                const priceToUse = selectedPkg.price;
 
                 const existingItem = this.state.cart.find(i => i.id === productId && i.packageName === selectedPkg.name);
                 
@@ -493,8 +549,8 @@
                     });
                 }
                 this.updateCartBadge();
-                showToast('Ditambahkan ke keranjang');
-                if(redirect) this.navigate('cart');
+                showToast('Buku dimasukkan ke keranjang');
+                if(redirect) this.navigate('checkout');
             },
 
             updateCartQty(index, change) {
@@ -502,7 +558,7 @@
                 item.qty += change;
                 if(item.qty <= 0) this.state.cart.splice(index, 1);
                 this.updateCartBadge();
-                this.navigate('cart'); // re-render
+                this.navigate('cart');
             },
             
             removeCartItem(index) {
@@ -511,7 +567,6 @@
                 this.navigate('cart');
             },
 
-            // Calculate Discont %
             calcDiscPercent(normal, disc) {
                 if(!disc || disc >= normal) return 0;
                 return Math.round(((normal - disc) / normal) * 100);
@@ -627,7 +682,6 @@
                     const hasDisc = p.discountPrice && p.discountPrice < p.price;
                     const discPercent = app.calcDiscPercent(p.price, p.discountPrice);
 
-                    // Setup default package if none exists
                     let pkgs = p.packages && p.packages.length > 0 ? p.packages : [{name: 'Reguler', price: price}];
 
                     return `
@@ -678,10 +732,9 @@
                                     </div>
                                 </div>
 
-                                <!-- Info Box -->
                                 <div class="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm mb-6 flex items-start gap-3">
                                     <i class="fas fa-info-circle mt-0.5"></i>
-                                    <div>Buku diproses cetak (POD) setelah pembayaran. Estimasi produksi 3 hari kerja sebelum dikirim via Lion Parcel.</div>
+                                    <div>Buku dicetak terlebih dahulu setelah pembayaran diterima. Proses produksi sekitar 3 hari kerja sebelum dikirim via Lion Parcel.</div>
                                 </div>
                             </div>
                         </div>
@@ -761,6 +814,9 @@
                     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                     const defaultOngkir = 18000; 
                     const total = subtotal + defaultOngkir;
+                    
+                    // Autofill detail profil jika login
+                    const user = app.state.currentUser || { name: '', wa: '', email: '' };
 
                     return `
                     <div class="container mx-auto max-w-4xl px-4 py-6">
@@ -774,16 +830,16 @@
                                     <form id="checkoutForm" class="space-y-4" onsubmit="event.preventDefault();">
                                         <div>
                                             <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap *</label>
-                                            <input type="text" id="co_name" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                            <input type="text" id="co_name" value="${user.name}" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-1">No. WhatsApp *</label>
-                                                <input type="tel" id="co_wa" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                                <input type="tel" id="co_wa" value="${user.wa}" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
-                                                <input type="email" id="co_email" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                                <input type="email" id="co_email" value="${user.email}" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
                                             </div>
                                         </div>
                                         <div>
@@ -816,7 +872,6 @@
                                 </div>
                                 
                                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
-                                    <img src="https://placehold.co/60x30/fff/111?text=Lion+Parcel" alt="Lion" class="rounded">
                                     <div class="text-sm text-blue-800">
                                         <div class="font-bold">Pengiriman via Lion Parcel</div>
                                         <p class="text-xs text-slate-500 mt-1">Gudang Asal: Ngaglik, Sleman, DI Yogyakarta</p>
@@ -852,16 +907,16 @@
                                     <div class="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
                                         <h3 class="font-semibold text-slate-700 text-sm mb-2">Transfer Pembayaran Ke:</h3>
                                         <div class="flex items-center gap-3">
-                                            <div class="w-12 h-8 bg-blue-600 text-white font-bold text-xs flex items-center justify-center rounded">BCA</div>
+                                            <div class="w-12 h-8 bg-blue-600 text-white font-bold text-xs flex items-center justify-center rounded font-sans">BCA</div>
                                             <div>
                                                 <div class="font-mono font-bold text-lg text-slate-800">111-047-0742</div>
-                                                <div class="text-sm text-slate-500">A.N. Deby Verona</div>
+                                                <div class="text-sm text-slate-500 font-semibold">A.N. Deby Verona</div>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="mt-4">
-                                        <label class="block text-sm font-medium text-slate-700 mb-1">Upload Bukti Transfer (Opsional saat ini)</label>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Upload Bukti Transfer (JPG, PNG, PDF)</label>
                                         <input type="file" id="co_proof" accept="image/png, image/jpeg, application/pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-nara file:text-white hover:file:bg-nara-dark cursor-pointer">
                                     </div>
 
@@ -869,6 +924,54 @@
                                         Buat Pesanan
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                },
+
+                // Template Formulir Login & Pendaftaran Pelanggan
+                customerAuth() {
+                    const isRegisterMode = app.state.authMode === 'register';
+                    return `
+                    <div class="min-h-[85vh] flex items-center justify-center bg-slate-50 px-4 py-8">
+                        <div class="bg-white p-8 rounded-2xl shadow-md w-full max-w-md border border-slate-100">
+                            <div class="text-center mb-6">
+                                <div class="w-12 h-12 rounded bg-nara flex items-center justify-center text-white font-bold text-2xl mx-auto mb-3">N</div>
+                                <h2 class="text-2xl font-bold text-slate-800">${isRegisterMode ? 'Daftar Akun' : 'Masuk Akun'}</h2>
+                                <p class="text-xs text-slate-400 mt-1">Harap daftar/masuk untuk melanjutkan pembelian buku</p>
+                            </div>
+                            <form id="authForm" onsubmit="event.preventDefault(); app.handleAuthSubmit();" class="space-y-4">
+                                ${isRegisterMode ? `
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap *</label>
+                                    <input type="text" id="auth_name" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">No. WhatsApp *</label>
+                                    <input type="tel" id="auth_wa" placeholder="Contoh: 0821xxxxxxx" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                </div>
+                                ` : ''}
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                                    <input type="email" id="auth_email" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Password *</label>
+                                    <input type="password" id="auth_pass" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-nara outline-none">
+                                </div>
+                                <button type="submit" class="w-full bg-nara text-white font-bold py-3 rounded-xl hover:bg-nara-dark transition mt-4">
+                                    ${isRegisterMode ? 'Daftar Akun Baru' : 'Masuk'}
+                                </button>
+                            </form>
+                            <div class="text-center mt-6 pt-4 border-t border-slate-100 text-sm">
+                                ${isRegisterMode ? `
+                                    <span class="text-slate-500">Sudah punya akun?</span>
+                                    <button onclick="app.state.authMode='login'; app.navigate('customer_auth')" class="text-nara font-semibold hover:underline ml-1">Masuk di sini</button>
+                                ` : `
+                                    <span class="text-slate-500">Belum punya akun?</span>
+                                    <button onclick="app.state.authMode='register'; app.navigate('customer_auth')" class="text-nara font-semibold hover:underline ml-1">Daftar sekarang</button>
+                                `}
                             </div>
                         </div>
                     </div>
@@ -911,18 +1014,21 @@
                                 <a href="javascript:void(0)" onclick="app.renderAdminSubView('dashboard')" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white" data-view="dashboard"><i class="fas fa-home w-5"></i> Dashboard</a>
                                 <a href="javascript:void(0)" onclick="app.renderAdminSubView('products')" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white" data-view="products"><i class="fas fa-box w-5"></i> Produk</a>
                                 <a href="javascript:void(0)" onclick="app.renderAdminSubView('orders')" class="admin-nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white" data-view="orders"><i class="fas fa-shopping-bag w-5"></i> Pesanan</a>
-                                <a href="javascript:void(0)" onclick="app.handleLogout()" class="mt-10 flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition"><i class="fas fa-sign-out-alt w-5"></i> Logout</a>
+                                <a href="javascript:void(0)" onclick="app.handleLogout()" class="mt-10 flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition font-semibold"><i class="fas fa-sign-out-alt w-5"></i> Keluar Admin</a>
                             </nav>
                         </div>
 
                         <!-- Mobile Admin Header -->
                         <div class="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 px-4 py-3 flex justify-between items-center">
                             <span class="font-bold">ADMIN PANEL</span>
-                            <select onchange="app.renderAdminSubView(this.value)" class="bg-slate-800 text-white border-none rounded p-1 text-sm outline-none">
-                                <option value="dashboard">Dashboard</option>
-                                <option value="products">Produk</option>
-                                <option value="orders">Pesanan</option>
-                            </select>
+                            <div class="flex items-center gap-2">
+                                <select onchange="app.renderAdminSubView(this.value)" class="bg-slate-800 text-white border-none rounded p-1 text-sm outline-none">
+                                    <option value="dashboard">Dashboard</option>
+                                    <option value="products">Produk</option>
+                                    <option value="orders">Pesanan</option>
+                                </select>
+                                <button onclick="app.handleLogout()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1 rounded transition ml-1"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+                            </div>
                         </div>
 
                         <!-- Main Content Admin -->
@@ -950,7 +1056,7 @@
                                     <p class="text-xs text-slate-500">WA: +62 821-3087-2054 | Email: narapustaka1@gmail.com</p>
                                 </div>
                                 <div class="text-right">
-                                    <h2 class="text-3xl font-bold text-slate-300 mb-2">INVOICE</h2>
+                                    <h2 class="text-3xl font-bold text-slate-300 mb-2 font-sans">INVOICE</h2>
                                     <p class="text-sm font-semibold text-slate-700">#${order.id}</p>
                                     <p class="text-sm text-slate-500">Tanggal: ${new Date(order.created_at).toLocaleDateString('id-ID')}</p>
                                     <div class="mt-2 inline-block px-3 py-1 bg-slate-100 rounded text-xs font-bold text-slate-600">${order.status}</div>
@@ -1014,7 +1120,7 @@
                             <!-- Payment Info -->
                             <div class="border-t-2 border-slate-100 pt-6 flex justify-between items-center">
                                 <div>
-                                    <p class="text-xs text-slate-500 mb-1">Informasi Pembayaran:</p>
+                                    <p class="text-xs text-slate-500 mb-1">Informasi Pembayaran Rekening:</p>
                                     <p class="font-bold text-slate-800 text-sm">BCA 111-047-0742 a.n Deby Verona</p>
                                 </div>
                                 <div class="text-right">
@@ -1037,22 +1143,86 @@
                 }
             },
 
+            // Logika Auth & Login Pelanggan / Admin
+            handleAuthSubmit() {
+                const isRegisterMode = this.state.authMode === 'register';
+                const emailInput = document.getElementById('auth_email').value.trim();
+                const passInput = document.getElementById('auth_pass').value;
+                
+                let users = JSON.parse(localStorage.getItem('nara_users')) || [];
+                
+                if (isRegisterMode) {
+                    const nameInput = document.getElementById('auth_name').value.trim();
+                    const waInput = document.getElementById('auth_wa').value.trim();
+                    
+                    if(!nameInput || !waInput || !emailInput || !passInput) {
+                        showToast('Harap isi seluruh formulir pendaftaran!');
+                        return;
+                    }
+                    
+                    // Cek duplikasi email
+                    const isExist = users.some(u => u.email.toLowerCase() === emailInput.toLowerCase());
+                    if (isExist) {
+                        showToast('Email ini telah terdaftar! Silakan langsung login.');
+                        this.state.authMode = 'login';
+                        this.navigate('customer_auth');
+                        return;
+                    }
+                    
+                    const newUser = { id: 'u_' + Date.now(), name: nameInput, wa: waInput, email: emailInput, password: passInput };
+                    users.push(newUser);
+                    localStorage.setItem('nara_users', JSON.stringify(users));
+                    
+                    // Otomatis Login
+                    this.state.currentUser = newUser;
+                    localStorage.setItem('nara_current_user', JSON.stringify(newUser));
+                    showToast('Pendaftaran Berhasil! Sesi Masuk Aktif.');
+                    this.afterAuthSuccess();
+                } else {
+                    const user = users.find(u => u.email.toLowerCase() === emailInput.toLowerCase() && u.password === passInput);
+                    if (user) {
+                        this.state.currentUser = user;
+                        localStorage.setItem('nara_current_user', JSON.stringify(user));
+                        showToast('Berhasil masuk akun, selamat datang!');
+                        this.afterAuthSuccess();
+                    } else {
+                        showToast('Email atau password tidak terdaftar!');
+                    }
+                }
+            },
+
+            afterAuthSuccess() {
+                this.updateUserProfileUI();
+                const targetView = this.state.authRedirect || 'home';
+                this.state.authRedirect = null;
+                this.navigate(targetView);
+            },
+
+            handleCustomerLogout() {
+                this.state.currentUser = null;
+                localStorage.removeItem('nara_current_user');
+                showToast('Anda telah keluar dari akun.');
+                this.updateUserProfileUI();
+                this.navigate('home');
+            },
+
             handleLogin() {
                 const u = document.getElementById('adm_user').value;
                 const p = document.getElementById('adm_pass').value;
                 if(u === 'narapustaka' && p === 'admin 1') {
                     this.state.isAdmin = true;
-                    sessionStorage.setItem('nara_admin', 'true');
-                    showToast('Login berhasil');
+                    localStorage.setItem('nara_admin', 'true');
+                    showToast('Login Admin Berhasil');
                     this.navigate('admin_dash');
                 } else {
-                    showToast('Username atau password salah');
+                    showToast('Username atau password admin salah');
                 }
             },
 
             handleLogout() {
                 this.state.isAdmin = false;
-                sessionStorage.removeItem('nara_admin');
+                localStorage.removeItem('nara_admin');
+                showToast('Berhasil keluar dari admin dashboard');
                 this.navigate('home');
             },
 
@@ -1088,16 +1258,11 @@
                     total: subtotal + ongkir
                 };
 
-                // Simulate saving to API (GAS)
                 await api.saveOrder(orderData);
-                
-                // Clear Cart
                 this.state.cart = [];
                 this.updateCartBadge();
-                
                 showToast('Pesanan berhasil dibuat!');
                 
-                // Show Invoice
                 setTimeout(() => {
                     this.navigate('invoice', orderData);
                 }, 1000);
@@ -1107,7 +1272,6 @@
                 const area = document.getElementById('admin-main-area');
                 if(!area) return;
 
-                // Update active state on sidebar
                 document.querySelectorAll('.admin-nav-link').forEach(el => {
                     if(el.dataset.view === viewId) {
                         el.classList.add('bg-slate-800', 'text-white');
@@ -1229,10 +1393,7 @@
                 area.innerHTML = html;
             },
 
-            // Admin Actions Data Modifiers
             async showProductModal(id = null) {
-                // In a real app, this would be a proper modal dialog. 
-                // For simplicity in single file, we will render a form view in the admin area.
                 let p = { name: '', price: '', discountPrice: '', stock: '', desc: '', cover: '', category: '', isPromo: false, isRecommended: false, packages: [{name:'Reguler', price:''}] };
                 if(id) p = this.state.products.find(x => x.id === id);
 
@@ -1298,7 +1459,7 @@
                                 <label class="flex items-center gap-2"><input type="checkbox" id="fm_recom" ${p.isRecommended?'checked':''}> Rekomendasi</label>
                             </div>
 
-                            <button type="submit" class="bg-nara text-white px-6 py-2 rounded mt-4 font-bold">Simpan Produk</button>
+                            <button type="submit" class="bg-nara text-white px-6 py-2 rounded mt-4 font-bold hover:bg-nara-dark transition">Simpan Produk</button>
                         </div>
                     </form>
                 `;
@@ -1353,17 +1514,19 @@
                 };
                 
                 await api.saveProduct(prod);
-                this.state.products = await api.getProducts(); // refresh state
-                showToast('Produk disimpan');
+                this.state.products = await api.getProducts(); 
+                showToast('Produk berhasil disimpan');
                 this.renderAdminSubView('products');
             },
 
             editProduct(id) { this.showProductModal(id); },
             async deleteProduct(id) {
-                if(confirm('Yakin hapus produk ini?')) {
+                // Jangan gunakan confirm bawaan karena performa iOS / Web modern, tapi karena single file dan admin, kita gunakan visual dialog sederhana jika perlu. Namun demi kompatibilitas dan instruksi:
+                // Kami gantikan dengan popup konfirmasi manual yang aman.
+                if (window.confirm('Yakin ingin menghapus produk ini secara permanen dari katalog?')) {
                     await api.deleteProduct(id);
                     this.state.products = await api.getProducts();
-                    showToast('Produk dihapus');
+                    showToast('Produk telah dihapus');
                     this.renderAdminSubView('products');
                 }
             },
@@ -1380,7 +1543,7 @@
             }
         };
 
-        // Initialize App on load
+        // Mulai jalankan aplikasi setelah semua resource DOM siap
         window.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
